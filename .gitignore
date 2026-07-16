@@ -1,2 +1,1 @@
-# Ignore large PDF files that exceed GitHub's 100MB limit
-*.pdf
+# PDF files are tracked via Git LFS
