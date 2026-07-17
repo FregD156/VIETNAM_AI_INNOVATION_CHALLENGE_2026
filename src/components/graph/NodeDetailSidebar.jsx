@@ -55,7 +55,7 @@ export const NodeDetailSidebar = () => {
         {rawLabel === 'Clause' && text && (
           <div className="detail-section">
             <span className="detail-label">Nội Dung Điều Khoản Gốc</span>
-            <div className="detail-value-text">
+            <div className="detail-value-text paper-surface">
               {text}
             </div>
           </div>

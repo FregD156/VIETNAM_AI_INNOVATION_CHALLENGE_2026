@@ -1,8 +1,8 @@
 .actionable-draft {
   margin-top: 14px;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px dashed var(--color-border-gold);
-  border-radius: var(--radius-md);
+  background-color: rgba(0, 0, 0, 0.15);
+  border: 1px dashed var(--orange-signature);
+  border-radius: var(--radius-panel);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -13,25 +13,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--color-border-glass);
+  border-bottom: 1px solid var(--navy-hairline);
   padding-bottom: 8px;
 }
 
 .draft-title {
   font-size: 12px;
   font-weight: 700;
-  color: var(--color-accent-gold);
+  color: var(--orange-signature);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-family: var(--font-data);
 }
 
 .draft-badge {
-  background-color: var(--color-accent-navy);
-  color: var(--color-text-primary);
+  background-color: var(--navy-surface-raised);
+  color: var(--text-primary);
   font-size: 10px;
   padding: 2px 8px;
-  border-radius: 20px;
-  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-circle);
+  border: 1px solid var(--navy-hairline);
 }
 
 /* Textarea Editor */
@@ -39,21 +40,21 @@
   width: 100%;
   min-height: 120px;
   max-height: 250px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--color-border-glass);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-primary);
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-tag);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 13px;
   line-height: 1.5;
   padding: 10px;
   resize: vertical;
   outline: none;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
 .draft-editor:focus {
-  border-color: var(--color-accent-gold);
+  border-color: var(--orange-signature);
 }
 
 /* Actions Menu */
@@ -68,33 +69,33 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-tag);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .btn-copy {
   background-color: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-glass);
+  color: var(--text-secondary);
+  border: 1px solid var(--navy-hairline);
 }
 
 .btn-copy:hover {
-  background-color: var(--color-bg-glass-hover);
-  color: var(--color-text-primary);
+  background-color: var(--navy-surface-raised);
+  color: var(--text-primary);
 }
 
 .btn-sync {
-  background-color: var(--color-accent-gold);
-  color: var(--color-bg-primary);
-  border: 1px solid var(--color-accent-gold);
+  background-color: var(--orange-signature);
+  color: #ffffff;
+  border: 1px solid var(--orange-signature);
 }
 
 .btn-sync:hover:not(:disabled) {
-  background-color: var(--color-accent-gold-hover);
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+  background-color: var(--orange-signature-hover);
+  box-shadow: 0 0 10px rgba(240, 99, 29, 0.3);
 }
 
 .btn-sync:disabled {
@@ -111,9 +112,9 @@
 }
 
 .sync-status.success {
-  color: var(--color-success);
+  color: var(--emerald-active);
 }
 
 .sync-status.loading {
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }

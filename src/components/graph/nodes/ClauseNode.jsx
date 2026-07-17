@@ -4,11 +4,12 @@ import './ClauseNode.css';
 
 export const ClauseNode = ({ data }) => {
   const isActive = data.status === 'active';
+  const handleColor = isActive ? '#2F9E68' : '#C0442C';
   
   return (
     <div className={`clause-node ${isActive ? 'active' : 'expired'}`}>
       {/* Target handle */}
-      <Handle type="target" position={Position.Top} style={{ background: isActive ? '#10b981' : '#ef4444' }} />
+      <Handle type="target" position={Position.Top} style={{ background: handleColor }} />
       
       <div className="clause-node-header">
         <span className="clause-status-tag">
@@ -25,7 +26,7 @@ export const ClauseNode = ({ data }) => {
       </div>
 
       {/* Source handle */}
-      <Handle type="source" position={Position.Bottom} style={{ background: isActive ? '#10b981' : '#ef4444' }} />
+      <Handle type="source" position={Position.Bottom} style={{ background: handleColor }} />
     </div>
   );
 };

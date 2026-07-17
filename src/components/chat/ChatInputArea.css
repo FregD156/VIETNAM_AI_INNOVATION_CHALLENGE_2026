@@ -1,7 +1,7 @@
 .chat-input-area {
   padding: 16px;
-  background-color: var(--color-bg-sidebar);
-  border-top: 1px solid var(--color-border-glass);
+  background-color: var(--navy-surface);
+  border-top: 1px solid var(--navy-hairline);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -17,23 +17,23 @@
   flex: 1;
   display: flex;
   background-color: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-border-glass);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
   padding: 8px 14px;
   align-items: flex-end;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
 .input-container:focus-within {
-  border-color: var(--color-accent-gold);
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+  border-color: var(--orange-signature);
+  box-shadow: 0 0 10px rgba(240, 99, 29, 0.15);
 }
 
 .chat-input {
   flex: 1;
   background: transparent;
   border: none;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 13px;
   line-height: 1.5;
@@ -55,49 +55,49 @@
 .btn-input-icon {
   background: transparent;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 6px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .btn-input-icon:hover {
-  background-color: var(--color-bg-glass-hover);
-  color: var(--color-text-primary);
+  background-color: var(--navy-surface-raised);
+  color: var(--text-primary);
 }
 
 .btn-input-icon.recording {
-  color: #ef4444;
-  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--brick-expired);
+  background-color: var(--brick-expired-wash);
 }
 
 .btn-send {
-  background-color: var(--color-accent-gold);
-  color: var(--color-bg-primary);
+  background-color: var(--orange-signature);
+  color: #ffffff;
   border: none;
   width: 38px;
   height: 38px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all var(--transition-fast);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .btn-send:hover:not(:disabled) {
-  background-color: var(--color-accent-gold-hover);
+  background-color: var(--orange-signature-hover);
   transform: scale(1.05);
 }
 
 .btn-send:disabled {
-  background-color: var(--color-bg-glass-hover);
-  color: var(--color-text-muted);
+  background-color: var(--navy-surface-raised);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
@@ -107,8 +107,9 @@
   justify-content: space-between;
   align-items: center;
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   padding: 0 4px;
+  font-family: var(--font-data);
 }
 
 .suggestion-chips {
@@ -118,19 +119,20 @@
 }
 
 .suggestion-chip {
-  background-color: var(--color-bg-glass);
-  border: 1px solid var(--color-border-glass);
-  color: var(--color-text-secondary);
+  background-color: var(--navy-surface-raised);
+  border: 1px solid var(--navy-hairline);
+  color: var(--text-secondary);
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-circle);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--dur-fast) var(--ease-standard);
+  font-family: var(--font-ui);
 }
 
 .suggestion-chip:hover {
-  border-color: var(--color-accent-gold);
-  color: var(--color-text-primary);
-  background-color: var(--color-bg-glass-hover);
+  border-color: var(--orange-signature);
+  color: var(--text-primary);
+  background-color: var(--navy-surface);
 }
 
 .status-info {
@@ -142,6 +144,6 @@
 .status-dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  background-color: var(--color-success);
+  border-radius: var(--radius-circle);
+  background-color: var(--emerald-active);
 }

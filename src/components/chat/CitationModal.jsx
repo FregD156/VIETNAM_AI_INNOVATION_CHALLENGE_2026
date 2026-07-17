@@ -58,7 +58,7 @@ export const CitationModal = ({ citationId, onClose }) => {
               <div className="skeleton" style={{ height: '14px', width: '85%' }} />
             </div>
           ) : (
-            <div>
+            <div className="paper-surface citation-paper-content">
               <p>{citationData?.sourceText}</p>
             </div>
           )}

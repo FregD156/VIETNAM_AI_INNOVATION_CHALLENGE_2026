@@ -4,7 +4,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-bg-primary);
+  background-color: var(--navy-abyss);
 }
 
 /* Container for empty state */
@@ -14,12 +14,12 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   gap: 16px;
   text-align: center;
 }
 
 .empty-chat-icon {
   font-size: 48px;
-  color: var(--color-accent-navy);
+  color: var(--navy-surface-raised);
 }

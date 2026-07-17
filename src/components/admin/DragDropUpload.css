@@ -7,8 +7,8 @@
 
 /* Drag & Drop Dropzone Box */
 .dropzone {
-  border: 2px dashed var(--color-border-glass);
-  border-radius: var(--radius-lg);
+  border: 2px dashed var(--navy-hairline);
+  border-radius: var(--radius-panel);
   padding: 32px 20px;
   display: flex;
   flex-direction: column;
@@ -18,28 +18,28 @@
   background-color: rgba(255, 255, 255, 0.01);
   cursor: pointer;
   gap: 12px;
-  transition: all var(--transition-fast);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .dropzone:hover, .dropzone.active {
-  border-color: var(--color-accent-gold);
-  background-color: rgba(212, 175, 55, 0.03);
+  border-color: var(--orange-signature);
+  background-color: var(--orange-wash);
 }
 
 .upload-icon {
   font-size: 40px;
-  color: var(--color-accent-gold);
+  color: var(--orange-signature);
 }
 
 .upload-text {
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .upload-subtext {
   font-size: 10px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 /* Upload Queue List */
@@ -53,8 +53,8 @@
 
 .queue-item {
   background-color: rgba(0, 0, 0, 0.15);
-  border: 1px solid var(--color-border-glass);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-tag);
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -77,7 +77,7 @@
 
 .file-name {
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -85,7 +85,7 @@
 
 .file-size {
   font-size: 9px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .queue-actions {
@@ -97,14 +97,14 @@
 .btn-remove-queue {
   background: transparent;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
-  transition: color var(--transition-fast);
+  transition: color var(--dur-fast) var(--ease-standard);
 }
 
 .btn-remove-queue:hover {
-  color: var(--color-danger);
+  color: var(--brick-expired);
 }
 
 /* Progress bar styling */
@@ -118,6 +118,6 @@
 
 .progress-bar-fill {
   height: 100%;
-  background-color: var(--color-accent-gold);
+  background-color: var(--orange-signature);
   transition: width 0.1s ease;
 }

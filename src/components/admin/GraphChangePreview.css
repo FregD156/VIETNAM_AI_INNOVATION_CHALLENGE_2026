@@ -3,43 +3,43 @@
   flex-direction: column;
   gap: 16px;
   background-color: rgba(0, 0, 0, 0.15);
-  border: 1px solid var(--color-border-glass);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
   padding: 20px;
 }
 
 .preview-title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--color-accent-gold);
-  border-bottom: 1px solid var(--color-border-glass);
+  color: var(--orange-signature);
+  border-bottom: 1px solid var(--navy-hairline);
   padding-bottom: 8px;
 }
 
 /* Diff Viewer container */
 .diff-viewer {
   background-color: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--color-border-glass);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
   padding: 16px;
   font-size: 12px;
   line-height: 1.7;
   max-height: 200px;
   overflow-y: auto;
-  font-family: monospace;
+  font-family: var(--font-data);
 }
 
 .diff-added {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
+  background-color: var(--emerald-active-wash);
+  color: var(--emerald-active);
   padding: 2px 4px;
   border-radius: 2px;
   font-weight: 600;
 }
 
 .diff-removed {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
+  background-color: var(--brick-expired-wash);
+  color: var(--brick-expired);
   text-decoration: line-through;
   padding: 2px 4px;
   border-radius: 2px;
@@ -57,9 +57,9 @@
   align-items: center;
   gap: 10px;
   background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--color-border-glass);
+  border: 1px solid var(--navy-hairline);
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-tag);
   font-size: 12px;
 }
 
@@ -68,43 +68,44 @@
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 10px;
+  font-family: var(--font-data);
 }
 
 .rel-badge.supersedes {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: var(--brick-expired-wash);
+  color: var(--brick-expired);
+  border: 1px solid rgba(192, 68, 44, 0.3);
 }
 
 .rel-badge.references {
-  background-color: var(--color-info-bg);
-  color: var(--color-info);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background-color: var(--sea-blue-wash);
+  color: var(--sea-blue-light);
+  border: 1px solid rgba(28, 114, 147, 0.3);
 }
 
 .rel-desc {
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .btn-approve {
   align-self: flex-end;
-  background-color: var(--color-success);
-  color: var(--color-bg-primary);
+  background-color: var(--emerald-active);
+  color: #ffffff;
   border: none;
   padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-tag);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all var(--transition-fast);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .btn-approve:hover:not(:disabled) {
-  background-color: #059669; /* Darker Emerald */
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  background-color: #247e52; /* Darker Emerald */
+  box-shadow: 0 0 10px rgba(47, 158, 104, 0.3);
 }
 
 .btn-approve:disabled {

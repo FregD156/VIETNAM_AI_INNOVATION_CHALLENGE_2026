@@ -6,9 +6,9 @@ html, body, #root {
   width: 100%;
   margin: 0;
   padding: 0;
-  background-color: var(--color-bg-primary);
-  font-family: var(--font-family-base);
-  color: var(--color-text-primary);
+  background-color: var(--navy-abyss);
+  font-family: var(--font-ui);
+  color: var(--text-primary);
   overflow: hidden;
 }
 
@@ -17,7 +17,7 @@ html, body, #root {
   display: flex;
   height: 100vh;
   width: 100vw;
-  background-color: var(--color-bg-primary);
+  background-color: var(--navy-abyss);
   overflow: hidden;
 }
 

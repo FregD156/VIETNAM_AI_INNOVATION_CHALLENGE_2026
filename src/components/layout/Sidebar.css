@@ -1,8 +1,8 @@
 .sidebar {
   width: 260px;
   height: 100%;
-  background-color: var(--color-bg-sidebar);
-  border-right: 1px solid var(--color-border-glass);
+  background-color: var(--navy-surface);
+  border-right: 1px solid var(--navy-hairline);
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
@@ -28,15 +28,15 @@
 .logo-icon {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--color-accent-gold) 0%, #b38600 100%);
+  border-radius: var(--radius-panel);
+  background: linear-gradient(135deg, var(--orange-signature) 0%, #b34600 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-bg-primary);
+  color: #ffffff;
   font-weight: 800;
   font-size: 18px;
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 12px rgba(240, 99, 29, 0.3);
 }
 
 .brand-text {
@@ -47,14 +47,14 @@
 .brand-name {
   font-size: 18px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   letter-spacing: 0.5px;
 }
 
 .brand-sub {
   font-size: 10px;
   font-weight: 500;
-  color: var(--color-accent-gold);
+  color: var(--orange-ember);
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -71,8 +71,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  border-radius: var(--radius-panel);
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -80,7 +80,7 @@
   border: none;
   width: 100%;
   text-align: left;
-  transition: all var(--transition-fast);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .menu-item svg {
@@ -88,20 +88,20 @@
 }
 
 .menu-item:hover {
-  background-color: var(--color-bg-glass-hover);
-  color: var(--color-text-primary);
+  background-color: var(--navy-surface-raised);
+  color: var(--text-primary);
 }
 
 .menu-item.active {
-  background-color: var(--color-accent-navy);
-  color: var(--color-accent-gold);
-  border: 1px solid var(--color-border-gold);
-  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.4);
+  background-color: var(--navy-surface-raised);
+  color: var(--orange-signature);
+  border: 1px solid var(--orange-signature);
+  box-shadow: 0 4px 12px rgba(240, 99, 29, 0.15);
 }
 
 /* User Account Section */
 .sidebar-footer {
-  border-top: 1px solid var(--color-border-glass);
+  border-top: 1px solid var(--navy-hairline);
   padding-top: 16px;
   display: flex;
   align-items: center;
@@ -111,10 +111,10 @@
 .user-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: var(--color-accent-navy);
-  border: 1px solid var(--color-border-gold);
-  color: var(--color-accent-gold);
+  border-radius: var(--radius-circle);
+  background: var(--navy-surface-raised);
+  border: 1px solid var(--navy-hairline);
+  color: var(--orange-ember);
   font-weight: 600;
   font-size: 14px;
   display: flex;
@@ -131,7 +131,7 @@
 .user-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,5 +139,5 @@
 
 .user-role {
   font-size: 10px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }

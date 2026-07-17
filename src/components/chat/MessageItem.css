@@ -2,7 +2,7 @@
   display: flex;
   width: 100%;
   margin-bottom: 20px;
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn var(--dur-base) var(--ease-standard) forwards;
 }
 
 .message-item-container.user {
@@ -16,33 +16,32 @@
 .message-bubble {
   max-width: 75%;
   padding: 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   position: relative;
   line-height: 1.6;
   font-size: 14px;
 }
 
-/* User Message styling */
+/* User Message styling - Solid raised surface */
 .message-item-container.user .message-bubble {
-  background-color: var(--color-accent-navy);
-  color: var(--color-text-primary);
-  border-bottom-right-radius: 4px;
-  border: 1px solid var(--color-border-glass);
+  background-color: var(--navy-surface-raised);
+  color: var(--text-primary);
+  border-bottom-right-radius: 2px;
+  border: 1px solid var(--navy-hairline);
 }
 
-/* AI Message styling */
+/* AI Message styling - Solid surface panel */
 .message-item-container.ai .message-bubble {
-  background-color: var(--color-bg-glass);
-  backdrop-filter: blur(var(--blur-glass));
-  border: 1px solid var(--color-border-glass);
-  color: var(--color-text-primary);
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  background-color: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  color: var(--text-primary);
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
 }
 
 /* Welcome message special highlight */
 .message-bubble.welcome-bubble {
-  border-color: var(--color-border-gold);
+  border-color: rgba(240, 99, 29, 0.3);
 }
 
 /* Message Header & Meta */
@@ -52,7 +51,8 @@
   align-items: center;
   margin-bottom: 8px;
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
+  font-family: var(--font-data);
 }
 
 .sender-name {
@@ -62,11 +62,11 @@
 }
 
 .message-item-container.ai .sender-name {
-  color: var(--color-accent-gold);
+  color: var(--orange-signature);
 }
 
 .message-item-container.user .sender-name {
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 /* Markdown parsing rendering styles */
@@ -88,7 +88,7 @@
 }
 
 .message-body strong {
-  color: var(--color-text-gold);
+  color: var(--orange-ember);
   font-weight: 600;
 }
 
@@ -96,7 +96,7 @@
 .message-citations {
   margin-top: 14px;
   padding-top: 10px;
-  border-top: 1px solid var(--color-border-glass);
+  border-top: 1px solid var(--navy-hairline);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -105,6 +105,6 @@
 
 .citations-label {
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-weight: 600;
 }

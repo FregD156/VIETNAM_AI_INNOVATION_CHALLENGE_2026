@@ -3,28 +3,28 @@
   top: 20px;
   left: 20px;
   width: 320px;
-  background-color: var(--color-bg-sidebar);
-  border: 1px solid var(--color-border-glass);
-  border-radius: var(--radius-md);
+  background-color: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
   padding: 6px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
   z-index: 10;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
 .graph-search-bar:focus-within {
-  border-color: var(--color-accent-gold);
-  box-shadow: 0 4px 25px rgba(212, 175, 55, 0.15);
+  border-color: var(--orange-signature);
+  box-shadow: 0 4px 25px rgba(240, 99, 29, 0.15);
 }
 
 .graph-search-input {
   flex: 1;
   background: transparent;
   border: none;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 13px;
   outline: none;
@@ -32,24 +32,24 @@
 }
 
 .search-icon {
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
 .btn-clear-search {
   background: transparent;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border-radius: 50%;
-  transition: all var(--transition-fast);
+  border-radius: var(--radius-circle);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .btn-clear-search:hover {
-  background-color: var(--color-bg-glass-hover);
-  color: var(--color-text-primary);
+  background-color: var(--navy-surface-raised);
+  color: var(--text-primary);
 }
