@@ -1,0 +1,91 @@
+.node-detail-sidebar {
+  width: 350px;
+  height: 100%;
+  background-color: var(--color-bg-sidebar);
+  border-left: 1px solid var(--color-border-glass);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  position: relative;
+  flex-shrink: 0;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border-glass);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+}
+
+.sidebar-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Document / Clause Metadata */
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+.detail-value-text {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-glass);
+  white-space: pre-wrap;
+}
+
+.detail-badge-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* Placeholder for no selection */
+.sidebar-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-muted);
+  padding: 40px;
+  text-align: center;
+  gap: 16px;
+}
+
+.placeholder-icon {
+  font-size: 40px;
+  color: var(--color-border-glass);
+}

@@ -1,0 +1,103 @@
+.version-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  padding-left: 20px;
+  margin-top: 15px;
+}
+
+/* Timeline Vertical Line */
+.version-timeline::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 5px;
+  width: 2px;
+  height: calc(100% - 12px);
+  background-color: var(--color-border-glass);
+}
+
+.timeline-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Timeline Dots */
+.timeline-dot {
+  position: absolute;
+  left: -20px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg-sidebar);
+  z-index: 2;
+}
+
+.timeline-dot.active {
+  background-color: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+}
+
+.timeline-dot.expired {
+  background-color: var(--color-danger);
+  box-shadow: 0 0 8px var(--color-danger);
+}
+
+.timeline-dot.draft {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 8px var(--color-warning);
+}
+
+/* Timeline Content */
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.timeline-year {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.timeline-status {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.timeline-status.active {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.timeline-status.expired {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.timeline-status.draft {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.timeline-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-glass);
+}
+
+.timeline-text.highlight {
+  border-color: var(--color-border-gold);
+}

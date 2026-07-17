@@ -1,0 +1,47 @@
+.chat-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.workspace-header {
+  height: 60px;
+  border-bottom: 1px solid var(--color-border-glass);
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-bg-sidebar);
+}
+
+.workspace-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.workspace-title svg {
+  color: var(--color-accent-gold);
+}
+
+.workspace-subtitle {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.workspace-badge {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

@@ -1,0 +1,46 @@
+@import './theme.css';
+@import './animations.css';
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-primary);
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
+/* App Container Layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--color-bg-primary);
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Utility classes */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.full-height {
+  height: 100%;
+}
+
+.no-select {
+  user-select: none;
+}

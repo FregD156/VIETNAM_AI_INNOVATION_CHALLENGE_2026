@@ -1,0 +1,100 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(11, 18, 32, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 600px;
+  max-height: 80%;
+  background-color: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border-gold);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border-glass);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-accent-gold);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.btn-close:hover {
+  background-color: var(--color-bg-glass-hover);
+  color: var(--color-text-primary);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+}
+
+.modal-body p {
+  margin-bottom: 12px;
+  white-space: pre-line; /* Đảm bảo xuống dòng đúng cấu trúc văn bản luật */
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border-glass);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-dismiss {
+  background-color: var(--color-accent-navy);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-glass);
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-dismiss:hover {
+  background-color: var(--color-accent-navy-hover);
+  border-color: var(--color-accent-gold);
+}

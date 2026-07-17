@@ -1,0 +1,116 @@
+/**
+ * graphParser.js
+ * Chuyển đổi dữ liệu thô từ Neo4j/Mock CSDL sang định dạng nodes và edges của React Flow
+ */
+
+export const parseNeo4jToReactFlow = (rawData) => {
+  if (!rawData || !rawData.rawNodes) {
+    return { nodes: [], edges: [] };
+  }
+
+  const { rawNodes, rawRelationships } = rawData;
+
+  // Cấu hình vị trí mặc định cho các Node để tạo giao diện đẹp mắt, tránh chồng chéo
+  const nodePositions = {
+    // Thông tư 39 & Clause
+    doc_tt39: { x: 100, y: 100 },
+    clause_5_tt39: { x: 100, y: 250 },
+    
+    // Thông tư 06 & Clause
+    doc_tt06: { x: 400, y: 100 },
+    clause_5_tt06: { x: 400, y: 250 },
+    
+    // Quyết định 214 & Clause
+    doc_qd214: { x: 700, y: 100 },
+    clause_14_qd214: { x: 700, y: 250 },
+    
+    // Thông tư 16 & Clause
+    doc_tt16: { x: 250, y: 450 },
+    clause_12_tt16: { x: 250, y: 600 },
+    
+    // Quyết định 104 & Clause
+    doc_qd104: { x: 550, y: 450 },
+    clause_9_qd104: { x: 550, y: 600 }
+  };
+
+  // 1. Chuyển đổi Nodes
+  const nodes = rawNodes.map((node) => {
+    const isDoc = node.label === 'Document';
+    const props = node.properties;
+    
+    // Vị trí mặc định hoặc tự động nếu không khai báo trước
+    const position = nodePositions[node.id] || { 
+      x: Math.random() * 500 + 100, 
+      y: Math.random() * 500 + 100 
+    };
+
+    return {
+      id: node.id,
+      type: isDoc ? 'documentNode' : 'clauseNode', // Custom node components
+      position,
+      data: {
+        id: props.id,
+        title: props.title,
+        text: props.text || '',
+        status: props.status || 'active', // active | expired
+        docType: props.type || 'NHNN',    // NHNN | SHB_Internal
+        effective_date: props.effective_date,
+        rawLabel: node.label
+      }
+    };
+  });
+
+  // 2. Chuyển đổi Edges
+  const edges = rawRelationships.map((rel) => {
+    let strokeColor = '#64748b'; // Mặc định xám
+    let animated = false;
+    let strokeWidth = 1.5;
+    let label = rel.type;
+
+    // Thiết lập màu và hiệu ứng cho từng mối quan hệ đặc thù
+    if (rel.type === 'SUPERSEDES') {
+      strokeColor = '#ef4444'; // Đỏ nguy cấp
+      animated = true;
+      strokeWidth = 2;
+      label = 'THAY THẾ (Supersedes)';
+    } else if (rel.type === 'CONFLICTS_WITH') {
+      strokeColor = '#f59e0b'; // Vàng xung đột
+      animated = true;
+      strokeWidth = 2.5;
+      label = 'XUNG ĐỘT (Conflicts)';
+    } else if (rel.type === 'REFERENCES') {
+      strokeColor = '#3b82f6'; // Xanh dẫn chiếu
+      strokeWidth = 1.8;
+      label = 'DẪN CHIẾU (References)';
+    } else if (rel.type === 'AMENDS') {
+      strokeColor = '#10b981'; // Xanh lá sửa đổi
+      strokeWidth = 1.8;
+      label = 'SỬA ĐỔI (Amends)';
+    } else if (rel.type === 'HAS_CLAUSE') {
+      strokeColor = 'rgba(255, 255, 255, 0.15)'; // Nối văn bản với điều khoản
+      strokeWidth = 1;
+      label = '';
+    }
+
+    return {
+      id: rel.id,
+      source: rel.start,
+      target: rel.end,
+      animated,
+      label,
+      type: 'smoothstep',
+      style: {
+        stroke: strokeColor,
+        strokeWidth
+      },
+      labelStyle: {
+        fill: '#94a3b8',
+        fontSize: '9px',
+        fontWeight: 'bold',
+        background: '#0b1220'
+      }
+    };
+  });
+
+  return { nodes, edges };
+};

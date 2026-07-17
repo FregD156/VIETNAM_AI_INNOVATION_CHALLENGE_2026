@@ -1,0 +1,119 @@
+.actionable-draft {
+  margin-top: 14px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--color-border-gold);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.draft-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-glass);
+  padding-bottom: 8px;
+}
+
+.draft-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.draft-badge {
+  background-color: var(--color-accent-navy);
+  color: var(--color-text-primary);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border-glass);
+}
+
+/* Textarea Editor */
+.draft-editor {
+  width: 100%;
+  min-height: 120px;
+  max-height: 250px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.draft-editor:focus {
+  border-color: var(--color-accent-gold);
+}
+
+/* Actions Menu */
+.draft-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-copy {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-glass);
+}
+
+.btn-copy:hover {
+  background-color: var(--color-bg-glass-hover);
+  color: var(--color-text-primary);
+}
+
+.btn-sync {
+  background-color: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border: 1px solid var(--color-accent-gold);
+}
+
+.btn-sync:hover:not(:disabled) {
+  background-color: var(--color-accent-gold-hover);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.btn-sync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Status Notifications */
+.sync-status {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sync-status.success {
+  color: var(--color-success);
+}
+
+.sync-status.loading {
+  color: var(--color-text-secondary);
+}

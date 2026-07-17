@@ -1,0 +1,78 @@
+.admin-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Administrative activity logs list */
+.admin-card {
+  background-color: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-glass);
+  padding-bottom: 8px;
+}
+
+.audit-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.audit-log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.log-time {
+  color: var(--color-text-muted);
+  width: 60px;
+}
+
+.log-action {
+  flex: 1;
+  color: var(--color-text-primary);
+  padding: 0 10px;
+}
+
+.log-status {
+  font-weight: 600;
+}
+
+.log-status.success {
+  color: var(--color-success);
+}

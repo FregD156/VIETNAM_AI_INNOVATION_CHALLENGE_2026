@@ -1,0 +1,123 @@
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Drag & Drop Dropzone Box */
+.dropzone {
+  border: 2px dashed var(--color-border-glass);
+  border-radius: var(--radius-lg);
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.01);
+  cursor: pointer;
+  gap: 12px;
+  transition: all var(--transition-fast);
+}
+
+.dropzone:hover, .dropzone.active {
+  border-color: var(--color-accent-gold);
+  background-color: rgba(212, 175, 55, 0.03);
+}
+
+.upload-icon {
+  font-size: 40px;
+  color: var(--color-accent-gold);
+}
+
+.upload-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.upload-subtext {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+/* Upload Queue List */
+.upload-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.queue-item {
+  background-color: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.queue-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.file-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-size {
+  font-size: 9px;
+  color: var(--color-text-muted);
+}
+
+.queue-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-remove-queue {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  transition: color var(--transition-fast);
+}
+
+.btn-remove-queue:hover {
+  color: var(--color-danger);
+}
+
+/* Progress bar styling */
+.progress-bar-container {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-accent-gold);
+  transition: width 0.1s ease;
+}

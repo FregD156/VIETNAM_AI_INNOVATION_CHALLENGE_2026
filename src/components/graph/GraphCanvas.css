@@ -1,0 +1,79 @@
+.graph-canvas-container {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background-color: var(--color-bg-primary);
+  overflow: hidden;
+}
+
+/* React Flow custom styling overrides */
+.react-flow {
+  background-color: var(--color-bg-primary);
+}
+
+.react-flow__background {
+  opacity: 0.05;
+}
+
+/* Customize controls and mini-map overlays */
+.react-flow__controls {
+  background: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.react-flow__controls-button {
+  background: transparent;
+  border-bottom: 1px solid var(--color-border-glass);
+  color: var(--color-text-secondary);
+  fill: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.react-flow__controls-button:hover {
+  background-color: var(--color-bg-glass-hover);
+  color: var(--color-accent-gold);
+  fill: var(--color-accent-gold);
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+.react-flow__minimap {
+  background-color: var(--color-bg-sidebar) !important;
+  border: 1px solid var(--color-border-glass) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(11, 18, 32, 0.6) !important;
+}
+
+/* Customize custom nodes borders on active */
+.react-flow__node.selected > div {
+  border: 1.5px solid var(--color-accent-gold) !important;
+  box-shadow: 0 0 15px var(--color-accent-gold) !important;
+}
+
+/* Customize Edge label styling */
+.react-flow__edge-text {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  fill: var(--color-text-muted) !important;
+}
+
+.react-flow__edge-textbg {
+  fill: var(--color-bg-primary) !important;
+  opacity: 0.9 !important;
+  rx: 3 !important;
+  ry: 3 !important;
+}
+
+.react-flow__attribution {
+  background-color: transparent !important;
+  color: var(--color-text-muted) !important;
+  font-size: 8px !important;
+}
