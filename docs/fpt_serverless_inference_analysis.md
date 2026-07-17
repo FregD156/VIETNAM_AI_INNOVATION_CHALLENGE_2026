@@ -43,7 +43,7 @@ Dịch vụ **Serverless Inference** thuộc hệ sinh thái FPT AI Inference, c
 | **Xử lý RAG chính xác** để RM tra cứu hồ sơ khách hàng, quy định tín dụng, sản phẩm tiết kiệm. | Tích hợp bộ đôi **Embedding Model** và **Rerank Model** của FPT để tối ưu hóa độ chính xác của RAG, nâng tỷ lệ chính xác phản hồi đạt `>= 85%` theo yêu cầu. |
 | **Tốc độ phản hồi cực nhanh** (Dưới 5 giây cho câu hỏi đơn giản, dưới 15 giây cho tác vụ soạn email/kịch bản cuộc gọi). | TTFT dưới 1 giây nhờ chạy trực tiếp trên cụm GPU H100/H200 đặt tại Việt Nam, giảm độ trễ đường truyền viễn thông quốc tế. |
 | **Tuân thủ Luật An ninh mạng & Nghị định 13/2023** về bảo vệ dữ liệu cá nhân ngân hàng. | Dữ liệu được lưu trữ và xử lý hoàn toàn tại Việt Nam (On-premise / Local Cloud). Tích hợp **Guardrail Model** để tự động phát hiện, chặn lọc hoặc ẩn danh hóa (anonymize) thông tin PII trước khi gửi đến mô hình. |
-| **Mở rộng tính năng CRM (Voice Agent)** để RM gọi điện hoặc ghi âm ghi chú cuộc gọi. | Sử dụng **TTS** và **STT** của FPT để tự động chuyển kịch bản gọi điện (call script) thành giọng nói tự nhiên hoặc ghi âm cuộc hội thoại của RM và transribe thành văn bản cập nhật vào CRM. |
+| **Mở rộng tính năng CRM (Voice Agent)** để RM gọi điện hoặc ghi âm ghi chú cuộc gọi. | Sử dụng **TTS** và **STT** của FPT để tự động chuyển kịch bản gọi điện (call script) thành giọng nói tự nhiên hoặc ghi âm cuộc hội thoại của RM và transcribe thành văn bản cập nhật vào CRM. |
 
 ---
 
