@@ -138,10 +138,12 @@ export const NodeDetailSidebar = () => {
                 <LuBrain className="ai-insight-icon glow-orange-icon" />
                 <span className="ai-insight-title">Phân tích RAG Insight</span>
               </div>
-              <span className={`ai-risk-badge ${insight.riskClass}`}>
-                <LuTriangleAlert className="risk-icon-mini" />
-                {insight.risk}
-              </span>
+              {insight.riskClass !== 'risk-low' && (
+                <span className={`ai-risk-badge ${insight.riskClass}`}>
+                  <LuTriangleAlert className="risk-icon-mini" />
+                  {insight.risk}
+                </span>
+              )}
             </div>
             <div className="ai-insight-content">
               <p className="ai-insight-summary">{insight.summary}</p>

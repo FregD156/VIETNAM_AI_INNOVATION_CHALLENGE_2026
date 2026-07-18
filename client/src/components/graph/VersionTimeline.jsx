@@ -73,9 +73,6 @@ export const VersionTimeline = ({ nodeId = '' }) => {
             <div className="timeline-card-header">
               <span className="timeline-version-badge monospace">{item.version}</span>
               <span className="timeline-year-text monospace">Năm ban hành: {item.year}</span>
-              <span className={`timeline-status-badge ${item.status}`}>
-                {isActive ? 'Đang hiệu lực' : 'Đã hết hạn'}
-              </span>
             </div>
 
             {/* Card Text Content */}
