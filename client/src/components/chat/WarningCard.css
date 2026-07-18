@@ -1,86 +1,86 @@
 /* ============================================================
-   SHB GRAPH-RAG — WARNING CARD STYLES
+   SHB GRAPH-RAG — WARNING CARD STYLES (WARNING GOLDEN ORANGE)
    ============================================================ */
 
 .warning-card {
-  margin-top: 16px;
-  background-color: var(--brick-expired-wash); /* Nền đỏ gạch mờ đúng rule */
-  border: 1px solid rgba(192, 68, 44, 0.3);
+  margin-top: 12px;
+  background-color: rgba(240, 99, 29, 0.04); /* Nền cam thương hiệu mờ cảnh báo */
+  border: 1px solid rgba(240, 99, 29, 0.25); /* Viền cam thương hiệu */
   border-radius: var(--radius-panel);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(192, 68, 44, 0.15);
+  box-shadow: 0 4px 16px rgba(240, 99, 29, 0.08);
   animation: cardFadeIn var(--dur-base) var(--ease-standard) forwards;
   transition: all var(--dur-base) var(--ease-standard);
 }
 
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .warning-card.collapsed {
   gap: 0;
-  padding: 12px 16px;
+  padding: 8px 12px;
 }
 
 .warning-card.collapsed:hover {
-  border-color: rgba(192, 68, 44, 0.5);
-  box-shadow: 0 4px 24px rgba(192, 68, 44, 0.22);
+  border-color: rgba(240, 99, 29, 0.45);
+  box-shadow: 0 4px 18px rgba(240, 99, 29, 0.12);
   transform: translateY(-1px);
 }
 
 .warning-card.expanded {
-  gap: 14px;
-  padding: 16px;
-}
-
-@keyframes cardFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  gap: 10px;
+  padding: 12px 14px;
 }
 
 .warning-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
 }
 
 .warning-header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.warning-toggle-icon {
-  color: var(--brick-expired);
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  transition: transform var(--dur-fast) var(--ease-standard);
+  gap: 8px;
 }
 
 .warning-icon-wrapper {
-  color: var(--brick-expired);
-  font-size: 20px;
+  color: var(--orange-signature);
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 0 4px var(--brick-expired));
+  filter: drop-shadow(0 0 3px rgba(240, 99, 29, 0.4));
 }
 
 .warning-card-title {
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--brick-expired);
+  color: var(--orange-signature);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: var(--font-ui);
-  text-shadow: 0 0 8px rgba(192, 68, 44, 0.4);
+  text-shadow: 0 0 6px rgba(240, 99, 29, 0.2);
+}
+
+.warning-toggle-icon {
+  color: var(--orange-signature);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  transition: transform var(--dur-fast) var(--ease-standard);
 }
 
 /* Comparative layout columns */
 .warning-comparison-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
@@ -88,11 +88,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .column-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -103,16 +103,16 @@
   background-color: rgba(10, 22, 40, 0.4);
   border: 1px solid var(--navy-hairline);
   border-radius: var(--radius-panel);
-  padding: 10px 12px;
-  min-height: 80px;
+  padding: 8px 10px;
+  min-height: 60px; /* Nhỏ hơn so với 80px */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .rule-code {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--orange-ember);
   font-family: var(--font-data) !important;
@@ -123,7 +123,7 @@
 }
 
 .rule-summary-text {
-  font-size: 11.5px;
+  font-size: 10.5px; /* Giảm từ 11.5px */
   color: var(--text-primary);
   margin: 0;
   line-height: 1.4;
@@ -140,35 +140,35 @@
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: 14px;
   background-color: var(--navy-surface-raised);
   border: 1px solid var(--navy-hairline);
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-circle); /* tròn theo rule */
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-circle);
   flex-shrink: 0;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
 
 /* Resolution Footer */
 .warning-footer-resolution {
   background-color: rgba(10, 22, 40, 0.25);
-  border-left: 3px solid var(--brick-expired);
+  border-left: 3px solid var(--orange-signature);
   border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
-  padding: 8px 12px;
-  font-size: 11.5px;
-  line-height: 1.5;
+  padding: 6px 10px;
+  font-size: 10.5px;
+  line-height: 1.4;
   color: var(--text-secondary);
 }
 
 .resolution-prefix {
   font-weight: 700;
   color: var(--text-primary);
-  margin-right: 6px;
+  margin-right: 4px;
 }
 
 .resolution-text strong {
-  color: var(--brick-expired);
+  color: var(--orange-signature);
   font-weight: 700;
 }
 
@@ -188,8 +188,9 @@
    SHB GRAPH-RAG — LIGHT MODE WARNING CARD OVERRIDES
    ============================================================ */
 [data-theme="light"] .warning-card {
-  background-color: rgba(225, 29, 72, 0.035) !important; /* Đỏ hồng light cực kỳ nhẹ nhàng */
-  border: 1px solid rgba(225, 29, 72, 0.15) !important;
+  background-color: rgba(240, 99, 29, 0.02) !important;
+  border-color: rgba(240, 99, 29, 0.15) !important;
+  box-shadow: none !important;
 }
 
 [data-theme="light"] .warning-card-title {
@@ -202,7 +203,7 @@
 }
 
 [data-theme="light"] .rule-summary-text strong {
-  color: var(--text-primary) !important; /* Tránh bị trắng tịt màu */
+  color: var(--text-primary) !important;
 }
 
 [data-theme="light"] .rule-code {
@@ -219,7 +220,7 @@
 }
 
 [data-theme="light"] .warning-footer-resolution {
-  background-color: rgba(225, 29, 72, 0.02) !important;
+  background-color: rgba(240, 99, 29, 0.01) !important;
 }
 
 /* Slide down animation */
@@ -231,4 +232,3 @@
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
