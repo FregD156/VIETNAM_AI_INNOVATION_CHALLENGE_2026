@@ -12,7 +12,6 @@ import {
 } from 'react-icons/lu';
 import CitationTag from './CitationTag';
 import WarningCard from './WarningCard';
-import ActionableDraft from './ActionableDraft';
 import './MessageItem.css';
 
 export const MessageItem = ({ message, onCitationClick }) => {
@@ -249,10 +248,7 @@ export const MessageItem = ({ message, onCitationClick }) => {
           {/* Cảnh báo xung đột pháp quy */}
           {isAi && message.has_conflict && <WarningCard />}
 
-          {/* Bản nháp email / script đề xuất */}
-          {isAi && message.actionable_draft && (
-            <ActionableDraft draft={message.actionable_draft} />
-          )}
+
 
           {/* Tags nguồn trích dẫn pháp lý */}
           {isAi && message.citations && message.citations.length > 0 && (
