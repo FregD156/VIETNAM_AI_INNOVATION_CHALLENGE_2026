@@ -4,37 +4,50 @@ import './ClauseNode.css';
 
 export const ClauseNode = ({ data }) => {
   const isActive = data.status === 'active' || data.status === 'Còn hiệu lực' || data.status === 'Còn hiệu lực một phần';
-  // Đổ màu handle theo tình trạng hiệu lực: Active = Green, Expired = Brick Red
+  
+  // Đổ màu dot theo tình trạng hiệu lực: Active = Green, Expired = Brick Red
   const handleColor = isActive ? 'var(--emerald-active)' : 'var(--brick-expired)';
   
   return (
-    <div className={`clause-node ${isActive ? 'active' : 'expired'}`}>
-      {/* Target handle */}
+    <div className={`clause-node-dot ${isActive ? 'active' : 'expired'}`}>
+      {/* Target handle bao phủ 100% hình tròn mờ để kết nối chéo tự nhiên */}
       <Handle 
         type="target" 
         position={Position.Top} 
-        style={{ background: handleColor, width: 8, height: 8 }} 
+        style={{ 
+          background: 'transparent', 
+          border: 'none', 
+          width: '100%', 
+          height: '100%', 
+          top: 0, 
+          left: 0, 
+          borderRadius: '50%', 
+          transform: 'none', 
+          zIndex: 5 
+        }} 
       />
       
-      <div className="clause-node-header">
-        <span className="clause-status-tag">
-          {isActive ? 'Active Clause' : 'Expired Clause'}
-        </span>
-      </div>
+      <div className="clause-dot-circle" style={{ backgroundColor: handleColor }} />
       
-      <div className="clause-node-title">
-        {data.title}
+      <div className="clause-dot-label">
+        {data.title || data.id}
       </div>
 
-      <div className="clause-node-text-preview" title={data.content || data.text || ''}>
-        {data.content || data.text || ''}
-      </div>
-
-      {/* Source handle */}
+      {/* Source handle bao phủ 100% hình tròn mờ */}
       <Handle 
         type="source" 
         position={Position.Bottom} 
-        style={{ background: handleColor, width: 8, height: 8 }} 
+        style={{ 
+          background: 'transparent', 
+          border: 'none', 
+          width: '100%', 
+          height: '100%', 
+          top: 0, 
+          left: 0, 
+          borderRadius: '50%', 
+          transform: 'none', 
+          zIndex: 5 
+        }} 
       />
     </div>
   );

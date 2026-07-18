@@ -1,123 +1,94 @@
 /* ============================================================
-   SHB GRAPH-RAG — DOCUMENT NODE STYLES
+   SHB GRAPH-RAG — DOCUMENT NODE DOT STYLES
    ============================================================ */
 
-.document-node {
-  padding: 12px 16px;
-  background-color: var(--navy-surface);
-  border: 1px solid var(--navy-hairline);
-  border-radius: var(--radius-panel); /* vuông bo nhẹ theo rule */
-  color: var(--text-primary);
-  font-family: var(--font-ui);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  width: 210px;
+.document-node-dot {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.doc-dot-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: var(--font-data);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  transition: all var(--dur-fast) var(--ease-standard);
+  z-index: 2;
+}
+
+.document-node-dot:hover .doc-dot-circle {
+  transform: scale(1.15);
+  box-shadow: 0 0 15px var(--orange-signature);
+  border-color: #ffffff;
+}
+
+.doc-dot-initial {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.doc-dot-label {
+  position: absolute;
+  top: 38px;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background-color: var(--navy-surface-raised);
+  padding: 4px 10px;
+  border-radius: var(--radius-circle);
+  border: 1px solid var(--navy-hairline);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-family: var(--font-ui);
+  pointer-events: none;
+  z-index: 10;
   transition: all var(--dur-fast) var(--ease-standard);
 }
 
-.document-node:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+.document-node-dot:hover .doc-dot-label {
+  color: #ffffff;
   border-color: var(--orange-signature);
 }
 
-/* Phân định viền trái */
-.document-node.law-doc {
-  border-left: 4px solid var(--sea-blue); /* Luật dùng xanh biển sâu */
+/* Specific glows based on doc type */
+.law-doc:hover .doc-dot-circle {
+  box-shadow: 0 0 15px var(--sea-blue);
 }
 
-.document-node.nhnn-doc {
-  border-left: 4px solid var(--emerald-active); /* NHNN dùng xanh lá */
+.nhnn-doc:hover .doc-dot-circle {
+  box-shadow: 0 0 15px var(--emerald-active);
 }
 
-.document-node.shb-doc {
-  border-left: 4px solid var(--orange-signature); /* SHB dùng cam brand */
-}
-
-.document-node-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--navy-hairline);
-  padding-bottom: 4px;
-}
-
-.document-node-tag {
-  font-size: 8.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-family: var(--font-data);
-}
-
-.document-node-tag.law {
-  color: #8ed3f4;
-  text-shadow: 0 0 8px rgba(142, 211, 244, 0.4);
-}
-
-.document-node-tag.nhnn {
-  color: #79f2c0;
-  text-shadow: 0 0 8px rgba(121, 242, 192, 0.4);
-}
-
-.document-node-tag.shb {
-  color: var(--orange-ember);
-  text-shadow: 0 0 8px rgba(255, 171, 107, 0.4);
-}
-
-.document-node-title {
-  font-size: 11.5px;
-  font-weight: 700;
-  line-height: 1.45;
-  color: var(--text-primary);
-}
-
-.document-node-date {
-  font-size: 9px;
-  color: var(--text-muted);
-  font-family: var(--font-data);
-}
-
-.monospace {
-  font-family: var(--font-data);
-}
-
-/* React Flow custom handles styling inside node */
-.react-flow__handle {
-  border: 1px solid var(--navy-abyss) !important;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-
-.document-node:hover .react-flow__handle {
-  transform: scale(1.3);
+.shb-doc:hover .doc-dot-circle {
+  box-shadow: 0 0 15px var(--orange-signature);
 }
 
 /* ============================================================
    SHB GRAPH-RAG — LIGHT MODE DOCUMENT NODE OVERRIDES
    ============================================================ */
-[data-theme="light"] .document-node {
-  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.05);
+[data-theme="light"] .doc-dot-label {
+  background-color: #FFFFFF !important;
+  color: #334155;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-[data-theme="light"] .document-node:hover {
-  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.1);
-  border-color: var(--orange-signature);
+[data-theme="light"] .document-node-dot:hover .doc-dot-label {
+  color: var(--orange-signature) !important;
+  border-color: var(--orange-signature) !important;
 }
 
-[data-theme="light"] .document-node-tag.law {
-  color: var(--sea-blue);
-  text-shadow: none;
+[data-theme="light"] .doc-dot-circle {
+  border-color: rgba(0, 0, 0, 0.08);
 }
-
-[data-theme="light"] .document-node-tag.nhnn {
-  color: var(--emerald-active);
-  text-shadow: none;
-}
-
-[data-theme="light"] .document-node-tag.shb {
-  color: var(--orange-signature);
-  text-shadow: none;
-}
-
