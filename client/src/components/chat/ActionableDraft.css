@@ -167,3 +167,42 @@
   user-select: none;
   pointer-events: none;
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE ACTIONABLE DRAFT OVERRIDES
+   ============================================================ */
+[data-theme="light"] .actionable-draft-container {
+  background-color: #FFFFFF !important;
+  border-color: rgba(28, 56, 41, 0.12) !important;
+}
+
+[data-theme="light"] .draft-type-name {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .draft-bullet-dot {
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .btn-copy:hover {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+}
+
+[data-theme="light"] .draft-paper-editor-wrapper {
+  background-color: rgba(15, 23, 42, 0.03) !important; /* Xanh xám nhạt mờ dịu mắt */
+}
+
+[data-theme="light"] .draft-editor-textarea {
+  border: 1px solid var(--paper-ivory-line) !important;
+}
+
+[data-theme="light"] .btn-crm-sync {
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .btn-crm-sync:hover:not(:disabled) {
+  box-shadow: none !important;
+}
+
