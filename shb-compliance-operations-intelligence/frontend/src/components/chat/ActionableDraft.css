@@ -1,0 +1,208 @@
+/* ============================================================
+   SHB GRAPH-RAG — ACTIONABLE DRAFT STYLES
+   ============================================================ */
+
+.actionable-draft-container {
+  margin-top: 16px;
+  background-color: rgba(16, 30, 54, 0.6);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo rule */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Toolbar Header */
+.draft-toolbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--navy-surface-raised);
+  border-bottom: 1px solid var(--navy-hairline);
+}
+
+.draft-type-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.draft-bullet-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-circle); /* tròn tuyệt đối */
+  background-color: var(--orange-signature);
+  box-shadow: 0 0 6px var(--orange-signature);
+}
+
+.draft-type-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-data);
+}
+
+.draft-toolbar-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Badges and states */
+.sync-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-panel);
+}
+
+.sync-badge.loading {
+  color: var(--text-secondary);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.sync-badge.success {
+  color: var(--emerald-active);
+  background-color: var(--emerald-active-wash);
+  border: 1px solid rgba(47, 158, 104, 0.2);
+}
+
+.icon-spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Toolbar Buttons */
+.btn-toolbar-tool {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  height: 26px;
+  border-radius: var(--radius-panel); /* vuông bo nhẹ */
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid var(--navy-hairline);
+  color: var(--text-secondary);
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.btn-copy:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-copy.copied {
+  color: var(--emerald-active);
+  background-color: var(--emerald-active-wash);
+  border-color: rgba(47, 158, 104, 0.3);
+}
+
+.btn-crm-sync {
+  background-color: var(--orange-signature);
+  border-color: var(--orange-signature);
+  color: #ffffff;
+}
+
+.btn-crm-sync:hover:not(:disabled) {
+  background-color: var(--orange-signature-hover);
+  border-color: var(--orange-signature-hover);
+  box-shadow: 0 0 8px rgba(240, 99, 29, 0.3);
+}
+
+.btn-crm-sync:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Paper Editor Sheet */
+.draft-paper-editor-wrapper {
+  position: relative;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.draft-editor-textarea {
+  width: 100%;
+  min-height: 140px;
+  max-height: 300px;
+  padding: 16px 16px 28px 16px;
+  resize: vertical;
+  outline: none;
+  font-size: 13px;
+  line-height: 1.7;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: border-color var(--dur-fast) var(--ease-standard);
+}
+
+.draft-editor-textarea:focus {
+  border-color: var(--paper-ivory-line);
+}
+
+/* Watermark chìm của SHB Compliance */
+.paper-watermark {
+  position: absolute;
+  bottom: 18px;
+  right: 20px;
+  font-family: var(--font-data);
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(36, 30, 20, 0.12); /* Trộn màu mực mờ */
+  letter-spacing: 1.5px;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE ACTIONABLE DRAFT OVERRIDES
+   ============================================================ */
+[data-theme="light"] .actionable-draft-container {
+  background-color: #FFFFFF !important;
+  border-color: rgba(28, 56, 41, 0.12) !important;
+}
+
+[data-theme="light"] .draft-type-name {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .draft-bullet-dot {
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .btn-copy:hover {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+}
+
+[data-theme="light"] .draft-paper-editor-wrapper {
+  background-color: rgba(15, 23, 42, 0.03) !important; /* Xanh xám nhạt mờ dịu mắt */
+}
+
+[data-theme="light"] .draft-editor-textarea {
+  border: 1px solid var(--paper-ivory-line) !important;
+}
+
+[data-theme="light"] .btn-crm-sync {
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .btn-crm-sync:hover:not(:disabled) {
+  box-shadow: none !important;
+}
+

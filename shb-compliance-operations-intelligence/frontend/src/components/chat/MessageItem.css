@@ -1,0 +1,505 @@
+/* ============================================================
+   SHB GRAPH-RAG — MESSAGE ITEM STYLES
+   ============================================================ */
+
+.message-item-row {
+  display: flex;
+  width: 100%;
+  margin-bottom: 24px;
+  gap: 12px;
+  animation: fadeIn var(--dur-base) var(--ease-standard) forwards;
+}
+
+.message-item-row.user {
+  justify-content: flex-end;
+}
+
+.message-item-row.ai {
+  justify-content: flex-start;
+}
+
+/* 1. SYMMETRICAL SENDER AVATARS */
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-circle); /* tròn tuyệt đối */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--navy-hairline);
+}
+
+.bot-avatar {
+  background: linear-gradient(135deg, var(--orange-signature) 0%, #c2410c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(240, 99, 29, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-avatar {
+  background-color: var(--navy-surface-raised);
+  color: var(--text-secondary);
+}
+
+/* 2. CHAT BUBBLE BOX */
+.message-bubble-box {
+  max-width: 88%;
+  padding: 16px 20px;
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo triết lý logo */
+  background-color: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 13.5px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transition: border-color var(--dur-fast) var(--ease-standard);
+}
+
+.message-item-row.user .message-bubble-box {
+  background-color: var(--navy-surface-raised);
+  border-left: 4px solid var(--sea-blue) !important; /* Viền trái xanh dẫn chiếu ở chế độ Tối */
+  border-bottom-right-radius: 2px; /* góc nhọn tinh tế bên người gửi */
+}
+
+.message-item-row.ai .message-bubble-box {
+  border-left: 4px solid var(--orange-signature) !important; /* Viền trái cam brand ở chế độ Tối */
+  border-bottom-left-radius: 2px; /* góc nhọn tinh tế bên AI */
+}
+
+/* Welcome message special styling */
+.message-bubble-box.welcome {
+  border-color: rgba(240, 99, 29, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(240, 99, 29, 0.06);
+}
+
+/* 3. BUBBLE HEADER METADATA */
+.message-bubble-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-family: var(--font-data);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--navy-hairline);
+  padding-bottom: 6px;
+}
+
+.bubble-sender-name {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.message-item-row.ai .bubble-sender-name {
+  color: var(--orange-signature);
+}
+
+.message-item-row.user .bubble-sender-name {
+  color: var(--text-secondary);
+}
+
+.bubble-message-time {
+  font-weight: 500;
+}
+
+/* 4. MARKDOWN PARSER RENDERING */
+.message-bubble-body {
+  word-break: break-word;
+}
+
+.message-p {
+  margin: 0 0 12px 0;
+}
+
+.message-p:last-child {
+  margin-bottom: 0;
+}
+
+.message-space {
+  height: 10px;
+}
+
+.message-h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 18px 0 10px 0;
+  border-bottom: 1px solid var(--navy-hairline);
+  padding-bottom: 4px;
+}
+
+.message-h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--orange-ember);
+  margin: 14px 0 8px 0;
+}
+
+/* Blockquote for original legal text quotes */
+.message-blockquote {
+  margin: 12px 0;
+  padding: 12px 16px;
+  background-color: rgba(28, 114, 147, 0.05); /* Sea Blue Wash mờ */
+  border-left: 3px solid var(--sea-blue);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  color: var(--text-secondary);
+}
+
+.blockquote-inner-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.quote-mark-legal {
+  font-family: var(--font-legal);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--sea-blue-light);
+  opacity: 0.35;
+  line-height: 0.6;
+  height: 18px;
+  margin-top: 4px;
+  user-select: none;
+}
+
+.quote-content-legal-text {
+  margin: 0;
+  font-family: var(--font-legal);
+  font-size: 13px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.message-bubble-body ul, 
+.message-bubble-body ol {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+}
+
+.message-bubble-body li {
+  margin-bottom: 6px;
+}
+
+.message-bubble-body li:last-child {
+  margin-bottom: 0;
+}
+
+.message-bubble-body strong {
+  color: var(--orange-ember);
+  font-weight: 600;
+}
+
+/* 5. CITATIONS FOOTER SECTION */
+.message-bubble-citations {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--navy-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.citations-header-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.citations-header-icon {
+  font-size: 13px;
+  color: var(--sea-blue-light);
+}
+
+.citations-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Custom animation overlay helper */
+.animate-fade-in {
+  animation: fadeIn var(--dur-fast) var(--ease-standard) forwards;
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — MESSAGE ACTION TOOLBAR
+   ============================================================ */
+.message-bubble-wrapper-outer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 88%;
+}
+
+.message-item-row.user .message-bubble-wrapper-outer {
+  align-items: flex-end;
+}
+
+.message-item-row.ai .message-bubble-wrapper-outer {
+  align-items: flex-start;
+}
+
+.message-action-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+  height: 20px;
+}
+
+.msg-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: var(--radius-tag);
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.msg-action-btn:hover {
+  color: var(--text-primary);
+}
+
+.msg-action-btn svg {
+  font-size: 12px;
+  transition: color var(--dur-fast);
+}
+
+.msg-action-btn:hover svg {
+  color: var(--orange-signature);
+}
+
+/* TTS Playing state */
+.msg-action-btn.tts-playing {
+  color: var(--orange-signature);
+  font-weight: 600;
+}
+
+.tts-playing-icon {
+  animation: ttsPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ttsPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.msg-action-divider {
+  width: 1px;
+  height: 10px;
+  background-color: var(--navy-hairline);
+}
+
+.msg-action-feedback-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--radius-tag);
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.msg-action-feedback-btn:hover {
+  color: var(--text-primary);
+}
+
+.msg-action-feedback-btn.active-like {
+  color: var(--emerald-active) !important;
+}
+
+.msg-action-feedback-btn.active-dislike {
+  color: var(--brick-expired) !important;
+}
+
+.success-green-icon {
+  color: var(--emerald-active) !important;
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE CHAT BUBBLE OVERRIDES
+   ============================================================ */
+[data-theme="light"] .message-bubble-box {
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .message-item-row.ai .message-bubble-box {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(28, 56, 41, 0.12) !important;
+  border-left: 4px solid var(--orange-signature) !important; /* Viền trái cam thương hiệu */
+}
+
+[data-theme="light"] .message-item-row.user .message-bubble-box {
+  background-color: rgba(225, 234, 228, 0.5) !important; /* Xanh mint nhạt mờ dịu mắt */
+  border: 1px solid rgba(28, 56, 41, 0.1) !important;
+  border-left: 4px solid var(--sea-blue) !important; /* Viền trái xanh dẫn chiếu */
+}
+
+[data-theme="light"] .message-h3 {
+  color: var(--orange-signature); /* Dùng cam signature sẫm màu hơn */
+}
+
+[data-theme="light"] .message-bubble-body strong {
+  color: var(--orange-signature); /* Dùng cam signature để nổi chữ rõ ràng */
+}
+
+[data-theme="light"] .message-blockquote {
+  background-color: rgba(28, 114, 147, 0.04);
+  color: var(--text-primary); /* Chữ tối hơn để đảm bảo tương phản tốt */
+}
+
+[data-theme="light"] .quote-mark-legal {
+  color: var(--sea-blue);
+}
+
+[data-theme="light"] .citations-header-icon {
+  color: var(--sea-blue);
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — RAG CONFIDENCE GAUGE STYLES
+   ============================================================ */
+.rag-confidence-gauge-container {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gauge-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gauge-label-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gauge-shield-icon {
+  font-size: 13.5px;
+}
+
+.gauge-shield-icon.high { color: var(--emerald-active); }
+.gauge-shield-icon.medium { color: var(--orange-signature); }
+.gauge-shield-icon.low { color: var(--brick-expired); }
+
+.gauge-title-text {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.gauge-percent-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.gauge-bar-track {
+  height: 4px;
+  background-color: var(--navy-surface-raised);
+  border-radius: var(--radius-circle);
+  overflow: hidden;
+  width: 100%;
+}
+
+.gauge-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-circle);
+  width: 0;
+  animation: fillGauge 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.gauge-bar-fill.high { background-color: var(--emerald-active); }
+.gauge-bar-fill.medium { background-color: var(--orange-signature); }
+.gauge-bar-fill.low { background-color: var(--brick-expired); }
+
+@keyframes fillGauge {
+  from { width: 0; }
+  to { width: var(--target-width); }
+}
+
+/* Light mode overrides for Gauge */
+[data-theme="light"] .rag-confidence-gauge-container {
+  background-color: rgba(47, 158, 104, 0.02) !important;
+  border-color: rgba(47, 158, 104, 0.1) !important;
+}
+
+[data-theme="light"] .gauge-title-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .gauge-bar-track {
+  background-color: rgba(28, 56, 41, 0.08) !important;
+}
+
+/* ============================================================
+   CẢI TIẾN: HIGHLIGHT VÀ BADGE CHO VĂN BẢN PHÁP LÝ
+   ============================================================ */
+.legal-highlight {
+  background-color: var(--orange-wash);
+  color: var(--orange-ember);
+  padding: 1px 4px;
+  border-radius: var(--radius-tag);
+  font-weight: 600;
+  border: 1px dashed rgba(240, 99, 29, 0.3);
+}
+
+[data-theme="light"] .legal-highlight {
+  background-color: rgba(240, 99, 29, 0.08);
+  color: var(--orange-signature);
+  border-color: rgba(240, 99, 29, 0.4);
+}
+
+.legal-code-badge {
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  font-weight: 500;
+  background-color: var(--navy-abyss);
+  border: 1px solid var(--navy-hairline);
+  color: var(--sea-blue-light);
+  padding: 1px 5px;
+  border-radius: var(--radius-tag);
+  display: inline-block;
+  margin: 0 2px;
+}
+
+[data-theme="light"] .legal-code-badge {
+  background-color: rgba(28, 114, 147, 0.06);
+  border-color: rgba(28, 114, 147, 0.15);
+  color: var(--sea-blue);
+}
+
+
+
+
+

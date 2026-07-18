@@ -1,0 +1,117 @@
+.graph-canvas-container {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background-color: var(--navy-abyss);
+  overflow: hidden;
+}
+
+/* React Flow custom styling overrides */
+.react-flow {
+  background-color: var(--navy-abyss);
+}
+
+.react-flow__background {
+  opacity: 0.05;
+}
+
+/* Customize controls and mini-map overlays - Standard #1 Hairline */
+.react-flow__controls {
+  background: var(--navy-surface) ;
+  border: 1px solid var(--navy-hairline) !important;
+  border-radius: var(--radius-panel) !important;
+  box-shadow: var(--shadow-panel);
+}
+
+.react-flow__controls-button {
+  background: transparent;
+  border-bottom: 1px solid var(--navy-hairline) !important;
+  color: var(--text-secondary);
+  fill: var(--text-secondary);
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.react-flow__controls-button:hover {
+  background-color: var(--navy-surface-raised);
+  color: var(--orange-signature);
+  fill: var(--orange-signature);
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+.react-flow__minimap {
+  background-color: var(--navy-surface) !important;
+  border: 1px solid var(--navy-hairline) !important;
+  border-radius: var(--radius-panel) !important;
+  box-shadow: var(--shadow-panel) !important;
+}
+
+.react-flow__minimap-node {
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(10, 22, 40, 0.6) !important;
+}
+
+/* Customize custom nodes borders on active - Standard #5 Soft Glow */
+.react-flow__node.selected > div {
+  border: 1.5px solid var(--orange-signature) !important;
+  animation: nodeSelectedRipple 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) 1;
+}
+
+@keyframes nodeSelectedRipple {
+  0% {
+    outline: 2px solid var(--orange-signature);
+    outline-offset: 0px;
+  }
+  50% {
+    outline: 6px solid rgba(240, 99, 29, 0.4);
+    outline-offset: 4px;
+  }
+  100% {
+    outline: 10px solid rgba(240, 99, 29, 0);
+    outline-offset: 8px;
+  }
+}
+
+/* Customize Edge label styling */
+.react-flow__edge-text {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  fill: var(--text-muted) !important;
+}
+
+.react-flow__edge-textbg {
+  fill: var(--navy-abyss) !important;
+  opacity: 0.9 !important;
+  rx: 0 !important; /* Sharp corners */
+  ry: 0 !important;
+}
+
+.react-flow__attribution {
+  background-color: transparent !important;
+  color: var(--text-muted) !important;
+  font-size: 8px !important;
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE GRAPH CANVAS OVERRIDES
+   ============================================================ */
+[data-theme="light"] .react-flow__background {
+  opacity: 0.18; /* Tăng độ rõ của lưới chấm nền ở Light Mode */
+}
+
+[data-theme="light"] .react-flow__controls {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.08) !important;
+}
+
+[data-theme="light"] .react-flow__minimap {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.08) !important;
+}
+
+[data-theme="light"] .react-flow__minimap-mask {
+  fill: rgba(255, 255, 255, 0.65) !important; /* Đổi mask tối thành sáng mờ ở Light Mode */
+}
+

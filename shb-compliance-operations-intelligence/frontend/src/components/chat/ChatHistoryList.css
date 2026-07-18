@@ -1,0 +1,25 @@
+.chat-history-list {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--navy-abyss);
+}
+
+/* Container for empty state */
+.empty-chat-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  gap: 16px;
+  text-align: center;
+}
+
+.empty-chat-icon {
+  font-size: 48px;
+  color: var(--navy-surface-raised);
+}

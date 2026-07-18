@@ -1,0 +1,193 @@
+/* ============================================================
+   SHB GRAPH-RAG — WARNING CARD STYLES
+   ============================================================ */
+
+.warning-card {
+  margin-top: 16px;
+  background-color: var(--brick-expired-wash); /* Nền đỏ gạch mờ đúng rule */
+  border: 1px solid rgba(192, 68, 44, 0.3);
+  border-radius: var(--radius-panel);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(192, 68, 44, 0.15);
+  animation: cardFadeIn var(--dur-base) var(--ease-standard) forwards;
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.warning-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.warning-icon-wrapper {
+  color: var(--brick-expired);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 4px var(--brick-expired));
+}
+
+.warning-card-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--brick-expired);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-ui);
+  text-shadow: 0 0 8px rgba(192, 68, 44, 0.4);
+}
+
+/* Comparative layout columns */
+.warning-comparison-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.comparison-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.column-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.column-content-box {
+  background-color: rgba(10, 22, 40, 0.4);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
+  padding: 10px 12px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.rule-code {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--orange-ember);
+  font-family: var(--font-data) !important;
+}
+
+.rule-code.compliance {
+  color: var(--sea-blue-light);
+}
+
+.rule-summary-text {
+  font-size: 11.5px;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.rule-summary-text strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Connector icon */
+.comparison-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 16px;
+  background-color: var(--navy-surface-raised);
+  border: 1px solid var(--navy-hairline);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-circle); /* tròn theo rule */
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Resolution Footer */
+.warning-footer-resolution {
+  background-color: rgba(10, 22, 40, 0.25);
+  border-left: 3px solid var(--brick-expired);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.resolution-prefix {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-right: 6px;
+}
+
+.resolution-text strong {
+  color: var(--brick-expired);
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .warning-comparison-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .comparison-connector {
+    transform: rotate(90deg);
+    margin: 4px auto;
+  }
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE WARNING CARD OVERRIDES
+   ============================================================ */
+[data-theme="light"] .warning-card {
+  background-color: rgba(225, 29, 72, 0.035) !important; /* Đỏ hồng light cực kỳ nhẹ nhàng */
+  border: 1px solid rgba(225, 29, 72, 0.15) !important;
+}
+
+[data-theme="light"] .warning-card-title {
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .column-content-box {
+  background-color: #FFFFFF !important;
+  border-color: rgba(28, 56, 41, 0.1) !important;
+}
+
+[data-theme="light"] .rule-summary-text strong {
+  color: var(--text-primary) !important; /* Tránh bị trắng tịt màu */
+}
+
+[data-theme="light"] .rule-code {
+  color: var(--orange-signature) !important;
+}
+
+[data-theme="light"] .rule-code.compliance {
+  color: var(--sea-blue) !important;
+}
+
+[data-theme="light"] .comparison-connector {
+  background-color: var(--navy-surface-raised) !important;
+  border-color: var(--navy-hairline) !important;
+}
+
+[data-theme="light"] .warning-footer-resolution {
+  background-color: rgba(225, 29, 72, 0.02) !important;
+}
+

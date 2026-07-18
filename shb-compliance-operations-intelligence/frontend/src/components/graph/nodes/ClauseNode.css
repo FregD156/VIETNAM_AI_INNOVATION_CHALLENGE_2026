@@ -1,0 +1,117 @@
+/* ============================================================
+   SHB GRAPH-RAG — CLAUSE NODE STYLES
+   ============================================================ */
+
+.clause-node {
+  padding: 12px 14px;
+  background-color: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo rule */
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.clause-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: var(--orange-signature);
+}
+
+/* Active status styles */
+.clause-node.active {
+  border-left: 4px solid var(--emerald-active);
+  box-shadow: 0 0 12px rgba(47, 158, 104, 0.15);
+}
+
+.clause-node.active .clause-status-tag {
+  color: var(--emerald-active);
+  text-shadow: 0 0 8px rgba(47, 158, 104, 0.4);
+}
+
+/* Expired status styles */
+.clause-node.expired {
+  border-left: 4px solid var(--brick-expired);
+  box-shadow: 0 0 12px rgba(192, 68, 44, 0.15);
+}
+
+.clause-node.expired .clause-node-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.clause-node.expired .clause-status-tag {
+  color: var(--brick-expired);
+  text-shadow: 0 0 8px rgba(192, 68, 44, 0.4);
+}
+
+/* Internal elements */
+.clause-node-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--navy-hairline);
+  padding-bottom: 4px;
+}
+
+.clause-status-tag {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: var(--font-data);
+}
+
+.clause-node-title {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.clause-node-text-preview {
+  font-size: 9.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* React Flow custom handles styling inside node */
+.react-flow__handle {
+  border: 1px solid var(--navy-abyss) !important;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.clause-node:hover .react-flow__handle {
+  transform: scale(1.3);
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE CLAUSE NODE OVERRIDES
+   ============================================================ */
+[data-theme="light"] .clause-node {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.05);
+}
+
+[data-theme="light"] .clause-node:hover {
+  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.1);
+  border-color: var(--orange-signature);
+}
+
+[data-theme="light"] .clause-node.active {
+  box-shadow: 0 4px 12px rgba(47, 158, 104, 0.08);
+}
+
+[data-theme="light"] .clause-node.expired {
+  box-shadow: 0 4px 12px rgba(192, 68, 44, 0.08);
+}
+
+[data-theme="light"] .clause-status-tag {
+  text-shadow: none !important;
+}
+

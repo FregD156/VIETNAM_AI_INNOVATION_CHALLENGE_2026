@@ -1,0 +1,175 @@
+/* ============================================================
+   SHB GRAPH-RAG — GRAPH LEGEND PANEL STYLES
+   ============================================================ */
+
+.graph-legend-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+  padding: 12px;
+  background-color: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo rule */
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  pointer-events: auto; /* cho phép click nếu cần */
+  user-select: none;
+}
+
+.legend-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend-sec-title {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.legend-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.legend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.btn-legend-reset {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--radius-circle);
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.btn-legend-reset:hover {
+  color: var(--orange-signature);
+  background-color: var(--navy-surface-raised);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.legend-item.filterable {
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: 4px;
+}
+
+.legend-item.filterable:hover {
+  background-color: var(--navy-surface-raised);
+}
+
+.legend-item.filterable.active {
+  background-color: rgba(240, 99, 29, 0.08);
+}
+
+.legend-item.filterable.active .legend-item-text {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.legend-item.filterable.inactive {
+  opacity: 0.45;
+}
+
+.legend-item-text {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.legend-divider {
+  height: 1px;
+  background-color: var(--navy-hairline);
+  margin: 4px 0;
+}
+
+/* Indicators styling */
+.dot-color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-circle); /* tròn */
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.legend-item.filterable:hover .dot-color-indicator {
+  transform: scale(1.15);
+}
+
+.legend-check-icon {
+  color: var(--navy-abyss);
+  font-size: 9px;
+  stroke-width: 4px; /* làm dày nét */
+}
+
+/* Node Colors mapping */
+.dot-color-indicator.node-shb {
+  background-color: var(--orange-signature);
+  box-shadow: 0 0 6px rgba(240, 99, 29, 0.4);
+}
+
+.dot-color-indicator.node-nhnn {
+  background-color: var(--sea-blue-light);
+  box-shadow: 0 0 6px rgba(79, 168, 201, 0.4);
+}
+
+.dot-color-indicator.node-active {
+  background-color: var(--emerald-active);
+  box-shadow: 0 0 6px rgba(47, 158, 104, 0.4);
+}
+
+.dot-color-indicator.node-expired {
+  background-color: var(--brick-expired);
+  box-shadow: 0 0 6px rgba(192, 68, 44, 0.4);
+}
+
+/* Edge Lines mapping */
+.line-color-indicator {
+  width: 14px;
+  height: 2.5px;
+  border-radius: var(--radius-circle);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.line-color-indicator.edge-has {
+  background-color: var(--orange-signature);
+}
+
+.line-color-indicator.edge-supersedes {
+  background-color: var(--brick-expired);
+  height: 2px;
+  border-bottom: 1.5px dashed var(--brick-expired);
+}
+
+.line-color-indicator.edge-references {
+  background-color: var(--sea-blue);
+}

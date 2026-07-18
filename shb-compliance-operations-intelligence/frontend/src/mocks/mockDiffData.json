@@ -1,0 +1,19 @@
+{
+  "amendment_loan_policy": {
+    "title": "Dự thảo sửa đổi Điều 14 - QĐ 214/2022/SHB (Hạn mức cho vay online)",
+    "originalText": "Điều 14. Hạn mức cho vay không tài sản bảo đảm:\nĐối với sản phẩm cho vay tiêu dùng tín chấp dành cho cán bộ nhân viên thuộc đối tác liên kết của SHB, hạn mức cho vay tối đa là 500.000.000 VNĐ. Thời hạn vay tối đa 60 tháng.",
+    "modifiedText": "Điều 14. Hạn mức cho vay không tài sản bảo đảm:\nĐối với sản phẩm cho vay tiêu dùng tín chấp dành cho cán bộ nhân viên thuộc đối tác liên kết của SHB, hạn mức cho vay tối đa là 500.000.000 VNĐ. Thời hạn vay tối đa 60 tháng. Riêng đối với các khoản cho vay được duyệt online thông qua ứng dụng SHB Mobile, dư nợ cho vay tối đa đối với một khách hàng không vượt quá 100.000.000 VNĐ theo Thông tư 06/2023/TT-NHNN.",
+    "proposedRelations": [
+      {
+        "type": "SUPERSEDES",
+        "scope": "partial",
+        "description": "Thay thế một phần hạn mức 500M cho các khoản duyệt online tự động"
+      },
+      {
+        "type": "REFERENCES",
+        "targetNode": "clause_5_tt06",
+        "description": "Dẫn chiếu đến Điều 5 Thông tư 06/2023/TT-NHNN để đảm bảo tuân thủ pháp luật"
+      }
+    ]
+  }
+}

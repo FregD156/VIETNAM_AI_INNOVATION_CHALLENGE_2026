@@ -1,0 +1,369 @@
+/* ============================================================
+   SHB GRAPH-RAG — WELCOME SCREEN INTRO STYLES
+   ============================================================ */
+
+.welcome-screen-container {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--navy-abyss);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+}
+
+/* Hiệu ứng biến mất dần khi click Bắt đầu */
+.welcome-screen-container.exit-fade {
+  animation: welcomeExit 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes welcomeExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.03);
+    filter: blur(8px);
+  }
+}
+
+/* --- HẠT SÁNG NỀN TRÔI LẬP LỜ --- */
+.glow-particle-bg {
+  position: absolute;
+  border-radius: var(--radius-circle);
+  filter: blur(120px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle-1 {
+  width: 450px;
+  height: 450px;
+  background-color: var(--orange-signature);
+  top: -10%;
+  left: -5%;
+  animation: floatBg 20s ease-in-out infinite alternate;
+}
+
+.particle-2 {
+  width: 500px;
+  height: 500px;
+  background-color: var(--sea-blue);
+  bottom: -15%;
+  right: -5%;
+  animation: floatBg 25s ease-in-out infinite alternate-reverse;
+}
+
+.particle-3 {
+  width: 350px;
+  height: 350px;
+  background-color: var(--orange-ember);
+  top: 50%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  animation: floatBg 30s ease-in-out infinite alternate;
+  opacity: 0.08;
+}
+
+@keyframes floatBg {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(80px, 50px) scale(1.15);
+  }
+}
+
+/* --- WRAPPER NỘI DUNG CHÍNH --- */
+.welcome-inner-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1000px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  text-align: center;
+}
+
+/* --- LOGO BRAND HEADER --- */
+.welcome-logo-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-square-large {
+  width: 54px;
+  height: 54px;
+  background-color: var(--orange-signature);
+  border-radius: 8px; /* Khung vuông của logo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(240, 99, 29, 0.4);
+}
+
+.logo-circle-inner-large {
+  width: 34px;
+  height: 34px;
+  background-color: var(--navy-abyss);
+  border-radius: var(--radius-circle); /* Vòng tròn ôm trong */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text-s {
+  font-family: var(--font-ui);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--orange-signature);
+  line-height: 1;
+}
+
+.welcome-brand-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.welcome-brand-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+}
+
+.welcome-brand-badge {
+  font-family: var(--font-data);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--orange-ember);
+  background-color: var(--orange-wash);
+  padding: 2px 6px;
+  border-radius: var(--radius-tag);
+  letter-spacing: 1px;
+}
+
+/* --- HERO SECTION --- */
+.welcome-hero-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+}
+
+.welcome-main-title {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.highlight-gradient {
+  background: linear-gradient(135deg, var(--orange-signature) 30%, var(--orange-ember) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  text-shadow: 0 0 30px rgba(240, 99, 29, 0.15);
+}
+
+.welcome-hero-desc {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* --- FEATURES GRID --- */
+.welcome-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+.feature-intro-card {
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  background-color: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-panel);
+}
+
+.feature-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: 1px solid var(--navy-hairline);
+}
+
+.feature-icon-circle.chat-color {
+  background-color: rgba(240, 99, 29, 0.08);
+  color: var(--orange-ember);
+  border-color: rgba(240, 99, 29, 0.2);
+}
+
+.feature-icon-circle.graph-color {
+  background-color: var(--sea-blue-wash);
+  color: var(--sea-blue-light);
+  border-color: rgba(28, 114, 147, 0.2);
+}
+
+.feature-icon-circle.admin-color {
+  background-color: rgba(255, 255, 255, 0.02);
+  color: var(--text-secondary);
+}
+
+.feature-intro-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.feature-intro-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- FOOTER & CTA ACTION --- */
+.welcome-action-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.btn-welcome-start {
+  padding: 16px 36px;
+  border-radius: var(--radius-circle); /* Tròn trịa capsule */
+  background: linear-gradient(135deg, var(--orange-signature) 0%, #d84a0d 100%);
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(240, 99, 29, 0.45);
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.btn-welcome-start:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 30px rgba(240, 99, 29, 0.6);
+  color: #ffffff;
+}
+
+.btn-welcome-start:active {
+  transform: scale(0.97);
+}
+
+.btn-welcome-sparkle-icon {
+  font-size: 15px;
+  color: var(--orange-ember);
+  animation: welcomeSparkle 2s linear infinite;
+}
+
+@keyframes welcomeSparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+}
+
+.btn-welcome-arrow {
+  font-size: 15px;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.btn-welcome-start:hover .btn-welcome-arrow {
+  transform: translateX(4px);
+}
+
+.welcome-system-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-shield-icon {
+  color: var(--orange-signature);
+  font-size: 12px;
+}
+
+/* --- ANIMATIONS POP --- */
+.animate-pop {
+  animation: popIn 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.delay-1 { animation-delay: 200ms; }
+.delay-2 { animation-delay: 350ms; }
+.delay-3 { animation-delay: 500ms; }
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* --- LIGHT MODE OVERRIDES --- */
+[data-theme="light"] .welcome-screen-container {
+  background-color: #F0F4F1;
+}
+
+[data-theme="light"] .logo-circle-inner-large {
+  background-color: #F0F4F1;
+}
+
+[data-theme="light"] .feature-intro-card {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+}
+
+[data-theme="light"] .btn-welcome-start {
+  box-shadow: none !important;
+}
+
+[data-theme="light"] .feature-icon-circle.admin-color {
+  background-color: rgba(15, 23, 42, 0.02);
+  color: var(--text-secondary);
+}

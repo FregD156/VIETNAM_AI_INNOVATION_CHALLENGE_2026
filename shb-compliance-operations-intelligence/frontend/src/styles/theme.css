@@ -1,0 +1,176 @@
+/* ============================================================
+   SHB GRAPH-RAG — DESIGN TOKENS
+   Bản sắc: cam SHB + Midnight Navy + mô-típ "vuông ôm tròn"
+   (lấy từ logo 2026: hình vuông + hình tròn + chữ S,
+   triết lý "trời tròn, đất vuông")
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ---- Màu nền: Midnight Navy thật của SHB, không phải navy chung chung ---- */
+  --navy-abyss: #0A1628;        /* nền chính toàn app */
+  --navy-surface: #101E36;      /* panel nổi (card, sidebar) */
+  --navy-surface-raised: #16294A; /* panel nổi cao hơn (modal, dropdown) */
+  --navy-hairline: rgba(255, 255, 255, 0.08); /* viền mảnh trên nền tối */
+
+  /* ---- Cam signature — DÙNG TIẾT CHẾ, chỉ cho khoảnh khắc quan trọng ---- */
+  --orange-signature: #F0631D;
+  --orange-signature-hover: #FF7A36;
+  --orange-ember: #FFAB6B;      /* cam nhạt: glow nhẹ, không lạm dụng */
+  --orange-wash: rgba(240, 99, 29, 0.12); /* nền mờ cho badge/tag liên quan cam */
+
+  /* ---- Xanh biển phụ — REFERENCES edge, thông tin thứ cấp, điềm tĩnh ---- */
+  --sea-blue: #1C7293;
+  --sea-blue-light: #4FA8C9;
+  --sea-blue-wash: rgba(28, 114, 147, 0.14);
+
+  /* ---- Trạng thái Clause (đồ thị tri thức) ---- */
+  --emerald-active: #2F9E68;    /* còn hiệu lực */
+  --emerald-active-wash: rgba(47, 158, 104, 0.14);
+  --brick-expired: #C0442C;     /* hết hiệu lực — khác hẳn cam brand để không nhầm */
+  --brick-expired-wash: rgba(192, 68, 44, 0.14);
+
+  /* ---- Bề mặt "giấy" — dùng riêng cho văn bản pháp lý gốc ---- */
+  --paper-ivory: #F5EFE6;
+  --paper-ivory-line: #E4DACB;
+  --paper-ink: #241E14;         /* chữ trên nền giấy, không dùng đen thuần */
+
+  /* ---- Chữ trên nền tối ---- */
+  --text-primary: #F3F1EC;
+  --text-secondary: #A9AFBC;
+  --text-muted: #6E7585;
+
+  /* ---- Shadow & Focus Rings tiêu chuẩn cho chế độ Tối ---- */
+  --shadow-panel: 0 4px 15px rgba(0, 0, 0, 0.35);
+  --shadow-raised: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --focus-ring: 0 0 0 3px rgba(240, 99, 29, 0.3);
+
+  /* ---- Typography ---- */
+  --font-ui: 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-legal: 'Source Serif 4', Georgia, serif;   /* CHỈ dùng cho trích dẫn pháp lý gốc */
+  --font-data: 'IBM Plex Mono', monospace;           /* mã điều khoản, timestamp, version */
+
+  /* ---- Hình khối: micro-radius bo tròn nhẹ tinh tế ---- */
+  --radius-panel: 4px;
+  --radius-tag: 2px;
+  --radius-circle: 999px;
+
+  /* ---- Motion — có chủ đích, không rải rác ---- */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-signature: 480ms; /* riêng cho khoảnh khắc "vòng tròn nở từ khung vuông" */
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE DESIGN TOKENS
+   Giao diện sáng cao cấp, tinh tế, không chói mắt
+   ============================================================ */
+[data-theme="light"] {
+  --navy-abyss: #F0F4F1;          /* Nền chính Sage Mint dịu mát */
+  --navy-surface: #FFFFFF;        /* Nền panel trắng tinh nổi bật */
+  --navy-surface-raised: #E1EAE4; /* Nền popover/modal xanh mint nhạt */
+  --navy-hairline: rgba(28, 56, 41, 0.12); /* Viền xanh rừng mờ nhạt cực kỳ thanh lịch */
+
+  /* Chữ trên nền sáng */
+  --text-primary: #13221A;        /* Xanh rừng sẫm, tương phản tốt, dịu mắt */
+  --text-secondary: #344C3F;      /* Xanh xám */
+  --text-muted: #5C7467;          /* Xanh xám mờ */
+
+  /* Shadow & Focus Rings tiêu chuẩn cho chế độ Sáng - KHÔNG đổ bóng (Flat Design) */
+  --shadow-panel: none;
+  --shadow-raised: none;
+  --focus-ring: 0 0 0 3px rgba(47, 158, 104, 0.18); /* Vòng ring xanh mint dịu mắt */
+
+  /* Điều chỉnh sắc độ mờ để giữ thẩm mỹ */
+  --orange-wash: rgba(240, 99, 29, 0.08);
+  --sea-blue-wash: rgba(28, 114, 147, 0.08);
+  --emerald-active-wash: rgba(47, 158, 104, 0.1);
+  --brick-expired: #E11D48;        /* Đỏ hồng light tươi sáng, chuyên nghiệp */
+  --brick-expired-wash: rgba(225, 29, 72, 0.08);
+  
+  /* Đổi màu xanh biển phụ sang sẫm hơn trên nền sáng */
+  --sea-blue-light: #1C7293;
+}
+
+/* Ghi đè các hiệu ứng Glow phát sáng trên nền sáng để tránh nhòe chữ */
+[data-theme="light"] .glow-orange {
+  color: var(--orange-signature) !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .glow-emerald {
+  color: var(--emerald-active) !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .glow-brick {
+  color: var(--brick-expired) !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .glow-blue {
+  color: var(--sea-blue) !important;
+  text-shadow: none !important;
+}
+
+/* Ghi đè bóng đổ các node selected trên đồ thị ở Light Mode */
+[data-theme="light"] .react-flow__node.selected > div {
+  box-shadow: 0 0 0 3px rgba(240, 99, 29, 0.2) !important;
+}
+
+
+/* Glowing Text Shadow Utilities */
+.glow-orange {
+  color: var(--orange-signature) !important;
+  text-shadow: 0 0 8px var(--orange-ember), 0 0 15px rgba(240, 99, 29, 0.5);
+}
+
+.glow-emerald {
+  color: var(--emerald-active) !important;
+  text-shadow: 0 0 8px var(--emerald-active), 0 0 15px rgba(47, 158, 104, 0.5);
+}
+
+.glow-brick {
+  color: var(--brick-expired) !important;
+  text-shadow: 0 0 8px var(--brick-expired), 0 0 15px rgba(192, 68, 44, 0.5);
+}
+
+.glow-blue {
+  color: var(--sea-blue-light) !important;
+  text-shadow: 0 0 8px var(--sea-blue-light), 0 0 15px rgba(79, 168, 201, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--navy-abyss);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Utility: panel nghiệp vụ chuẩn — KHÔNG glassmorphism tràn lan,
+   chỉ 1 lớp nền phẳng + viền mảnh, đúng tinh thần "vuông = ổn định" */
+.panel {
+  background: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
+}
+
+/* Utility: bề mặt giấy cho nội dung pháp lý gốc — tương phản có chủ đích */
+.paper-surface {
+  background: var(--paper-ivory);
+  color: var(--paper-ink);
+  border: 1px solid var(--paper-ivory-line);
+  border-radius: var(--radius-panel);
+  font-family: var(--font-legal);
+}
+
+/* Utility: chấm/node tròn tuyệt đối */
+.node-dot {
+  border-radius: var(--radius-circle);
+}

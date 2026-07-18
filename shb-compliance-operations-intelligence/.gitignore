@@ -1,0 +1,23 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.env.*
+!.env.example
+*.bak
+.venv
+venv/
+ENV/
+env/
+
+# IDE files
+.vscode/
+.idea/
+.DS_Store
+
+# Temporary scratch scripts
+scratch/
+.tmp/
