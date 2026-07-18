@@ -8,8 +8,7 @@ import {
   LuVolumeX, 
   LuThumbsUp, 
   LuThumbsDown,
-  LuBookOpen,
-  LuShieldCheck
+  LuBookOpen
 } from 'react-icons/lu';
 import CitationTag from './CitationTag';
 import WarningCard from './WarningCard';
@@ -21,21 +20,6 @@ export const MessageItem = ({ message, onCitationClick }) => {
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState(null); // null | 'up' | 'down'
   const [isPlayingTTS, setIsPlayingTTS] = useState(false); // Giả lập giọng đọc TTS
-
-  // Tính toán / lấy điểm phần trăm độ tin cậy RAG
-  const getConfidenceScore = () => {
-    if (message.confidence) return message.confidence;
-    if (message.isWelcome) return null;
-    
-    // Giả lập thông minh dựa trên số lượng Citation nguồn dẫn chiếu
-    const base = 91;
-    const citCount = message.citations ? message.citations.length : 0;
-    const lengthMod = message.text ? message.text.length % 5 : 0;
-    const score = Math.min(99, base + (citCount * 2) + lengthMod);
-    return score;
-  };
-
-  const confidenceScore = getConfidenceScore();
 
   // Sao chép câu trả lời vào clipboard
   const handleCopyText = () => {
@@ -156,25 +140,6 @@ export const MessageItem = ({ message, onCitationClick }) => {
             </span>
             <span className="bubble-message-time">{message.timestamp}</span>
           </div>
-
-          {/* RAG Confidence Gauge (Thước đo độ tin cậy RAG) */}
-          {isAi && confidenceScore && (
-            <div className="rag-confidence-gauge-container animate-fade-in">
-              <div className="gauge-meta">
-                <div className="gauge-label-group">
-                  <LuShieldCheck className={`gauge-shield-icon ${confidenceScore >= 90 ? 'high' : confidenceScore >= 75 ? 'medium' : 'low'}`} />
-                  <span className="gauge-title-text">Độ tin cậy đối sánh RAG:</span>
-                </div>
-                <span className="gauge-percent-value monospace">{confidenceScore}%</span>
-              </div>
-              <div className="gauge-bar-track">
-                <div 
-                  className={`gauge-bar-fill ${confidenceScore >= 90 ? 'high' : confidenceScore >= 75 ? 'medium' : 'low'}`}
-                  style={{ '--target-width': `${confidenceScore}%` }}
-                />
-              </div>
-            </div>
-          )}
 
           {/* Nội dung tin nhắn */}
           <div className="message-bubble-body">
