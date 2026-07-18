@@ -49,9 +49,6 @@
 }
 
 .react-flow__minimap-node {
-  fill: var(--navy-surface-raised);
-  stroke: var(--navy-hairline);
-  stroke-width: 1px;
 }
 
 .react-flow__minimap-mask {
