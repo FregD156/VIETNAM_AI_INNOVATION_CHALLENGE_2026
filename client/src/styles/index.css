@@ -166,3 +166,13 @@ html, body, #root {
   box-shadow: 0 4px 12px rgba(192, 68, 44, 0.4);
 }
 
+/* ============================================================
+   SHB GRAPH-RAG — GLOBAL 100% FLAT DESIGN RESET
+   Loại bỏ hoàn toàn tất cả các hiệu ứng đổ bóng (box-shadow) 
+   trên toàn bộ hệ thống (cả Sáng & Tối) để tạo giao diện phẳng.
+   ============================================================ */
+* {
+  box-shadow: none !important;
+}
+
+
