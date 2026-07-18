@@ -91,6 +91,8 @@ export const MessageItem = ({ message, onCitationClick }) => {
     const lines = text.split('\n');
     let inList = false;
     let listItems = [];
+    let inOrderedList = false;
+    let orderedListItems = [];
     const elements = [];
 
     const parseKeywords = (text) => {
@@ -149,34 +151,35 @@ export const MessageItem = ({ message, onCitationClick }) => {
       });
     };
 
+    const closeListIfAny = (idx) => {
+      if (inList) {
+        elements.push(<ul key={`ul_${idx}`} className="message-ul">{listItems}</ul>);
+        listItems = [];
+        inList = false;
+      }
+      if (inOrderedList) {
+        elements.push(<ol key={`ol_${idx}`} className="message-ol">{orderedListItems}</ol>);
+        orderedListItems = [];
+        inOrderedList = false;
+      }
+    };
+
     lines.forEach((line, idx) => {
       const trimmed = line.trim();
       
       // 1. Nhận diện tiêu đề h3 (### )
       if (trimmed.startsWith('### ')) {
-        if (inList) {
-          elements.push(<ul key={`ul_${idx}`}>{listItems}</ul>);
-          listItems = [];
-          inList = false;
-        }
+        closeListIfAny(idx);
         elements.push(<h3 key={`h3_${idx}`} className="message-h3">{parseBold(trimmed.substring(4))}</h3>);
       }
       // 2. Nhận diện tiêu đề h2 (## )
       else if (trimmed.startsWith('## ')) {
-        if (inList) {
-          elements.push(<ul key={`ul_${idx}`}>{listItems}</ul>);
-          listItems = [];
-          inList = false;
-        }
+        closeListIfAny(idx);
         elements.push(<h2 key={`h2_${idx}`} className="message-h2">{parseBold(trimmed.substring(3))}</h2>);
       }
       // 3. Nhận diện trích dẫn luật gốc (> )
       else if (trimmed.startsWith('> ')) {
-        if (inList) {
-          elements.push(<ul key={`ul_${idx}`}>{listItems}</ul>);
-          listItems = [];
-          inList = false;
-        }
+        closeListIfAny(idx);
         elements.push(
           <blockquote key={`bq_${idx}`} className="message-blockquote animate-fade-in">
             <div className="blockquote-inner-wrapper">
@@ -188,31 +191,43 @@ export const MessageItem = ({ message, onCitationClick }) => {
       }
       // 4. Nhận diện danh sách dạng dấu tròn (* hoặc -)
       else if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        if (inOrderedList) {
+          elements.push(<ol key={`ol_${idx}`} className="message-ol">{orderedListItems}</ol>);
+          orderedListItems = [];
+          inOrderedList = false;
+        }
         inList = true;
         listItems.push(<li key={`li_${idx}`}>{parseBold(trimmed.substring(2))}</li>);
       } 
-      // 5. Nhận diện dòng trống tạo khoảng cách
-      else if (trimmed === '') {
+      // 4b. Nhận diện danh sách đánh số thứ tự (ví dụ: 1. Giấy tờ tùy thân)
+      else if (trimmed.match(/^\d+\.\s+/)) {
         if (inList) {
-          elements.push(<ul key={`ul_${idx}`}>{listItems}</ul>);
+          elements.push(<ul key={`ul_${idx}`} className="message-ul">{listItems}</ul>);
           listItems = [];
           inList = false;
         }
+        inOrderedList = true;
+        const matchIndex = trimmed.indexOf('.');
+        const listContent = trimmed.substring(matchIndex + 1).trim();
+        orderedListItems.push(<li key={`ol_li_${idx}`}>{parseBold(listContent)}</li>);
+      }
+      // 5. Nhận diện dòng trống tạo khoảng cách
+      else if (trimmed === '') {
+        closeListIfAny(idx);
         elements.push(<div key={`space_${idx}`} className="message-space" />);
       } 
       // 6. Đoạn văn thường
       else {
-        if (inList) {
-          elements.push(<ul key={`ul_${idx}`}>{listItems}</ul>);
-          listItems = [];
-          inList = false;
-        }
+        closeListIfAny(idx);
         elements.push(<p key={`p_${idx}`} className="message-p">{parseBold(line)}</p>);
       }
     });
 
     if (inList) {
-      elements.push(<ul key="ul_final">{listItems}</ul>);
+      elements.push(<ul key="ul_final" className="message-ul">{listItems}</ul>);
+    }
+    if (inOrderedList) {
+      elements.push(<ol key="ol_final" className="message-ol">{orderedListItems}</ol>);
     }
 
     return elements;
