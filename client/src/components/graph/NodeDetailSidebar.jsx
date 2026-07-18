@@ -195,8 +195,8 @@ export const NodeDetailSidebar = () => {
             <span className="section-label-text">Thông tin pháp lý</span>
           </div>
           <div className="detail-badges-row-flex">
-            <span className={`detail-status-pill ${status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần' ? 'active' : 'expired'}`}>
-              {status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần' ? 'Còn hiệu lực' : 'Hết hiệu lực'}
+            <span className={`detail-status-pill ${status === 'active' || status === 'Còn hiệu lực' ? 'active' : 'expired'}`}>
+              {status || 'Còn hiệu lực'}
             </span>
             <span className={`detail-source-pill ${isNhnn ? 'nhnn' : 'shb'}`}>
               {isNhnn ? 'NHNN Ban Hành' : 'Quy Chế SHB'}

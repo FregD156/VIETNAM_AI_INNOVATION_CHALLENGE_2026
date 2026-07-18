@@ -47,12 +47,12 @@ export const DocumentsWorkspace = () => {
   
   const activeClausesCount = clauses.filter(c => {
     const status = c.data.status || '';
-    return status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần';
+    return status === 'active' || status === 'Còn hiệu lực';
   }).length;
   
   const expiredClausesCount = clauses.filter(c => {
     const status = c.data.status || '';
-    return status === 'expired' || status === 'Hết hiệu lực' || status === 'Đã hết hiệu lực';
+    return status === 'expired' || status === 'Hết hiệu lực' || status === 'Đã hết hiệu lực' || status === 'Còn hiệu lực một phần';
   }).length;
 
   // 2. Lọc danh sách tài liệu và điều khoản hiển thị
@@ -64,7 +64,7 @@ export const DocumentsWorkspace = () => {
 
     // Lọc theo trạng thái hiệu lực (tương thích cả active/expired và Còn hiệu lực/Hết hiệu lực)
     const status = c.data.status || '';
-    const isNodeActive = status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần';
+    const isNodeActive = status === 'active' || status === 'Còn hiệu lực';
     const matchStatus = statusFilter === 'all' || 
       (statusFilter === 'active' && isNodeActive) || 
       (statusFilter === 'expired' && !isNodeActive);
@@ -204,7 +204,7 @@ export const DocumentsWorkspace = () => {
                       const docType = clause.data.docType || 'SHB';
                       const tagClass = docType === 'Luật' ? 'law' : (docType === 'NHNN' ? 'nhnn' : 'shb');
                       const status = clause.data.status || '';
-                      const isActive = status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần';
+                      const isActive = status === 'active' || status === 'Còn hiệu lực';
                       
                       return (
                         <tr 
