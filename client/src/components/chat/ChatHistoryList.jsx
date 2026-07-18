@@ -14,7 +14,7 @@ export const ChatHistoryList = ({ chatHistory, onCitationClick }) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatHistory]);
+  }, [chatHistory.length]);
 
   return (
     <div 
