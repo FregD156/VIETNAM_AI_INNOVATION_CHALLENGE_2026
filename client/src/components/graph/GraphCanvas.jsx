@@ -210,13 +210,13 @@ export const GraphCanvas = () => {
           .filter(Boolean);
         
         let currentY = 50;
-        const X_STEP = 260;
-        const Y_STEP = 80;
+        const X_STEP = 120;
+        const Y_STEP = 35;
         
         if (rootDocNode) {
           rootDocNode.position = { 
             x: 50, 
-            y: Math.max(160, (articleNodes.length * Y_STEP) / 2) 
+            y: Math.max(100, (articleNodes.length * Y_STEP) / 2) 
           };
         }
         
@@ -243,7 +243,7 @@ export const GraphCanvas = () => {
             currentY += Y_STEP;
           }
           
-          currentY += 40; // Giãn cách giữa các nhóm Điều
+          currentY += 20; // Giãn cách giữa các nhóm Điều
         });
       } else {
         applyLayoutAlgorithms(visibleNodes, visibleEdges, layoutMode);

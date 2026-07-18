@@ -9,7 +9,7 @@ export const ClauseNode = ({ data }) => {
   const handleColor = isActive ? 'var(--emerald-active)' : 'var(--brick-expired)';
   
   return (
-    <div className={`clause-node-dot ${isActive ? 'active' : 'expired'}`}>
+    <div className={`clause-node-dot ${isActive ? 'active' : 'expired'}`} title={data.title || data.id}>
       {/* Target handle bao phủ 100% hình tròn mờ để kết nối chéo tự nhiên */}
       <Handle 
         type="target" 
@@ -29,9 +29,6 @@ export const ClauseNode = ({ data }) => {
       
       <div className="clause-dot-circle" style={{ backgroundColor: handleColor }} />
       
-      <div className="clause-dot-label">
-        {data.title || data.id}
-      </div>
 
       {/* Source handle bao phủ 100% hình tròn mờ */}
       <Handle 
