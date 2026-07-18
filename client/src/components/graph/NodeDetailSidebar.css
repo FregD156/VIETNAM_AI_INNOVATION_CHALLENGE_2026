@@ -594,6 +594,17 @@
   color: var(--orange-signature);
 }
 
+.legal-italic-text {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.legal-bullet-item {
+  padding-left: 20px !important;
+  text-indent: -12px !important;
+  margin-bottom: 8px !important;
+}
+
 
 
 

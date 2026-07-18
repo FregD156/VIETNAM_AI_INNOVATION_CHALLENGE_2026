@@ -10,6 +10,33 @@ export const DocumentsWorkspace = () => {
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'expired'
   const [typeFilter, setTypeFilter] = useState('all'); // 'all' | 'Luật' | 'NHNN' | 'SHB'
 
+  // Parse markdown in nghiêng *text* thành JSX em
+  const parseItalic = (textStr) => {
+    if (!textStr) return '';
+    const italicParts = textStr.split(/\*([^*]+)\*/g);
+    if (italicParts.length === 1) return textStr;
+    
+    return italicParts.map((part, index) => {
+      if (index % 2 === 1) {
+        return <em key={`i-${index}`} className="legal-italic-text">{part}</em>;
+      }
+      return part;
+    });
+  };
+
+  // Parse markdown in đậm và in nghiêng inline
+  const parseInlineMarkdown = (textStr) => {
+    if (!textStr) return '';
+    const boldParts = textStr.split(/\*\*([^*]+)\*\*/g);
+    
+    return boldParts.flatMap((boldPart, bIdx) => {
+      if (bIdx % 2 === 1) {
+        return [<strong key={`b-${bIdx}`} className="legal-bold-text">{parseItalic(boldPart)}</strong>];
+      }
+      return parseItalic(boldPart);
+    });
+  };
+
   // Trích xuất danh sách nodes từ CSDL Đồ thị
   const allNodes = graphData?.nodes || [];
   
@@ -195,7 +222,7 @@ export const DocumentsWorkspace = () => {
                             <span className="code-title">{clause.data.title}</span>
                           </td>
                           <td className="cell-text">
-                            <p className="clause-text-truncate">{clause.data.content || clause.data.text}</p>
+                            <p className="clause-text-truncate">{parseInlineMarkdown(clause.data.content || clause.data.text)}</p>
                           </td>
                           <td className="cell-status" style={{ textAlign: 'center' }}>
                             <span className={`detail-status-pill ${isActive ? 'active' : 'expired'}`}>

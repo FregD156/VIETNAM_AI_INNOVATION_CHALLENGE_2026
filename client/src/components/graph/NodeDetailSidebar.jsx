@@ -35,17 +35,30 @@ export const NodeDetailSidebar = () => {
     return formatted.split('\n').map(line => line.trim()).filter(Boolean);
   };
 
-  // Parse markdown in đậm **text** thành JSX strong
-  const parseBoldMarkdown = (textStr) => {
+  // Parse markdown in nghiêng *text* thành JSX em
+  const parseItalicMarkdown = (textStr) => {
     if (!textStr) return '';
-    const parts = textStr.split(/\*\*([^*]+)\*\*/g);
-    if (parts.length === 1) return textStr;
+    const italicParts = textStr.split(/\*([^*]+)\*/g);
+    if (italicParts.length === 1) return textStr;
     
-    return parts.map((part, index) => {
+    return italicParts.map((part, index) => {
       if (index % 2 === 1) {
-        return <strong key={index} className="legal-bold-text">{part}</strong>;
+        return <em key={`i-${index}`} className="legal-italic-text">{part}</em>;
       }
       return part;
+    });
+  };
+
+  // Parse markdown in đậm **text** và in nghiêng *text* thành JSX
+  const parseMarkdown = (textStr) => {
+    if (!textStr) return '';
+    const boldParts = textStr.split(/\*\*([^*]+)\*\*/g);
+    
+    return boldParts.flatMap((boldPart, bIdx) => {
+      if (bIdx % 2 === 1) {
+        return [<strong key={`b-${bIdx}`} className="legal-bold-text">{parseItalicMarkdown(boldPart)}</strong>];
+      }
+      return parseItalicMarkdown(boldPart);
     });
   };
 
@@ -61,39 +74,53 @@ export const NodeDetailSidebar = () => {
       let isDocHeader = false;
       let isArticleHeader = false;
       let isSectionTitle = false;
+      let isBullet = false;
       
-      if (line.startsWith('### ')) {
+      // Phát hiện bullet point ở đầu dòng
+      let processedLine = line;
+      if (line.startsWith('* ') || line.startsWith('- ')) {
+        isBullet = true;
+        className = "legal-paragraph legal-bullet-item";
+        processedLine = line.substring(2);
+      }
+      
+      if (processedLine.startsWith('### ')) {
         className = "legal-section-title";
         isSectionTitle = true;
-      } else if (idx === 0) {
+        processedLine = processedLine.replace('### ', '');
+      } else if (idx === 0 && !isBullet) {
         className = "legal-doc-header";
         isDocHeader = true;
-      } else if (line.startsWith('Chương ') || line.startsWith('Điều ')) {
+      } else if (processedLine.startsWith('Chương ') || processedLine.startsWith('Điều ')) {
         className = "legal-article-header";
         isArticleHeader = true;
       }
       
-      const cleanLine = isSectionTitle ? line.replace('### ', '') : line;
-      
       // Nếu có highlightText, tìm kiếm và highlight trong dòng
-      if (cleanHighlight && cleanLine.toLowerCase().includes(cleanHighlight.toLowerCase())) {
-        const startIdx = cleanLine.toLowerCase().indexOf(cleanHighlight.toLowerCase());
+      if (cleanHighlight && processedLine.toLowerCase().includes(cleanHighlight.toLowerCase())) {
+        const startIdx = processedLine.toLowerCase().indexOf(cleanHighlight.toLowerCase());
         if (startIdx !== -1) {
-          const before = cleanLine.substring(0, startIdx);
-          const match = cleanLine.substring(startIdx, startIdx + cleanHighlight.length);
-          const after = cleanLine.substring(startIdx + cleanHighlight.length);
+          const before = processedLine.substring(0, startIdx);
+          const match = processedLine.substring(startIdx, startIdx + cleanHighlight.length);
+          const after = processedLine.substring(startIdx + cleanHighlight.length);
           
-          if (isSectionTitle) return <h4 key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</h4>;
-          if (isDocHeader) return <h4 key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</h4>;
-          if (isArticleHeader) return <h5 key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</h5>;
-          return <p key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</p>;
+          const highlightEl = <span className="legal-highlight-match">{match}</span>;
+          const content = <>{parseMarkdown(before)}{highlightEl}{parseMarkdown(after)}</>;
+          
+          if (isBullet) return <p key={idx} className={className}>• {content}</p>;
+          if (isSectionTitle) return <h4 key={idx} className={className}>{content}</h4>;
+          if (isDocHeader) return <h4 key={idx} className={className}>{content}</h4>;
+          if (isArticleHeader) return <h5 key={idx} className={className}>{content}</h5>;
+          return <p key={idx} className={className}>{content}</p>;
         }
       }
       
-      if (isSectionTitle) return <h4 key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</h4>;
-      if (isDocHeader) return <h4 key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</h4>;
-      if (isArticleHeader) return <h5 key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</h5>;
-      return <p key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</p>;
+      const content = parseMarkdown(processedLine);
+      if (isBullet) return <p key={idx} className={className}>• {content}</p>;
+      if (isSectionTitle) return <h4 key={idx} className={className}>{content}</h4>;
+      if (isDocHeader) return <h4 key={idx} className={className}>{content}</h4>;
+      if (isArticleHeader) return <h5 key={idx} className={className}>{content}</h5>;
+      return <p key={idx} className={className}>{content}</p>;
     });
   };
 
