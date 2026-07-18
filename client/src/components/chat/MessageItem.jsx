@@ -1,5 +1,15 @@
-import React from 'react';
-import { LuSparkles, LuUser } from 'react-icons/lu';
+import React, { useState } from 'react';
+import { 
+  LuSparkles, 
+  LuUser, 
+  LuCopy, 
+  LuCheck, 
+  LuVolume2, 
+  LuVolumeX, 
+  LuThumbsUp, 
+  LuThumbsDown,
+  LuBookOpen 
+} from 'react-icons/lu';
 import CitationTag from './CitationTag';
 import WarningCard from './WarningCard';
 import ActionableDraft from './ActionableDraft';
@@ -7,6 +17,22 @@ import './MessageItem.css';
 
 export const MessageItem = ({ message, onCitationClick }) => {
   const isAi = message.sender === 'ai';
+  const [copied, setCopied] = useState(false);
+  const [liked, setLiked] = useState(null); // null | 'up' | 'down'
+  const [isPlayingTTS, setIsPlayingTTS] = useState(false); // Giả lập giọng đọc TTS
+
+  // Sao chép câu trả lời vào clipboard
+  const handleCopyText = () => {
+    if (!message.text) return;
+    navigator.clipboard.writeText(message.text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Giả lập phát giọng nói câu trả lời
+  const toggleTTS = () => {
+    setIsPlayingTTS(!isPlayingTTS);
+  };
 
   // Nâng cấp parser Markdown đơn giản bằng JS thuần để render văn bản pháp quy đẹp mắt
   const parseText = (text) => {
@@ -56,8 +82,11 @@ export const MessageItem = ({ message, onCitationClick }) => {
           inList = false;
         }
         elements.push(
-          <blockquote key={`bq_${idx}`} className="message-blockquote">
-            {parseBold(trimmed.substring(2))}
+          <blockquote key={`bq_${idx}`} className="message-blockquote animate-fade-in">
+            <div className="blockquote-inner-wrapper">
+              <span className="quote-mark-legal">“</span>
+              <p className="quote-content-legal-text">{parseBold(trimmed.substring(2))}</p>
+            </div>
           </blockquote>
         );
       }
@@ -102,45 +131,87 @@ export const MessageItem = ({ message, onCitationClick }) => {
         </div>
       )}
 
-      <div className={`message-bubble-box ${message.isWelcome ? 'welcome' : ''}`}>
-        {/* Header tin nhắn */}
-        <div className="message-bubble-header">
-          <span className="bubble-sender-name">
-            {isAi ? 'Trợ lý AI Pháp quy SHB' : 'Cán bộ RM (Nguyễn Văn An)'}
-          </span>
-          <span className="bubble-message-time">{message.timestamp}</span>
-        </div>
+      <div className="message-bubble-wrapper-outer">
+        <div className={`message-bubble-box ${message.isWelcome ? 'welcome' : ''}`}>
+          {/* Header tin nhắn */}
+          <div className="message-bubble-header">
+            <span className="bubble-sender-name">
+              {isAi ? 'Trợ lý AI Pháp quy SHB' : 'Cán bộ RM (Nguyễn Văn An)'}
+            </span>
+            <span className="bubble-message-time">{message.timestamp}</span>
+          </div>
 
-        {/* Nội dung tin nhắn */}
-        <div className="message-bubble-body">
-          {parseText(message.text)}
-          
-          {/* Stream cursor nhấp nháy khi AI đang stream chữ */}
-          {isAi && message.text === '' && <span className="stream-cursor" />}
-        </div>
+          {/* Nội dung tin nhắn */}
+          <div className="message-bubble-body">
+            {parseText(message.text)}
+            
+            {/* Stream cursor nhấp nháy khi AI đang stream chữ */}
+            {isAi && message.text === '' && <span className="stream-cursor" />}
+          </div>
 
-        {/* Cảnh báo xung đột pháp quy */}
-        {isAi && message.has_conflict && <WarningCard />}
+          {/* Cảnh báo xung đột pháp quy */}
+          {isAi && message.has_conflict && <WarningCard />}
 
-        {/* Bản nháp email / script đề xuất */}
-        {isAi && message.actionable_draft && (
-          <ActionableDraft draft={message.actionable_draft} />
-        )}
+          {/* Bản nháp email / script đề xuất */}
+          {isAi && message.actionable_draft && (
+            <ActionableDraft draft={message.actionable_draft} />
+          )}
 
-        {/* Tags nguồn trích dẫn pháp lý */}
-        {isAi && message.citations && message.citations.length > 0 && (
-          <div className="message-bubble-citations">
-            <span className="citations-header-label">Nguồn trích dẫn:</span>
-            <div className="citations-tags-container">
-              {message.citations.map((cit) => (
-                <CitationTag 
-                  key={cit.id} 
-                  id={cit.id} 
-                  label={cit.label} 
-                  onClick={onCitationClick}
-                />
-              ))}
+          {/* Tags nguồn trích dẫn pháp lý */}
+          {isAi && message.citations && message.citations.length > 0 && (
+            <div className="message-bubble-citations">
+              <span className="citations-header-label">
+                <LuBookOpen className="citations-header-icon" />
+                <span>Nguồn trích dẫn đối sánh:</span>
+              </span>
+              <div className="citations-tags-container">
+                {message.citations.map((cit) => (
+                  <CitationTag 
+                    key={cit.id} 
+                    id={cit.id} 
+                    label={cit.label} 
+                    onClick={onCitationClick}
+                  />
+                ))}
+              </div>
             </div>
+          )}
+        </div>
+
+        {/* AI Message Action Toolbar (Thanh công cụ phụ chuyên nghiệp dưới câu trả lời) */}
+        {isAi && message.text !== '' && (
+          <div className="message-action-toolbar animate-fade-in">
+            <button className="msg-action-btn" onClick={handleCopyText} title="Sao chép câu trả lời">
+              {copied ? <LuCheck className="success-green-icon" /> : <LuCopy />}
+              <span>{copied ? 'Đã sao chép' : 'Sao chép'}</span>
+            </button>
+            
+            <button 
+              className={`msg-action-btn ${isPlayingTTS ? 'tts-playing' : ''}`} 
+              onClick={toggleTTS} 
+              title={isPlayingTTS ? 'Tắt giọng đọc' : 'Nghe trợ lý đọc câu trả lời (TTS)'}
+            >
+              {isPlayingTTS ? <LuVolumeX className="tts-playing-icon" /> : <LuVolume2 />}
+              <span>{isPlayingTTS ? 'Đang đọc...' : 'Nghe câu trả lời'}</span>
+            </button>
+
+            <div className="msg-action-divider"></div>
+
+            <button 
+              className={`msg-action-feedback-btn ${liked === 'up' ? 'active-like' : ''}`}
+              onClick={() => setLiked(liked === 'up' ? null : 'up')}
+              title="Câu trả lời hữu ích"
+            >
+              <LuThumbsUp />
+            </button>
+            
+            <button 
+              className={`msg-action-feedback-btn ${liked === 'down' ? 'active-dislike' : ''}`}
+              onClick={() => setLiked(liked === 'down' ? null : 'down')}
+              title="Câu trả lời chưa chính xác"
+            >
+              <LuThumbsDown />
+            </button>
           </div>
         )}
       </div>

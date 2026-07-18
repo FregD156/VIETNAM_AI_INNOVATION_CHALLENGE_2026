@@ -141,13 +141,34 @@
 /* Blockquote for original legal text quotes */
 .message-blockquote {
   margin: 12px 0;
-  padding: 10px 16px;
+  padding: 12px 16px;
   background-color: rgba(28, 114, 147, 0.05); /* Sea Blue Wash mờ */
   border-left: 3px solid var(--sea-blue);
   border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
   color: var(--text-secondary);
+}
+
+.blockquote-inner-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.quote-mark-legal {
   font-family: var(--font-legal);
-  font-size: 13.5px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--sea-blue-light);
+  opacity: 0.35;
+  line-height: 0.6;
+  height: 18px;
+  margin-top: 4px;
+  user-select: none;
+}
+
+.quote-content-legal-text {
+  margin: 0;
+  font-family: var(--font-legal);
+  font-size: 13px;
   line-height: 1.6;
   font-style: italic;
 }
@@ -187,6 +208,14 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.citations-header-icon {
+  font-size: 13px;
+  color: var(--sea-blue-light);
 }
 
 .citations-tags-container {
@@ -201,10 +230,116 @@
 }
 
 /* ============================================================
+   SHB GRAPH-RAG — MESSAGE ACTION TOOLBAR
+   ============================================================ */
+.message-bubble-wrapper-outer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 72%;
+}
+
+.message-item-row.user .message-bubble-wrapper-outer {
+  align-items: flex-end;
+}
+
+.message-item-row.ai .message-bubble-wrapper-outer {
+  align-items: flex-start;
+}
+
+.message-action-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+  height: 20px;
+}
+
+.msg-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: var(--radius-tag);
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.msg-action-btn:hover {
+  color: var(--text-primary);
+}
+
+.msg-action-btn svg {
+  font-size: 12px;
+  transition: color var(--dur-fast);
+}
+
+.msg-action-btn:hover svg {
+  color: var(--orange-signature);
+}
+
+/* TTS Playing state */
+.msg-action-btn.tts-playing {
+  color: var(--orange-signature);
+  font-weight: 600;
+}
+
+.tts-playing-icon {
+  animation: ttsPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ttsPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.msg-action-divider {
+  width: 1px;
+  height: 10px;
+  background-color: var(--navy-hairline);
+}
+
+.msg-action-feedback-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--radius-tag);
+  color: var(--text-muted);
+  font-size: 12px;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.msg-action-feedback-btn:hover {
+  color: var(--text-primary);
+}
+
+.msg-action-feedback-btn.active-like {
+  color: var(--emerald-active) !important;
+}
+
+.msg-action-feedback-btn.active-dislike {
+  color: var(--brick-expired) !important;
+}
+
+.success-green-icon {
+  color: var(--emerald-active) !important;
+}
+
+/* ============================================================
    SHB GRAPH-RAG — LIGHT MODE CHAT BUBBLE OVERRIDES
    ============================================================ */
 [data-theme="light"] .message-bubble-box {
-  box-shadow: 0 4px 18px rgba(10, 22, 40, 0.04);
+  box-shadow: none !important;
 }
 
 [data-theme="light"] .message-h3 {
@@ -219,4 +354,13 @@
   background-color: rgba(28, 114, 147, 0.06);
   color: var(--text-primary); /* Chữ tối hơn để đảm bảo tương phản tốt */
 }
+
+[data-theme="light"] .quote-mark-legal {
+  color: var(--sea-blue);
+}
+
+[data-theme="light"] .citations-header-icon {
+  color: var(--sea-blue);
+}
+
 
