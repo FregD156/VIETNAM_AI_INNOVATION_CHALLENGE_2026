@@ -6,6 +6,29 @@ const GraphContext = createContext(null);
 
 export const GraphProvider = ({ children }) => {
   const [rawData, setRawData] = useState(mockGraphData);
+
+  // Tải dữ liệu đồ thị thực tế từ backend FastAPI khi mount
+  useEffect(() => {
+    const fetchRealGraphData = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+          (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:8000'
+            : 'https://api.compliance.shb.com.vn');
+            
+        const response = await fetch(`${baseUrl}/graph`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && (data.nodes || data.rawNodes)) {
+            setRawData(data);
+          }
+        }
+      } catch (error) {
+        console.warn('Không thể kết nối API đồ thị thật, tự động dùng mock data dự phòng:', error);
+      }
+    };
+    fetchRealGraphData();
+  }, []);
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
   const [selectedNode, setSelectedNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');

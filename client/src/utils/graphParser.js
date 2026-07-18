@@ -4,11 +4,45 @@
  */
 
 export const parseNeo4jToReactFlow = (rawData) => {
-  if (!rawData || !rawData.rawNodes) {
+  if (!rawData) {
     return { nodes: [], edges: [] };
   }
 
-  const { rawNodes, rawRelationships } = rawData;
+  // 1. Phân biệt định dạng mock và định dạng API NetworkX thật từ FastAPI
+  let rawNodes = [];
+  let rawRelationships = [];
+
+  if (rawData.rawNodes && rawData.rawRelationships) {
+    // Định dạng Mock
+    rawNodes = rawData.rawNodes;
+    rawRelationships = rawData.rawRelationships;
+  } else if (rawData.nodes && rawData.links) {
+    // Định dạng API NetworkX thật từ FastAPI
+    rawNodes = rawData.nodes.map(node => {
+      const nodeId = node.id || '';
+      return {
+        id: nodeId,
+        label: node.label || (nodeId.startsWith('doc_') ? 'Document' : 'Clause'),
+        properties: {
+          id: nodeId,
+          title: node.title || node.name || '',
+          text: node.text || node.content || '',
+          status: node.status || 'active',
+          type: node.type || node.docType || (nodeId.startsWith('doc_tt') ? 'NHNN' : 'SHB_Internal'),
+          effective_date: node.effective_date || ''
+        }
+      };
+    });
+    
+    rawRelationships = rawData.links.map((link, idx) => ({
+      id: link.id || `rel_${link.source}_${link.type || 'link'}_${link.target}_${idx}`,
+      start: link.source,
+      end: link.target,
+      type: link.type || 'HAS_CLAUSE'
+    }));
+  } else {
+    return { nodes: [], edges: [] };
+  }
 
   // Cấu hình vị trí mặc định cho các Node để tạo giao diện đẹp mắt, tránh chồng chéo
   const nodePositions = {
@@ -40,7 +74,7 @@ export const parseNeo4jToReactFlow = (rawData) => {
   // 1. Chuyển đổi Nodes
   const nodes = rawNodes.map((node) => {
     const isDoc = node.label === 'Document';
-    const props = node.properties;
+    const props = node.properties || {};
     
     // Vị trí mặc định hoặc tự động nếu không khai báo trước
     const position = nodePositions[node.id] || { 
@@ -53,12 +87,12 @@ export const parseNeo4jToReactFlow = (rawData) => {
       type: isDoc ? 'documentNode' : 'clauseNode', // Custom node components
       position,
       data: {
-        id: props.id,
-        title: props.title,
+        id: props.id || node.id,
+        title: props.title || '',
         text: props.text || '',
         status: props.status || 'active', // active | expired
         docType: props.type || 'NHNN',    // NHNN | SHB_Internal
-        effective_date: props.effective_date,
+        effective_date: props.effective_date || '',
         rawLabel: node.label
       }
     };
