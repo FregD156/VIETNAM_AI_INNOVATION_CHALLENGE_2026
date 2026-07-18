@@ -8,17 +8,25 @@ export const DocumentsWorkspace = () => {
   const { graphData, selectedNode, setSelectedNode } = useGraphData();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'expired'
-  const [typeFilter, setTypeFilter] = useState('all'); // 'all' | 'NHNN' | 'SHB'
+  const [typeFilter, setTypeFilter] = useState('all'); // 'all' | 'Luật' | 'NHNN' | 'SHB'
 
   // Trích xuất danh sách nodes từ CSDL Đồ thị
   const allNodes = graphData?.nodes || [];
   
-  // 1. Tính toán số liệu thống kê (KPIs)
+  // 1. Tính toán số liệu thống kê (KPIs) với bộ lọc tương thích ngôn ngữ
   const totalDocs = allNodes.filter(n => n.type === 'documentNode').length;
   const clauses = allNodes.filter(n => n.type === 'clauseNode');
   const totalClauses = clauses.length;
-  const activeClausesCount = clauses.filter(c => c.data.status === 'active').length;
-  const expiredClausesCount = clauses.filter(c => c.data.status === 'expired').length;
+  
+  const activeClausesCount = clauses.filter(c => {
+    const status = c.data.status || '';
+    return status === 'active' || status === 'Còn hiệu lực';
+  }).length;
+  
+  const expiredClausesCount = clauses.filter(c => {
+    const status = c.data.status || '';
+    return status === 'expired' || status === 'Hết hiệu lực' || status === 'Đã hết hiệu lực';
+  }).length;
 
   // 2. Lọc danh sách tài liệu và điều khoản hiển thị
   const filteredClauses = clauses.filter(c => {
@@ -27,14 +35,16 @@ export const DocumentsWorkspace = () => {
     const textMatch = (c.data.text || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchSearch = titleMatch || textMatch;
 
-    // Lọc theo trạng thái hiệu lực
-    const matchStatus = statusFilter === 'all' || c.data.status === statusFilter;
+    // Lọc theo trạng thái hiệu lực (tương thích cả active/expired và Còn hiệu lực/Hết hiệu lực)
+    const status = c.data.status || '';
+    const isNodeActive = status === 'active' || status === 'Còn hiệu lực';
+    const matchStatus = statusFilter === 'all' || 
+      (statusFilter === 'active' && isNodeActive) || 
+      (statusFilter === 'expired' && !isNodeActive);
 
-    // Lọc theo loại văn bản ban hành
-    const isNhnnNode = c.data.docType === 'NHNN' || c.id.includes('tt');
-    const matchType = typeFilter === 'all' || 
-      (typeFilter === 'NHNN' && isNhnnNode) || 
-      (typeFilter === 'SHB' && !isNhnnNode);
+    // Lọc theo loại văn bản ban hành (Luật | NHNN | SHB)
+    const docType = c.data.docType || 'SHB';
+    const matchType = typeFilter === 'all' || docType === typeFilter;
 
     return matchSearch && matchStatus && matchType;
   });
@@ -50,7 +60,7 @@ export const DocumentsWorkspace = () => {
             </div>
             <div className="header-text">
               <h1 className="documents-main-title">Kho Lưu Trữ Pháp Quy SHB</h1>
-              <p className="documents-sub-title">Quản lý tập trung và thống kê số liệu toàn bộ văn bản quy định của NHNN và SHB</p>
+              <p className="documents-sub-title">Quản lý tập trung và thống kê số liệu toàn bộ văn bản quy định của Quốc hội, NHNN và SHB</p>
             </div>
           </div>
         </header>
@@ -141,6 +151,7 @@ export const DocumentsWorkspace = () => {
                   onChange={(e) => setTypeFilter(e.target.value)}
                 >
                   <option value="all">Tất cả nguồn ban hành</option>
+                  <option value="Luật">Luật (Quốc hội)</option>
                   <option value="NHNN">Văn bản Ngân hàng Nhà nước</option>
                   <option value="SHB">Văn bản Nội bộ SHB</option>
                 </select>
@@ -163,8 +174,11 @@ export const DocumentsWorkspace = () => {
                 <tbody>
                   {filteredClauses.length > 0 ? (
                     filteredClauses.map((clause) => {
-                      const isNhnn = clause.data.docType === 'NHNN' || clause.id.includes('tt');
-                      const isActive = clause.data.status === 'active';
+                      const docType = clause.data.docType || 'SHB';
+                      const tagClass = docType === 'Luật' ? 'law' : (docType === 'NHNN' ? 'nhnn' : 'shb');
+                      const status = clause.data.status || '';
+                      const isActive = status === 'active' || status === 'Còn hiệu lực';
+                      
                       return (
                         <tr 
                           key={clause.id} 
@@ -173,8 +187,8 @@ export const DocumentsWorkspace = () => {
                         >
                           <td className="cell-code">
                             <div className="code-badge-wrapper">
-                              <span className={`cell-source-tag ${isNhnn ? 'nhnn' : 'shb'}`}>
-                                {isNhnn ? 'NHNN' : 'SHB'}
+                              <span className={`cell-source-tag ${tagClass}`}>
+                                {docType}
                               </span>
                               <span className="code-id monospace">{clause.id}</span>
                             </div>
@@ -184,7 +198,7 @@ export const DocumentsWorkspace = () => {
                             <p className="clause-text-truncate">{clause.data.text}</p>
                           </td>
                           <td className="cell-status" style={{ textAlign: 'center' }}>
-                            <span className={`detail-status-pill ${clause.data.status}`}>
+                            <span className={`detail-status-pill ${isActive ? 'active' : 'expired'}`}>
                               {isActive ? 'Còn hiệu lực' : 'Hết hiệu lực'}
                             </span>
                           </td>

@@ -3,22 +3,47 @@ import { Handle, Position } from 'reactflow';
 import './DocumentNode.css';
 
 export const DocumentNode = ({ data }) => {
-  const isNhnn = data.docType === 'NHNN';
-  // Đổ màu handle theo cơ quan ban hành: NHNN = Sea Blue, SHB = Orange Brand
-  const handleColor = isNhnn ? 'var(--sea-blue)' : 'var(--orange-signature)';
+  const docType = data.docType || 'SHB';
+  
+  // Xác định cấu hình giao diện cho 3 phân loại tài liệu
+  const getStyleConfig = () => {
+    if (docType === 'Luật') {
+      return {
+        className: 'law-doc',
+        tagClass: 'law',
+        label: 'Luật Quốc Hội',
+        color: 'var(--sea-blue)'
+      };
+    } else if (docType === 'NHNN') {
+      return {
+        className: 'nhnn-doc',
+        tagClass: 'nhnn',
+        label: 'Thông tư NHNN',
+        color: 'var(--emerald-active)'
+      };
+    }
+    return {
+      className: 'shb-doc',
+      tagClass: 'shb',
+      label: 'Quy chế SHB',
+      color: 'var(--orange-signature)'
+    };
+  };
+
+  const config = getStyleConfig();
   
   return (
-    <div className={`document-node ${isNhnn ? 'nhnn-doc' : 'shb-doc'}`}>
+    <div className={`document-node ${config.className}`}>
       {/* Target handle for incoming relationships */}
       <Handle 
         type="target" 
         position={Position.Top} 
-        style={{ background: handleColor, width: 8, height: 8 }} 
+        style={{ background: config.color, width: 8, height: 8 }} 
       />
       
       <div className="document-node-header">
-        <span className={`document-node-tag ${isNhnn ? 'nhnn' : 'shb'}`}>
-          {isNhnn ? 'NHNN Regulation' : 'SHB Internal'} {data.isExpanded ? '▼' : '▶'}
+        <span className={`document-node-tag ${config.tagClass}`}>
+          {config.label} {data.isExpanded ? '▼' : '▶'}
         </span>
         <span className="document-node-date monospace">{data.effective_date}</span>
       </div>
@@ -31,7 +56,7 @@ export const DocumentNode = ({ data }) => {
       <Handle 
         type="source" 
         position={Position.Bottom} 
-        style={{ background: handleColor, width: 8, height: 8 }} 
+        style={{ background: config.color, width: 8, height: 8 }} 
       />
     </div>
   );

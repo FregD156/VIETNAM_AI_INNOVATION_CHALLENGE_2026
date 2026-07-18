@@ -20,16 +20,27 @@ export const parseNeo4jToReactFlow = (rawData) => {
     // Định dạng API NetworkX thật từ FastAPI
     rawNodes = rawData.nodes.map(node => {
       const nodeId = node.id || '';
+      const props = node.properties || {};
+      const docNum = props.doc_num || node.doc_num || nodeId;
+      
+      // Phân loại nguồn ban hành động chuẩn dữ liệu mới
+      let docType = 'SHB';
+      if (docNum.toLowerCase().startsWith('law-') || docNum.toUpperCase().includes('QH')) {
+        docType = 'Luật';
+      } else if (docNum.toUpperCase().includes('TT-NHNN') || docNum.includes('39/2016') || docNum.includes('17/2024') || docNum.includes('06/2023')) {
+        docType = 'NHNN';
+      }
+      
       return {
         id: nodeId,
         label: node.label || (nodeId.startsWith('doc_') ? 'Document' : 'Clause'),
         properties: {
           id: nodeId,
-          title: node.title || node.name || '',
-          text: node.text || node.content || '',
-          status: node.status || 'active',
-          type: node.type || node.docType || (nodeId.startsWith('doc_tt') ? 'NHNN' : 'SHB_Internal'),
-          effective_date: node.effective_date || ''
+          title: node.title || node.name || props.title || '',
+          text: node.text || node.content || props.text || '',
+          status: node.status || props.status || 'Còn hiệu lực',
+          type: docType,
+          effective_date: node.effective_date || props.effective_date || ''
         }
       };
     });
@@ -82,6 +93,17 @@ export const parseNeo4jToReactFlow = (rawData) => {
       y: Math.random() * 500 + 100 
     };
 
+    // Phân loại nguồn ban hành chuẩn dữ liệu mới
+    let docType = props.type || 'SHB';
+    const docNum = props.doc_num || node.id || '';
+    if (docNum.toLowerCase().startsWith('law-') || docNum.toUpperCase().includes('QH') || docType === 'Luật') {
+      docType = 'Luật';
+    } else if (docNum.toUpperCase().includes('TT-NHNN') || docNum.includes('39/2016') || docNum.includes('17/2024') || docNum.includes('06/2023') || docType === 'NHNN') {
+      docType = 'NHNN';
+    } else {
+      docType = 'SHB';
+    }
+
     return {
       id: node.id,
       type: isDoc ? 'documentNode' : 'clauseNode', // Custom node components
@@ -90,8 +112,8 @@ export const parseNeo4jToReactFlow = (rawData) => {
         id: props.id || node.id,
         title: props.title || '',
         text: props.text || '',
-        status: props.status || 'active', // active | expired
-        docType: props.type || 'NHNN',    // NHNN | SHB_Internal
+        status: props.status || 'Còn hiệu lực', 
+        docType: docType,    // Luật | NHNN | SHB
         effective_date: props.effective_date || '',
         rawLabel: node.label
       }

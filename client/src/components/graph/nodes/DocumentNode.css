@@ -24,8 +24,12 @@
 }
 
 /* Phân định viền trái */
+.document-node.law-doc {
+  border-left: 4px solid var(--sea-blue); /* Luật dùng xanh biển sâu */
+}
+
 .document-node.nhnn-doc {
-  border-left: 4px solid var(--sea-blue); /* NHNN dùng xanh biển */
+  border-left: 4px solid var(--emerald-active); /* NHNN dùng xanh lá */
 }
 
 .document-node.shb-doc {
@@ -48,9 +52,14 @@
   font-family: var(--font-data);
 }
 
+.document-node-tag.law {
+  color: #8ed3f4;
+  text-shadow: 0 0 8px rgba(142, 211, 244, 0.4);
+}
+
 .document-node-tag.nhnn {
-  color: var(--sea-blue-light);
-  text-shadow: 0 0 8px rgba(79, 168, 201, 0.4);
+  color: #79f2c0;
+  text-shadow: 0 0 8px rgba(121, 242, 192, 0.4);
 }
 
 .document-node-tag.shb {
@@ -97,8 +106,13 @@
   border-color: var(--orange-signature);
 }
 
-[data-theme="light"] .document-node-tag.nhnn {
+[data-theme="light"] .document-node-tag.law {
   color: var(--sea-blue);
+  text-shadow: none;
+}
+
+[data-theme="light"] .document-node-tag.nhnn {
+  color: var(--emerald-active);
   text-shadow: none;
 }
 

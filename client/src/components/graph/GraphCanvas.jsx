@@ -167,15 +167,23 @@ export const GraphCanvas = () => {
           pannable 
           nodeStrokeColor={(n) => {
             if (n.type === 'documentNode') {
-              return n.data.docType === 'NHNN' ? '#1C7293' : '#F0631D';
+              const docType = n.data.docType || 'SHB';
+              if (docType === 'Luật') return '#1C7293';
+              if (docType === 'NHNN') return '#2F9E68';
+              return '#F0631D';
             }
-            return n.data.status === 'active' ? '#2F9E68' : '#C0442C';
+            const status = n.data.status || 'Còn hiệu lực';
+            return (status === 'Còn hiệu lực' || status === 'active') ? '#2F9E68' : '#C0442C';
           }} 
           nodeColor={(n) => {
             if (n.type === 'documentNode') {
-              return n.data.docType === 'NHNN' ? 'rgba(28, 114, 147, 0.25)' : 'rgba(240, 99, 29, 0.25)';
+              const docType = n.data.docType || 'SHB';
+              if (docType === 'Luật') return 'rgba(28, 114, 147, 0.25)';
+              if (docType === 'NHNN') return 'rgba(47, 158, 104, 0.25)';
+              return 'rgba(240, 99, 29, 0.25)';
             }
-            return n.data.status === 'active' ? 'rgba(47, 158, 104, 0.25)' : 'rgba(192, 68, 44, 0.25)';
+            const status = n.data.status || 'Còn hiệu lực';
+            return (status === 'Còn hiệu lực' || status === 'active') ? 'rgba(47, 158, 104, 0.25)' : 'rgba(192, 68, 44, 0.25)';
           }} 
           nodeStrokeWidth={3}
         />

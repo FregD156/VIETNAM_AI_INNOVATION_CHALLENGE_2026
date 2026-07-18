@@ -320,9 +320,14 @@
   border-radius: var(--radius-tag);
 }
 
-.cell-source-tag.nhnn {
+.cell-source-tag.law {
   background-color: var(--sea-blue-wash);
-  color: var(--sea-blue-light);
+  color: #8ed3f4;
+}
+
+.cell-source-tag.nhnn {
+  background-color: rgba(47, 158, 104, 0.15);
+  color: #79f2c0;
 }
 
 .cell-source-tag.shb {
