@@ -1,7 +1,7 @@
 import re
 import sqlite3
 from contextlib import closing
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from rank_bm25 import BM25Okapi
 from app.core.paths import SQLITE_DATABASE_FILE
@@ -23,7 +23,7 @@ CASES = [
 
 
 class BenchmarkService:
-    def __init__(self, database_file: str | None = None):
+    def __init__(self, database_file: Optional[str] = None):
         self.database_file = database_file or str(SQLITE_DATABASE_FILE)
 
     @staticmethod

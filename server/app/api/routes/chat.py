@@ -2,7 +2,7 @@ import asyncio
 import json
 import queue
 import threading
-from typing import Any
+from typing import Any, Optional, List
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -36,10 +36,10 @@ def _attach_evidence_graph(payload: dict[str, Any]) -> None:
 
 def _run_pipeline_in_thread(
     pipeline,
-    conversation: list[dict],
+    conversation: List[dict],
     stream: bool,
     output_queue: queue.Queue,
-    model: str | None = None,
+    model: Optional[str] = None,
 ) -> None:
     """Run blocking model calls outside the ASGI event loop."""
     try:
@@ -57,7 +57,7 @@ def _run_pipeline_in_thread(
         output_queue.put(_SENTINEL)
 
 
-async def _stream_events(pipeline, conversation: list[dict], model: str | None):
+async def _stream_events(pipeline, conversation: List[dict], model: Optional[str]):
     output_queue: queue.Queue = queue.Queue()
     threading.Thread(
         target=_run_pipeline_in_thread,
