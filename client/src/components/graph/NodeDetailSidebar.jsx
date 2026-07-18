@@ -7,7 +7,7 @@ import './NodeDetailSidebar.css';
 
 
 export const NodeDetailSidebar = () => {
-  const { selectedNode, setSelectedNode } = useGraphData();
+  const { selectedNode, setSelectedNode, graphData } = useGraphData();
 
   if (!selectedNode) {
     return (
@@ -26,7 +26,23 @@ export const NodeDetailSidebar = () => {
   }
 
   const { title, status, docType, effective_date, rawLabel } = selectedNode.data;
-  const text = selectedNode.data.content || selectedNode.data.text || '';
+  let text = selectedNode.data.content || selectedNode.data.text || '';
+  
+  // Tự động gộp nội dung của các Clause con trực thuộc nếu đây là đề mục trung gian (như Điều 1) trống nội dung
+  if (!text && graphData) {
+    const childEdges = graphData.edges.filter(e => e.source === selectedNode.id);
+    const childNodes = childEdges
+      .map(e => graphData.nodes.find(n => n.id === e.target))
+      .filter(c => c && (c.data.content || c.data.text));
+      
+    if (childNodes.length > 0) {
+      text = childNodes.map(c => {
+        const cText = c.data.content || c.data.text || '';
+        return `### ${c.data.title || c.id}\n${cText}`;
+      }).join('\n\n');
+    }
+  }
+
   const isNhnn = docType === 'NHNN' || selectedNode.id.includes('tt');
 
   return (
@@ -87,7 +103,12 @@ export const NodeDetailSidebar = () => {
                 {(() => {
                   const highlightText = selectedNode.data.highlightText;
                   if (!highlightText) {
-                    return <p className="legal-paragraph">{text}</p>;
+                    return text.split('\n').map((para, pIdx) => {
+                      if (para.startsWith('### ')) {
+                        return <h4 key={pIdx} className="legal-section-title">{para.replace('### ', '')}</h4>;
+                      }
+                      return para.trim() ? <p key={pIdx} className="legal-paragraph">{para}</p> : null;
+                    });
                   }
                   
                   const cleanText = text.replace(/\s+/g, ' ');

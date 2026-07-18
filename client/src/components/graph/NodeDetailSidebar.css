@@ -527,4 +527,22 @@
   color: var(--text-primary) !important;
 }
 
+.legal-section-title {
+  font-family: var(--font-legal);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--navy-abyss);
+  margin-top: 18px;
+  margin-bottom: 8px;
+  border-bottom: 1.5px solid rgba(10, 22, 40, 0.15);
+  padding-bottom: 3px;
+  display: block;
+}
+
+[data-theme="light"] .legal-section-title {
+  color: #0f172a !important;
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+
 
