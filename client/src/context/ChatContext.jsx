@@ -85,7 +85,12 @@ export const ChatProvider = ({ children }) => {
         }));
       apiMessages.push({ role: 'user', content: queryText });
 
-      const selectedModel = localStorage.getItem('shb_selected_model') || 'shb-core';
+      // Lọc và bảo vệ model ID gửi đi khớp CSDL thật (bỏ qua các cache model cũ)
+      const selectedModel = localStorage.getItem('shb_selected_model') || '';
+      let modelToSend = selectedModel;
+      if (modelToSend === 'shb-core' || modelToSend === 'gemini-pro' || modelToSend === 'gemini-flash') {
+        modelToSend = ''; // Chuyển về mặc định của Backend thật
+      }
 
       // 2. Gọi API streaming thật của FastAPI
       const response = await fetch(`${baseUrl}/chat`, {
@@ -95,7 +100,7 @@ export const ChatProvider = ({ children }) => {
         },
         body: JSON.stringify({
           messages: apiMessages,
-          model: selectedModel,
+          model: modelToSend,
           stream: true
         })
       });
