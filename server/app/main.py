@@ -53,6 +53,17 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     application = FastAPI(title="SHB Legal Intelligence API", lifespan=lifespan)
+    
+    # Cấu hình CORS cho phép Frontend (ví dụ localhost:5173) gọi API chéo nguồn
+    from fastapi.middleware.cors import CORSMiddleware
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     application.include_router(health.router)
     application.include_router(chat.router)
     application.include_router(graph.router)
