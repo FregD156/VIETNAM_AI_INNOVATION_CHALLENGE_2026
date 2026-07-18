@@ -36,35 +36,40 @@ export const GraphCanvas = () => {
     const docNodes = nodesList.filter(n => n.type === 'documentNode');
     
     if (mode === 'lr') {
-      // Bố cục Trái -> Phải (Phân tầng từ văn bản gốc sang các điều khoản con)
-      docNodes.forEach((doc, docIdx) => {
-        doc.position = { x: 100, y: 150 + docIdx * 350 };
-        
+      // Bố cục Trái -> Phải (Phân tầng từ văn bản gốc sang các điều khoản con - 2 Cột song song để tránh bị dài dòng)
+      let currentY = 100;
+      docNodes.forEach((doc) => {
         const children = nodesList.filter(n => {
           if (n.id === doc.id) return false;
           return edgesList.some(e => e.target === n.id && (e.source === doc.id || e.source.startsWith(doc.id + '|')));
         });
         
+        const cols = 2;
+        const rowCount = Math.ceil(children.length / cols) || 1;
+        const groupHeight = Math.max(120, rowCount * 110);
+        
+        // Căn giữa Document node theo chiều dọc của cụm Clause con
+        doc.position = { x: 100, y: currentY + (groupHeight / 2) - 40 };
+        
         children.forEach((child, childIdx) => {
+          const row = Math.floor(childIdx / cols);
+          const col = childIdx % cols;
           child.position = {
-            x: 480,
-            y: doc.position.y - 120 + childIdx * 100
+            x: 460 + col * 320, // Cột 1: 460, Cột 2: 780
+            y: currentY + row * 110
           };
         });
+        
+        // Cộng dồn Y lũy kế cho văn bản tiếp theo kèm khoảng cách an toàn 120px
+        currentY += groupHeight + 120;
       });
     } else if (mode === 'snowflake') {
-      // Bố cục Bông tuyết (Quy chế gốc ở tâm, các điều khoản tỏa tròn xung quanh)
-      const centers = {
-        doc_tt39: { x: 400, y: 350 },
-        doc_tt06: { x: 1200, y: 350 },
-        doc_qd214: { x: 2000, y: 350 },
-        doc_tt16: { x: 400, y: 1050 },
-        doc_qd104: { x: 1200, y: 1050 },
-        doc_qd_tietkiem: { x: 2000, y: 1050 }
-      };
-      
+      // Bố cục Bông tuyết (Quy chế gốc ở tâm, các điều khoản tỏa tròn xung quanh - Tính toán tâm động chia 2 cột chính)
       docNodes.forEach((doc, idx) => {
-        const center = centers[doc.id] || { x: 600 + (idx % 3) * 800, y: 350 + Math.floor(idx / 3) * 700 };
+        const center = { 
+          x: 500 + (idx % 2) * 1000, 
+          y: 400 + Math.floor(idx / 2) * 900 
+        };
         doc.position = center;
         
         const children = nodesList.filter(n => {
@@ -73,7 +78,7 @@ export const GraphCanvas = () => {
         });
         
         const count = children.length;
-        const radius = 240;
+        const radius = 280; // Bán kính tỏa tròn an toàn không chồng lấn
         children.forEach((child, childIdx) => {
           const angle = (childIdx * 2 * Math.PI) / (count || 1);
           child.position = {
@@ -83,28 +88,31 @@ export const GraphCanvas = () => {
         });
       });
     } else if (mode === 'grid') {
-      // Bố cục Dàn lưới gọn gàng (Xếp theo cụm lưới chữ nhật tương ứng từng văn bản)
+      // Bố cục Dàn lưới gọn gàng (Xếp theo cụm lưới chữ nhật 3 cột tương ứng từng văn bản, giãn cách dọc lũy kế)
       let startY = 100;
       docNodes.forEach((doc) => {
-        doc.position = { x: 100, y: startY + 40 };
-        
         const children = nodesList.filter(n => {
           if (n.id === doc.id) return false;
           return edgesList.some(e => e.target === n.id && (e.source === doc.id || e.source.startsWith(doc.id + '|')));
         });
         
         const cols = 3;
+        const rowCount = Math.ceil(children.length / cols) || 1;
+        const groupHeight = rowCount * 110;
+        
+        // Căn giữa Document node theo chiều dọc của lưới con
+        doc.position = { x: 100, y: startY + (groupHeight / 2) - 20 };
+        
         children.forEach((child, childIdx) => {
           const row = Math.floor(childIdx / cols);
           const col = childIdx % cols;
           child.position = {
-            x: 420 + col * 260,
-            y: startY + row * 95
+            x: 460 + col * 300, // Chia 3 cột giãn cách rộng rãi
+            y: startY + row * 110
           };
         });
         
-        const rowCount = Math.ceil(children.length / cols) || 1;
-        startY += rowCount * 95 + 90;
+        startY += groupHeight + 120;
       });
     }
   };
