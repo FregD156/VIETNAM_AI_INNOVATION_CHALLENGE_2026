@@ -7,14 +7,14 @@ from app.integrations.reranker_client import OpenAIExtended
 load_dotenv()
 
 # --- CẤU HÌNH CHAT ---
-CHAT_MODEL_NAME = os.getenv('CHAT_MODEL_NAME', 'qwen3-4b')
-CHAT_BASE_URL = os.getenv("CHAT_BASE_URL", "http://localhost:1234/v1")
-CHAT_API_KEY = os.getenv("CHAT_API_KEY", 'dont need')
+CHAT_MODEL_NAME = os.getenv('CHAT_MODEL_NAME', 'gpt-4o-mini')
+CHAT_BASE_URL = os.getenv("CHAT_BASE_URL", "https://api.openai.com/v1")
+CHAT_API_KEY = os.getenv("CHAT_API_KEY", '')
 
 # --- CẤU HÌNH EMBEDDING ---
-EMBEDDING_MODEL_NAME = os.getenv('EMBEDDING_MODEL_NAME', 'text-embedding-qwen3-embedding-0.6b')
-EMBEDDING_BASE_URL = os.getenv("EMBEDDING_BASE_URL", "http://localhost:1234/v1")
-EMBEDDING_API_KEY = os.getenv("EMBEDDING_API_KEY", 'dont need')
+EMBEDDING_MODEL_NAME = os.getenv('EMBEDDING_MODEL_NAME', 'text-embedding-3-small')
+EMBEDDING_BASE_URL = os.getenv("EMBEDDING_BASE_URL", "https://api.openai.com/v1")
+EMBEDDING_API_KEY = os.getenv("EMBEDDING_API_KEY", '')
 
 # --- CẤU HÌNH RERANK ---
 RERANKER_MODEL_NAME = os.getenv("RERANKER_MODEL_NAME")
@@ -30,29 +30,41 @@ def _configured_model_names(variable: str, defaults: str = "") -> List[str]:
 def get_available_chat_models() -> List[Dict[str, str]]:
     """Return selectable models without exposing provider credentials."""
     base_url = CHAT_BASE_URL.lower()
+    
+    # Xác định provider và kiểm tra xem API key thực tế tương ứng có tồn tại hay không
+    is_key_provided = True
     if "groq" in base_url:
         default_provider_key = "groq"
         default_provider = "Groq"
+        is_key_provided = bool(os.getenv("GROQ_API_KEY") or CHAT_API_KEY)
     elif "fpt" in base_url:
         default_provider_key = "fpt"
         default_provider = "FPT AI Factory"
+        is_key_provided = bool(os.getenv("FPT_API_KEY") or CHAT_API_KEY)
     elif "openai" in base_url:
         default_provider_key = "openai"
         default_provider = "OpenAI"
+        is_key_provided = bool(os.getenv("OPENAI_API_KEY") or CHAT_API_KEY)
     elif "localhost" in base_url or "127.0.0.1" in base_url:
         default_provider_key = "ollama"
         default_provider = "Local"
+        # Vô hiệu hóa model local mặc định khi chạy offline không có cấu hình rõ ràng
+        is_key_provided = False
     else:
         default_provider_key = "configured"
         default_provider = "Configured endpoint"
+        is_key_provided = bool(CHAT_API_KEY)
 
-    models = [
-        {
-            "id": "",
-            "label": f"{CHAT_MODEL_NAME} · Mặc định",
-            "provider": default_provider,
-        }
-    ]
+    models = []
+    # Chỉ thêm model mặc định nếu API Key thực tế tương ứng được khai báo
+    if is_key_provided and CHAT_MODEL_NAME:
+        models.append(
+            {
+                "id": "",
+                "label": f"{CHAT_MODEL_NAME} · Mặc định",
+                "provider": default_provider,
+            }
+        )
 
     provider_models = []
     if os.getenv("GROQ_API_KEY"):
@@ -105,16 +117,20 @@ def get_available_chat_models() -> List[Dict[str, str]]:
 
 class ChatService:
     def __init__(self, api_key: Optional[str] = None):
+        # Cung cấp key giữ chỗ để tránh crash khi khởi tạo client của thư viện openai
+        chat_key = api_key or CHAT_API_KEY or "no_key_provided"
+        embed_key = EMBEDDING_API_KEY or "no_key_provided"
+
         # Client cho Chat (LLM)
         self.chat_client = OpenAI(
             base_url=CHAT_BASE_URL,
-            api_key=api_key or CHAT_API_KEY
+            api_key=chat_key
         )
         
         # Client cho Embedding
         self.embedding_client = OpenAI(
             base_url=EMBEDDING_BASE_URL,
-            api_key=EMBEDDING_API_KEY
+            api_key=embed_key
         )
         
         # Client cho Rerank (optional)
