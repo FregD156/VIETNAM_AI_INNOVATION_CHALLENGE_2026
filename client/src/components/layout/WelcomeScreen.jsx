@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LuMessageSquare, LuGitFork, LuCloudUpload, LuSparkles, LuArrowRight, LuShieldAlert } from 'react-icons/lu';
 import './WelcomeScreen.css';
 
 export const WelcomeScreen = ({ onEnter }) => {
   const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    // Đặt theme mặc định ban đầu là light khi chưa có cấu hình trong bộ nhớ
+    const initialTheme = localStorage.getItem('shb_app_theme') || 'light';
+    document.body.setAttribute('data-theme', initialTheme);
+    localStorage.setItem('shb_app_theme', initialTheme);
+  }, []);
 
   const handleStart = () => {
     setIsExiting(true);

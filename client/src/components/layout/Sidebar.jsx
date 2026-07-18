@@ -42,7 +42,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
 
   // Quản lý theme sáng/tối
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('shb_app_theme') || 'dark';
+    return localStorage.getItem('shb_app_theme') || 'light';
   });
 
   // Tải danh sách models động từ API để hiển thị nhãn chính xác ở Sidebar
