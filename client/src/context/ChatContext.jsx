@@ -173,7 +173,6 @@ export const ChatProvider = ({ children }) => {
                   const article = metadata.article || '';
                   const clause = metadata.clause || '';
                   
-                  // Tạo nhãn dạng: "SHB-eKYC-2023 - Điều B2" hoặc fallback
                   let label = metadata.title || `Tài liệu [${key}]`;
                   if (docNum) {
                     label = `${docNum} - ${article} ${clause}`.trim();
@@ -185,6 +184,27 @@ export const ChatProvider = ({ children }) => {
                     sourceText: value?.content || value?.text || ''
                   };
                 });
+
+                // Trích lục danh sách từ sources (toàn bộ tài liệu bối cảnh đã trích xuất) để hiển thị đầy đủ
+                const sourcesList = (finalData.sources || []).map((doc, idx) => {
+                  const metadata = doc.metadata || {};
+                  const docNum = metadata.doc_num || '';
+                  const article = metadata.article || '';
+                  const clause = metadata.clause || '';
+                  
+                  let label = metadata.title || `Tài liệu [${idx + 1}]`;
+                  if (docNum) {
+                    label = `${docNum} - ${article} ${clause}`.trim();
+                  }
+                  
+                  return {
+                    id: doc.chunk_id || doc.id || String(idx + 1),
+                    label: label,
+                    sourceText: doc.content || doc.text || ''
+                  };
+                });
+
+                const finalCitations = sourcesList.length > 0 ? sourcesList : citationsList;
                 
                 // Phát hiện mâu thuẫn
                 const hasConflict = finalData.conflict_status === 'conflict_detected' || (finalData.conflicts && finalData.conflicts.length > 0);
@@ -207,7 +227,7 @@ export const ChatProvider = ({ children }) => {
                   msg.id === aiMessageId ? { 
                     ...msg, 
                     text: text,
-                    citations: citationsList,
+                    citations: finalCitations,
                     has_conflict: hasConflict,
                     actionable_draft: actionableDraft
                   } : msg
