@@ -46,12 +46,27 @@ export const parseNeo4jToReactFlow = (rawData) => {
       };
     });
     
-    rawRelationships = rawData.links.map((link, idx) => ({
-      id: link.id || `rel_${link.source}_${link.type || 'link'}_${link.target}_${idx}`,
-      start: link.source,
-      end: link.target,
-      type: link.type || 'HAS_CLAUSE'
-    }));
+    rawRelationships = rawData.links.map((link, idx) => {
+      let sourceId = link.source;
+      let targetId = link.target;
+      
+      // Nếu source là số (chỉ số index trong mảng nodes từ NetworkX)
+      if (typeof link.source === 'number' && rawData.nodes[link.source]) {
+        sourceId = rawData.nodes[link.source].id;
+      }
+      
+      // Nếu target là số (chỉ số index trong mảng nodes từ NetworkX)
+      if (typeof link.target === 'number' && rawData.nodes[link.target]) {
+        targetId = rawData.nodes[link.target].id;
+      }
+      
+      return {
+        id: link.id || `rel_${sourceId}_${link.type || 'link'}_${targetId}_${idx}`,
+        start: sourceId,
+        end: targetId,
+        type: link.type || 'HAS_CLAUSE'
+      };
+    });
   } else {
     return { nodes: [], edges: [] };
   }
