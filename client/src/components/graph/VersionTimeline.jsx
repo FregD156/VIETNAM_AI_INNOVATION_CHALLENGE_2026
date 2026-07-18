@@ -34,12 +34,21 @@ export const VersionTimeline = ({ nodeId = '' }) => {
       if (n.type !== 'clauseNode' && n.data?.rawLabel !== 'Clause') return false;
       
       const nd = n.data || {};
-      if (currentProvId && nd.provision_id) {
-        return nd.provision_id === currentProvId;
+      
+      // Luôn giữ lại chính node đang chọn
+      if (n.id === nodeId) return true;
+      
+      // Nếu có provision_id thì so khớp theo chi tiết mã nghiệp vụ
+      if (currentProvId && nd.provision_id && nd.provision_id === currentProvId) {
+        return true;
       }
       
-      // Fallback so khớp theo tên Điều và Khoản (ví dụ: "Điều 3", "Khoản 1")
-      return nd.article === currentArticle && nd.clause === currentClause;
+      // Chỉ so khớp theo điều + khoản khi cả hai đều có giá trị thực tế khác rỗng
+      if (currentArticle && currentClause && nd.article === currentArticle && nd.clause === currentClause) {
+        return true;
+      }
+      
+      return false;
     });
     
     // 3. Map sang cấu trúc dữ liệu hiển thị của dòng thời gian
