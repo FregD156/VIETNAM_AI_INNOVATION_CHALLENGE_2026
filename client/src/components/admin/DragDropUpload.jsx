@@ -26,8 +26,8 @@ export const DragDropUpload = () => {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const files = Array.from(e.dataTransfer.files);
       files.forEach(file => {
-        // Chỉ nhận file PDF
-        if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
+        // Chỉ nhận file Markdown (.md) theo đúng yêu cầu của Backend
+        if (file.name.toLowerCase().endsWith('.md')) {
           uploadFile(file);
         }
       });
@@ -56,7 +56,7 @@ export const DragDropUpload = () => {
         ref={fileInputRef}
         type="file"
         multiple
-        accept=".pdf"
+        accept=".md"
         onChange={handleFileChange}
         style={{ display: 'none' }}
       />
@@ -71,8 +71,8 @@ export const DragDropUpload = () => {
         onClick={onButtonClick}
       >
         <LuUpload className="upload-icon" />
-        <span className="upload-text">Kéo thả tài liệu PDF hoặc Click để chọn</span>
-        <span className="upload-subtext">Hỗ trợ quy trình tín dụng, thông tư ngân hàng nhà nước dạng PDF (Tối đa 20MB)</span>
+        <span className="upload-text">Kéo thả tài liệu Markdown (.md) hoặc Click để chọn</span>
+        <span className="upload-subtext">Hỗ trợ quy trình, thông tư dạng Markdown có tiêu đề cấp 1 (# Tiêu đề) (Tối đa 5MB)</span>
       </div>
 
       {/* Danh sách file đang nạp lên RAG */}

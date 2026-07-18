@@ -38,7 +38,7 @@ export const AdminWorkspace = () => {
         <div className="admin-grid-column left-side">
           <section className="admin-card-section">
             <div className="admin-card-header-row">
-              <span className="admin-card-title-text">Nạp tài liệu văn bản mới (PDF)</span>
+              <span className="admin-card-title-text">Nạp tài liệu văn bản mới (Markdown)</span>
               <span className="admin-card-header-badge">RAG Parser v2</span>
             </div>
             <div className="admin-card-content">

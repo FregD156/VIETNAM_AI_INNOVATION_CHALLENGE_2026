@@ -160,13 +160,26 @@ export const ChatProvider = ({ children }) => {
                 const finalData = event.data || {};
                 const text = finalData.text || fullText;
                 
-                // Trích lục citations từ Object map sang Array
+                // Trích lục citations từ Object map sang Array bằng thông tin chi tiết động từ metadata
                 const citationMap = finalData.citations || {};
-                const citationsList = Object.entries(citationMap).map(([key, value]) => ({
-                  id: value?.chunk_id || value?.id || key,
-                  label: value?.title || `Tài liệu [${key}]`,
-                  sourceText: value?.content || value?.text || ''
-                }));
+                const citationsList = Object.entries(citationMap).map(([key, value]) => {
+                  const metadata = value?.metadata || {};
+                  const docNum = metadata.doc_num || '';
+                  const article = metadata.article || '';
+                  const clause = metadata.clause || '';
+                  
+                  // Tạo nhãn dạng: "SHB-eKYC-2023 - Điều B2" hoặc fallback
+                  let label = metadata.title || `Tài liệu [${key}]`;
+                  if (docNum) {
+                    label = `${docNum} - ${article} ${clause}`.trim();
+                  }
+                  
+                  return {
+                    id: value?.chunk_id || value?.id || key,
+                    label: label,
+                    sourceText: value?.content || value?.text || ''
+                  };
+                });
                 
                 // Phát hiện mâu thuẫn
                 const hasConflict = finalData.conflict_status === 'conflict_detected' || (finalData.conflicts && finalData.conflicts.length > 0);
@@ -200,11 +213,24 @@ export const ChatProvider = ({ children }) => {
               // Nhận trước danh sách citations để hiển thị nhanh trên UI
               const finalData = event.data || {};
               const citationMap = finalData.citations || {};
-              const citationsList = Object.entries(citationMap).map(([key, value]) => ({
-                id: value?.chunk_id || value?.id || key,
-                label: value?.title || `Tài liệu [${key}]`,
-                sourceText: value?.content || value?.text || ''
-              }));
+              const citationsList = Object.entries(citationMap).map(([key, value]) => {
+                const metadata = value?.metadata || {};
+                const docNum = metadata.doc_num || '';
+                const article = metadata.article || '';
+                const clause = metadata.clause || '';
+                
+                // Tạo nhãn dạng: "SHB-eKYC-2023 - Điều B2" hoặc fallback
+                let label = metadata.title || `Tài liệu [${key}]`;
+                if (docNum) {
+                  label = `${docNum} - ${article} ${clause}`.trim();
+                }
+                
+                return {
+                  id: value?.chunk_id || value?.id || key,
+                  label: label,
+                  sourceText: value?.content || value?.text || ''
+                };
+              });
               setChatHistory(prev => prev.map(msg => 
                 msg.id === aiMessageId ? { 
                   ...msg, 
