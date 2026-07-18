@@ -170,11 +170,23 @@ export const GraphCanvas = () => {
       
       // Clause Node chỉ hiển thị nếu Document cha của nó nằm trong danh sách expandedNodeIds (Cấp Micro)
       if (node.type === 'clauseNode') {
-        const parentDocEdge = graphData.edges.find(
-          e => e.target === node.id && e.source.startsWith('doc_')
-        );
+        const parentDocEdge = graphData.edges.find(e => {
+          if (e.target !== node.id) return false;
+          // Tìm xem node nguồn có phải là document node hay không
+          const sourceNode = graphData.nodes.find(n => n.id === e.source);
+          return sourceNode && sourceNode.type === 'documentNode';
+        });
+        
         if (parentDocEdge && expandedNodeIds.has(parentDocEdge.source)) {
           return true;
+        }
+        
+        // Fallback: nếu node ID chứa ký tự "|" thì lấy phần trước "|" làm ID cha
+        if (node.id.includes('|')) {
+          const parentId = node.id.split('|')[0];
+          if (expandedNodeIds.has(parentId)) {
+            return true;
+          }
         }
       }
       

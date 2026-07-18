@@ -149,7 +149,7 @@ export const parseNeo4jToReactFlow = (rawData) => {
       animated = true;
       strokeWidth = 2;
       label = 'THAY THẾ (Supersedes)';
-    } else if (rel.type === 'CONFLICTS_WITH') {
+    } else if (rel.type === 'CONFLICTS_WITH' || rel.type === 'CONFLICTS') {
       strokeColor = 'var(--brick-expired)'; // Đỏ gạch xung đột
       animated = true;
       strokeWidth = 2.5;
@@ -162,8 +162,8 @@ export const parseNeo4jToReactFlow = (rawData) => {
       strokeColor = 'var(--emerald-active)'; // Xanh lá sửa đổi
       strokeWidth = 1.8;
       label = 'SỬA ĐỔI (Amends)';
-    } else if (rel.type === 'HAS_CLAUSE') {
-      strokeColor = 'var(--navy-hairline)'; // Tự động đổi màu trắng mờ ở Dark Mode / xám đậm mờ ở Light Mode
+    } else if (rel.type === 'contains' || rel.type === 'HAS_CLAUSE') {
+      strokeColor = 'rgba(255, 255, 255, 0.35)'; // Màu trắng sữa mờ rõ nét, không dùng --navy-hairline quá mờ
       strokeWidth = 1.2;
       label = '';
     }

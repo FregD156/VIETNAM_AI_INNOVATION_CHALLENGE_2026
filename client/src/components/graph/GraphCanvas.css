@@ -212,5 +212,10 @@
   border-color: var(--orange-signature) !important;
 }
 
+[data-theme="light"] .react-flow__edge-path {
+  stroke: rgba(10, 22, 40, 0.25) !important;
+}
+
+
 
 
