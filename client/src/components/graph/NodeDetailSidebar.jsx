@@ -9,6 +9,72 @@ import './NodeDetailSidebar.css';
 export const NodeDetailSidebar = () => {
   const { selectedNode, setSelectedNode, graphData } = useGraphData();
 
+  // Phân tách chuỗi dẹt từ Backend thành các dòng riêng biệt theo Chương/Điều/Khoản
+  const formatLegalTextToLines = (rawText) => {
+    if (!rawText) return [];
+    
+    // Tách dòng các Clause đã gộp bằng ###
+    if (rawText.includes('### ')) {
+      return rawText.split('\n').filter(line => line.trim());
+    }
+
+    let formatted = rawText
+      .replace(/\s+-\s+Chương\s+/g, '\nChương ')
+      .replace(/\s+-\s+Điều\s+/g, '\nĐiều ')
+      .replace(/\s+-\s+Khoản\s+/g, '\nKhoản ')
+      .replace(/\s+-\s+Điểm\s+/g, '\nĐiểm ');
+      
+    return formatted.split('\n').map(line => line.trim()).filter(Boolean);
+  };
+
+  // Render văn bản phân cấp có cấu trúc đẹp mắt kèm highlight RAG chéo
+  const renderFormattedLegalText = (rawText, highlightText = '') => {
+    if (!rawText) return null;
+    
+    const lines = formatLegalTextToLines(rawText);
+    const cleanHighlight = (highlightText || '').trim();
+    
+    return lines.map((line, idx) => {
+      let className = "legal-paragraph indent-paragraph";
+      let isDocHeader = false;
+      let isArticleHeader = false;
+      let isSectionTitle = false;
+      
+      if (line.startsWith('### ')) {
+        className = "legal-section-title";
+        isSectionTitle = true;
+      } else if (idx === 0) {
+        className = "legal-doc-header";
+        isDocHeader = true;
+      } else if (line.startsWith('Chương ') || line.startsWith('Điều ')) {
+        className = "legal-article-header";
+        isArticleHeader = true;
+      }
+      
+      const cleanLine = isSectionTitle ? line.replace('### ', '') : line;
+      
+      // Nếu có highlightText, tìm kiếm và highlight trong dòng
+      if (cleanHighlight && cleanLine.toLowerCase().includes(cleanHighlight.toLowerCase())) {
+        const startIdx = cleanLine.toLowerCase().indexOf(cleanHighlight.toLowerCase());
+        if (startIdx !== -1) {
+          const before = cleanLine.substring(0, startIdx);
+          const match = cleanLine.substring(startIdx, startIdx + cleanHighlight.length);
+          const after = cleanLine.substring(startIdx + cleanHighlight.length);
+          
+          if (isSectionTitle) return <h4 key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</h4>;
+          if (isDocHeader) return <h4 key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</h4>;
+          if (isArticleHeader) return <h5 key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</h5>;
+          return <p key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</p>;
+        }
+      }
+      
+      if (isSectionTitle) return <h4 key={idx} className={className}>{cleanLine}</h4>;
+      if (isDocHeader) return <h4 key={idx} className={className}>{cleanLine}</h4>;
+      if (isArticleHeader) return <h5 key={idx} className={className}>{cleanLine}</h5>;
+      return <p key={idx} className={className}>{cleanLine}</p>;
+    });
+  };
+
   if (!selectedNode) {
     return (
       <aside className="node-detail-sidebar placeholder-state">
@@ -100,44 +166,7 @@ export const NodeDetailSidebar = () => {
             <span className="section-label-text block-margin">Nội dung văn bản gốc</span>
             {text ? (
               <div className="detail-paper-surface-text paper-surface">
-                {(() => {
-                  const highlightText = selectedNode.data.highlightText;
-                  if (!highlightText) {
-                    return text.split('\n').map((para, pIdx) => {
-                      if (para.startsWith('### ')) {
-                        return <h4 key={pIdx} className="legal-section-title">{para.replace('### ', '')}</h4>;
-                      }
-                      return para.trim() ? <p key={pIdx} className="legal-paragraph">{para}</p> : null;
-                    });
-                  }
-                  
-                  const cleanText = text.replace(/\s+/g, ' ');
-                  const cleanHighlight = highlightText.replace(/\s+/g, ' ').trim();
-                  
-                  const index = cleanText.toLowerCase().indexOf(cleanHighlight.toLowerCase());
-                  if (index !== -1) {
-                    const before = cleanText.substring(0, index);
-                    const match = cleanText.substring(index, index + cleanHighlight.length);
-                    const after = cleanText.substring(index + cleanHighlight.length);
-                    return (
-                      <p className="legal-paragraph">
-                        {before}
-                        <span className="legal-highlight-match">{match}</span>
-                        {after}
-                      </p>
-                    );
-                  }
-                  
-                  return (
-                    <>
-                      <div className="rag-chunk-extracted-notice">
-                        <span className="notice-title">Đoạn được RAG trích xuất & đối sánh:</span>
-                        <p className="notice-content">{highlightText}</p>
-                      </div>
-                      <p className="legal-paragraph">{text}</p>
-                    </>
-                  );
-                })()}
+                {renderFormattedLegalText(text, selectedNode.data.highlightText)}
                 <div className="legal-paper-watermark">SHB COMPLIANCE ORIGINAL</div>
               </div>
             ) : (
