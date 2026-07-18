@@ -5,45 +5,47 @@ import VersionTimeline from './VersionTimeline';
 import './NodeDetailSidebar.css';
 
 // Dữ liệu Mock AI Insight để tăng tính thông minh và demo-able
-const getAiInsight = (nodeId) => {
-  const insights = {
-    'clause_5_tt39': {
-      risk: 'Trung bình',
-      riskClass: 'risk-medium',
-      summary: 'Quy định phương thức thỏa thuận gia hạn nợ và lãi suất. Hiện tại đã bị sửa đổi và thắt chặt kiểm soát nợ quá hạn bởi Thông tư 06/2023.',
-      actionNote: 'Cần kiểm tra kỹ lịch sử xếp hạng tín dụng nội bộ của khách hàng trước khi ký phụ lục gia hạn.'
-    },
-    'clause_5_tt06': {
-      risk: 'Thấp (Tuân thủ)',
-      riskClass: 'risk-low',
-      summary: 'Thông tư 06/2023/TT-NHNN quy định cứng hạn mức vay tiêu dùng online tối đa 100 triệu VNĐ nhằm hạn chế nợ xấu phát sinh hàng loạt.',
-      actionNote: 'Áp dụng cấu hình kiểm soát tự động trên hệ thống SHB Mobile. Tuyệt đối không phê duyệt vượt hạn mức.'
-    },
-    'clause_14_qd214': {
-      risk: 'Cao (Mâu thuẫn Luật)',
-      riskClass: 'risk-high',
-      summary: 'Mâu thuẫn nghiêm trọng với Thông tư 06/2023/TT-NHNN của Ngân hàng Nhà nước. Hạn mức nội bộ 500 triệu của quyết định 214 này đã lỗi thời và vượt quá 5 lần giới hạn pháp lý đối với kênh trực tuyến.',
-      actionNote: 'Tạm dừng giải ngân gói đối tác 500 triệu trực tuyến; chuyển hướng phê duyệt hồ sơ giấy truyền thống.'
-    },
-    'clause_12_tt16': {
-      risk: 'Trung bình',
-      riskClass: 'risk-medium',
-      summary: 'Thông tư NHNN khống chế giao dịch eKYC 100 triệu/tháng nhằm phòng chống rửa tiền và tạo tài khoản ảo.',
-      actionNote: 'Kiểm tra khớp thông tin sinh trắc học khuôn mặt trùng với cơ sở dữ liệu Bộ Công an.'
-    },
-    'clause_9_qd104': {
-      risk: 'Thấp (Tuân thủ)',
-      riskClass: 'risk-low',
-      summary: 'Quyết định nội bộ SHB đã cập nhật đúng hướng dẫn của Thông tư 16. Bắt buộc thu thập dữ liệu CCCD gắn chip NFC.',
-      actionNote: 'Yêu cầu RM hướng dẫn chi tiết khách hàng cách quét NFC trên điện thoại thông minh.'
-    }
-  };
+// Dữ liệu Mock AI Insight sinh động dựa theo từ khóa trong văn bản để demo-able tốt nhất
+const getAiInsight = (nodeId, nodeText, nodeTitle) => {
+  const text = (nodeText || '').toLowerCase();
+  const title = (nodeTitle || '').toLowerCase();
 
-  return insights[nodeId] || {
-    risk: 'Chưa đánh giá',
-    riskClass: 'risk-unknown',
-    summary: 'Hệ thống RAG AI đang tổng hợp cấu trúc liên kết và lịch sử của điều khoản này từ đồ thị.',
-    actionNote: 'Vui lòng liên hệ Phòng Pháp chế và Tuân thủ SHB để nhận thông tin chi tiết.'
+  // 1. Nhận diện eKYC, Sinh trắc học, CCCD
+  if (text.includes('ekyc') || text.includes('căn cước') || text.includes('chứng minh') || text.includes('nfc') || title.includes('ekyc') || nodeId.includes('ekyc')) {
+    return {
+      risk: 'Trung bình',
+      riskClass: 'risk-medium',
+      summary: 'Quy định về việc mở tài khoản và nhận biết khách hàng bằng phương thức điện tử (eKYC). Đảm bảo tuân thủ nghiêm ngặt Thông tư 16/2020/TT-NHNN của NHNN.',
+      actionNote: 'Yêu cầu RM hướng dẫn khách hàng quét NFC CCCD gắn chip trên ứng dụng SHB Mobile để xác thực sinh trắc học trùng khớp dữ liệu Bộ Công an.'
+    };
+  }
+
+  // 2. Nhận diện hạn mức trực tuyến, cho vay online
+  if (text.includes('hạn mức') || text.includes('trực tuyến') || text.includes('tiêu dùng online') || text.includes('cho vay') || title.includes('hạn mức')) {
+    return {
+      risk: 'Cao (Kiểm soát)',
+      riskClass: 'risk-high',
+      summary: 'Thông tư 06/2023/TT-NHNN quy định cứng hạn mức vay tiêu dùng trực tuyến tối đa 100 triệu VNĐ nhằm hạn chế nợ xấu phát sinh hàng loạt.',
+      actionNote: 'Áp dụng cấu hình kiểm soát tự động trên hệ thống SHB Mobile. Tuyệt đối không phê duyệt vượt hạn mức 100 triệu đối với kênh trực tuyến.'
+    };
+  }
+
+  // 3. Nhận diện gia hạn nợ, lãi suất quá hạn, cơ cấu nợ
+  if (text.includes('gia hạn') || text.includes('lãi suất') || text.includes('quá hạn') || text.includes('phụ lục') || title.includes('tín dụng')) {
+    return {
+      risk: 'Trung bình',
+      riskClass: 'risk-medium',
+      summary: 'Quy định phương thức thỏa thuận gia hạn nợ và điều chỉnh lãi suất. Cần kiểm soát chặt chẽ để tránh chuyển nhóm nợ xấu ngoài ý muốn.',
+      actionNote: 'Cần kiểm tra kỹ lịch sử xếp hạng tín dụng nội bộ của khách hàng trước khi ký kết phụ lục hợp đồng tín dụng gia hạn.'
+    };
+  }
+
+  // 4. Trường hợp mặc định cho các điều khoản khác
+  return {
+    risk: 'Thấp (Tuân thủ)',
+    riskClass: 'risk-low',
+    summary: 'Quy định quy trình nghiệp vụ nội bộ theo chuẩn SHB. Cung cấp bối cảnh kiểm soát phục vụ RM khi thực thi quy trình tác nghiệp tín dụng và bán lẻ.',
+    actionNote: 'Tuân thủ đúng trình tự các bước hướng dẫn tác nghiệp; ghi nhận đầy đủ hồ sơ minh chứng trên hệ thống lõi SHB.'
   };
 };
 
@@ -66,9 +68,10 @@ export const NodeDetailSidebar = () => {
     );
   }
 
-  const { title, text, status, docType, effective_date, rawLabel } = selectedNode.data;
+  const { title, status, docType, effective_date, rawLabel } = selectedNode.data;
+  const text = selectedNode.data.content || selectedNode.data.text || '';
   const isNhnn = docType === 'NHNN' || selectedNode.id.includes('tt');
-  const insight = getAiInsight(selectedNode.id);
+  const insight = getAiInsight(selectedNode.id, text, title);
 
   // Gửi câu hỏi nhanh sang chatbot
   const handleAskAI = () => {
