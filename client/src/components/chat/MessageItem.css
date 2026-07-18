@@ -61,16 +61,18 @@
 
 .message-item-row.user .message-bubble-box {
   background-color: var(--navy-surface-raised);
+  border-left: 4px solid var(--sea-blue) !important; /* Viền trái xanh dẫn chiếu ở chế độ Tối */
   border-bottom-right-radius: 2px; /* góc nhọn tinh tế bên người gửi */
 }
 
 .message-item-row.ai .message-bubble-box {
+  border-left: 4px solid var(--orange-signature) !important; /* Viền trái cam brand ở chế độ Tối */
   border-bottom-left-radius: 2px; /* góc nhọn tinh tế bên AI */
 }
 
 /* Welcome message special styling */
 .message-bubble-box.welcome {
-  border-color: rgba(240, 99, 29, 0.3);
+  border-color: rgba(240, 99, 29, 0.3) !important;
   box-shadow: 0 4px 20px rgba(240, 99, 29, 0.06);
 }
 
@@ -342,6 +344,18 @@
   box-shadow: none !important;
 }
 
+[data-theme="light"] .message-item-row.ai .message-bubble-box {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(28, 56, 41, 0.12) !important;
+  border-left: 4px solid var(--orange-signature) !important; /* Viền trái cam thương hiệu */
+}
+
+[data-theme="light"] .message-item-row.user .message-bubble-box {
+  background-color: rgba(225, 234, 228, 0.5) !important; /* Xanh mint nhạt mờ dịu mắt */
+  border: 1px solid rgba(28, 56, 41, 0.1) !important;
+  border-left: 4px solid var(--sea-blue) !important; /* Viền trái xanh dẫn chiếu */
+}
+
 [data-theme="light"] .message-h3 {
   color: var(--orange-signature); /* Dùng cam signature sẫm màu hơn */
 }
@@ -351,7 +365,7 @@
 }
 
 [data-theme="light"] .message-blockquote {
-  background-color: rgba(28, 114, 147, 0.06);
+  background-color: rgba(28, 114, 147, 0.04);
   color: var(--text-primary); /* Chữ tối hơn để đảm bảo tương phản tốt */
 }
 
@@ -362,5 +376,6 @@
 [data-theme="light"] .citations-header-icon {
   color: var(--sea-blue);
 }
+
 
 
