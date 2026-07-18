@@ -746,9 +746,13 @@
 }
 
 .sidebar-container.collapsed .sidebar-footer-container {
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   padding-top: 14px;
   border-top: 1px solid var(--navy-hairline);
+  height: auto;
+  gap: 12px;
 }
 
 .sidebar-footer-actions {
@@ -758,7 +762,11 @@
 }
 
 .sidebar-footer-actions.collapsed-actions {
-  display: none; /* Ẩn nút khi thu gọn */
+  display: flex; /* Hiện nút khi thu gọn */
+  flex-direction: column; /* Xếp dọc thẳng hàng */
+  gap: 10px;
+  align-items: center;
+  width: 100%;
 }
 
 .btn-sidebar-theme-toggle {
