@@ -279,14 +279,14 @@ export const GraphCanvas = () => {
           },
           style: {
             ...node.style,
-            opacity: isConnected ? 1 : 0.15,
+            opacity: 1, // Giữ nguyên độ sáng 100% cho mọi node
             transition: 'opacity 0.25s ease, transform 0.25s ease',
             border: isSelf 
               ? '2px solid var(--orange-signature)' 
-              : (isConnected ? '1.5px solid rgba(255, 255, 255, 0.45)' : 'none'),
+              : (isConnected ? '1.5px solid var(--orange-ember)' : 'none'),
             boxShadow: isSelf 
-              ? '0 0 15px rgba(240, 99, 29, 0.4)' 
-              : (isConnected ? '0 0 8px rgba(255, 255, 255, 0.2)' : 'none')
+              ? '0 0 15px var(--orange-signature)' 
+              : (isConnected ? '0 0 8px rgba(255, 171, 107, 0.4)' : 'none')
           }
         };
       });
@@ -295,13 +295,14 @@ export const GraphCanvas = () => {
         const isConnected = connectedEdgeIds.has(edge.id);
         return {
           ...edge,
-          animated: isConnected, // Chạy chuyển động truyền dữ liệu cho các đường kết nối
+          animated: isConnected, // Chạy hoạt họa cho kết nối
           style: {
             ...edge.style,
-            opacity: isConnected ? 1 : 0.08,
-            strokeWidth: isConnected ? 2.5 : (edge.style?.strokeWidth || 1.2),
-            stroke: isConnected ? (edge.style?.stroke || '#F0631D') : (edge.style?.stroke || '#64748b'),
-            transition: 'opacity 0.25s ease, stroke-width 0.25s ease'
+            opacity: 1, // Giữ nguyên độ sáng 100% cho mọi edge
+            strokeWidth: isConnected ? 3.5 : (edge.style?.strokeWidth || 1.2),
+            stroke: isConnected ? 'var(--orange-signature)' : (edge.style?.stroke || '#64748b'),
+            filter: isConnected ? 'drop-shadow(0 0 6px var(--orange-signature))' : 'none', // Hiệu ứng phát sáng neon rực rỡ
+            transition: 'all 0.25s ease'
           }
         };
       });
