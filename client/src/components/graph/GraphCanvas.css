@@ -115,3 +115,64 @@
   fill: rgba(255, 255, 255, 0.65) !important; /* Đổi mask tối thành sáng mờ ở Light Mode */
 }
 
+/* ============================================================
+   SHB GRAPH-RAG — GRAPH LAYOUT TOOLBAR STYLES
+   ============================================================ */
+.graph-layout-toolbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: var(--navy-surface-raised) !important;
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-circle); /* Theo rule: nút bấm và thanh công cụ tròn */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.toolbar-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 4px;
+}
+
+.btn-layout-option {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-circle);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.btn-layout-option:hover {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn-layout-option.active {
+  background-color: var(--orange-signature);
+  color: #ffffff;
+  border-color: var(--orange-signature);
+  box-shadow: 0 0 10px rgba(240, 99, 29, 0.35);
+}
+
+[data-theme="light"] .graph-layout-toolbar {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .btn-layout-option:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+

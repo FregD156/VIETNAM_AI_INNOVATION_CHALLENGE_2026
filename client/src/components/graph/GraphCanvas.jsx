@@ -24,11 +24,90 @@ export const GraphCanvas = () => {
   const { graphData, selectedNode, setSelectedNode } = useGraphData();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [layoutMode, setLayoutMode] = useState('original'); // 'original' | 'lr' | 'snowflake' | 'grid'
   
   const { setCenter } = useReactFlow();
 
   // Lưu trữ danh sách các Document Node ID đang được mở rộng
   const [expandedNodeIds, setExpandedNodeIds] = useState(new Set());
+
+  // Thuật toán sắp xếp toạ độ các Node động theo bố cục lựa chọn
+  const applyLayoutAlgorithms = (nodesList, edgesList, mode) => {
+    const docNodes = nodesList.filter(n => n.type === 'documentNode');
+    
+    if (mode === 'lr') {
+      // Bố cục Trái -> Phải (Phân tầng từ văn bản gốc sang các điều khoản con)
+      docNodes.forEach((doc, docIdx) => {
+        doc.position = { x: 100, y: 150 + docIdx * 350 };
+        
+        const children = nodesList.filter(n => {
+          if (n.id === doc.id) return false;
+          return edgesList.some(e => e.target === n.id && (e.source === doc.id || e.source.startsWith(doc.id + '|')));
+        });
+        
+        children.forEach((child, childIdx) => {
+          child.position = {
+            x: 480,
+            y: doc.position.y - 120 + childIdx * 100
+          };
+        });
+      });
+    } else if (mode === 'snowflake') {
+      // Bố cục Bông tuyết (Quy chế gốc ở tâm, các điều khoản tỏa tròn xung quanh)
+      const centers = {
+        doc_tt39: { x: 400, y: 350 },
+        doc_tt06: { x: 1200, y: 350 },
+        doc_qd214: { x: 2000, y: 350 },
+        doc_tt16: { x: 400, y: 1050 },
+        doc_qd104: { x: 1200, y: 1050 },
+        doc_qd_tietkiem: { x: 2000, y: 1050 }
+      };
+      
+      docNodes.forEach((doc, idx) => {
+        const center = centers[doc.id] || { x: 600 + (idx % 3) * 800, y: 350 + Math.floor(idx / 3) * 700 };
+        doc.position = center;
+        
+        const children = nodesList.filter(n => {
+          if (n.id === doc.id) return false;
+          return edgesList.some(e => e.target === n.id && (e.source === doc.id || e.source.startsWith(doc.id + '|')));
+        });
+        
+        const count = children.length;
+        const radius = 240;
+        children.forEach((child, childIdx) => {
+          const angle = (childIdx * 2 * Math.PI) / (count || 1);
+          child.position = {
+            x: center.x + radius * Math.cos(angle),
+            y: center.y + radius * Math.sin(angle)
+          };
+        });
+      });
+    } else if (mode === 'grid') {
+      // Bố cục Dàn lưới gọn gàng (Xếp theo cụm lưới chữ nhật tương ứng từng văn bản)
+      let startY = 100;
+      docNodes.forEach((doc) => {
+        doc.position = { x: 100, y: startY + 40 };
+        
+        const children = nodesList.filter(n => {
+          if (n.id === doc.id) return false;
+          return edgesList.some(e => e.target === n.id && (e.source === doc.id || e.source.startsWith(doc.id + '|')));
+        });
+        
+        const cols = 3;
+        children.forEach((child, childIdx) => {
+          const row = Math.floor(childIdx / cols);
+          const col = childIdx % cols;
+          child.position = {
+            x: 420 + col * 260,
+            y: startY + row * 95
+          };
+        });
+        
+        const rowCount = Math.ceil(children.length / cols) || 1;
+        startY += rowCount * 95 + 90;
+      });
+    }
+  };
 
   // Tự động mở rộng node cha (nếu nó là Clause) hoặc chính nó (nếu nó là Document) khi có lựa chọn từ bên ngoài
   useEffect(() => {
@@ -96,9 +175,14 @@ export const GraphCanvas = () => {
       return visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target);
     });
 
+    // 3. Áp dụng sắp xếp bố cục đồ thị động nếu có cấu hình
+    if (layoutMode !== 'original') {
+      applyLayoutAlgorithms(visibleNodes, visibleEdges, layoutMode);
+    }
+
     setNodes(visibleNodes);
     setEdges(visibleEdges);
-  }, [graphData, expandedNodeIds, setNodes, setEdges]);
+  }, [graphData, expandedNodeIds, layoutMode, setNodes, setEdges]);
 
   // Lắng nghe sự kiện focus node từ bên ngoài (như click CitationTag trong Chat)
   useEffect(() => {
@@ -150,6 +234,35 @@ export const GraphCanvas = () => {
 
   return (
     <div className="graph-canvas-container">
+      {/* Sắp xếp bố cục đồ thị Toolbar */}
+      <div className="graph-layout-toolbar panel">
+        <span className="toolbar-label">Bố cục:</span>
+        <button 
+          className={`btn-layout-option ${layoutMode === 'original' ? 'active' : ''}`} 
+          onClick={() => setLayoutMode('original')}
+        >
+          Mặc định
+        </button>
+        <button 
+          className={`btn-layout-option ${layoutMode === 'lr' ? 'active' : ''}`} 
+          onClick={() => setLayoutMode('lr')}
+        >
+          Trái → Phải
+        </button>
+        <button 
+          className={`btn-layout-option ${layoutMode === 'snowflake' ? 'active' : ''}`} 
+          onClick={() => setLayoutMode('snowflake')}
+        >
+          Bông tuyết
+        </button>
+        <button 
+          className={`btn-layout-option ${layoutMode === 'grid' ? 'active' : ''}`} 
+          onClick={() => setLayoutMode('grid')}
+        >
+          Gọn gàng
+        </button>
+      </div>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
