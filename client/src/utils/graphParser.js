@@ -175,6 +175,9 @@ export const parseNeo4jToReactFlow = (rawData) => {
       animated,
       label,
       type: 'smoothstep',
+      data: {
+        relationType: rel.type
+      },
       style: {
         stroke: strokeColor,
         strokeWidth

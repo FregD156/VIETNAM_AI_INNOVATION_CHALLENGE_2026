@@ -174,7 +174,7 @@ export const GraphCanvas = () => {
         
         // Quét tìm các liên kết chứa cấu trúc của node hiện tại
         const childEdges = graphData.edges.filter(e => 
-          e.source === currentId && (e.type === 'contains' || e.type === 'HAS_CLAUSE')
+          e.source === currentId && (e.data?.relationType === 'contains' || e.data?.relationType === 'HAS_CLAUSE')
         );
         
         childEdges.forEach(e => {
