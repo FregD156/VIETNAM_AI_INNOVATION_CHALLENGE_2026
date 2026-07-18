@@ -12,15 +12,53 @@ export const ChatInputArea = ({ onSendMessage, isStreaming }) => {
   const dropdownRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // Lấy cấu hình model từ localStorage
+  // Lấy cấu hình model từ localStorage hoặc mặc định là rỗng (Mặc định của backend)
   const [selectedModel, setSelectedModel] = useState(() => {
-    return localStorage.getItem('shb_selected_model') || 'shb-core';
+    return localStorage.getItem('shb_selected_model') || '';
   });
+
+  // Lưu trữ danh sách mô hình thực tế tải từ API
+  const [availableModels, setAvailableModels] = useState([
+    { id: '', label: 'qwen3-4b · Mặc định', provider: 'Local' }
+  ]);
+
+  // Gọi API /models của backend FastAPI để lấy danh sách mô hình thực tế
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+          (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:8000'
+            : 'https://api.compliance.shb.com.vn');
+            
+        const response = await fetch(`${baseUrl}/models`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.models) {
+            setAvailableModels(data.models);
+            
+            // Nếu model đang lưu trong localStorage không khớp với danh sách API trả về, 
+            // tự động chuyển về model mặc định đầu tiên
+            const isModelValid = data.models.some(m => m.id === selectedModel);
+            if (!isModelValid && data.models.length > 0) {
+              const defaultModelId = data.models[0].id;
+              setSelectedModel(defaultModelId);
+              localStorage.setItem('shb_selected_model', defaultModelId);
+              window.dispatchEvent(new Event('local-storage-update'));
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Không thể tải API /models thật, sử dụng cấu hình mặc định:', error);
+      }
+    };
+    fetchModels();
+  }, [selectedModel]);
 
   // Đồng bộ model AI 2 chiều (nếu đổi ở Sidebar)
   useEffect(() => {
     const handleStorageChange = () => {
-      setSelectedModel(localStorage.getItem('shb_selected_model') || 'shb-core');
+      setSelectedModel(localStorage.getItem('shb_selected_model') || '');
     };
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('local-storage-update', handleStorageChange);
@@ -75,10 +113,10 @@ export const ChatInputArea = ({ onSendMessage, isStreaming }) => {
     }
   }, []);
 
-  // Auto-resize textarea mượt mà không bị chèn chữ
+  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '22px'; // Chiều cao mặc định 1 dòng
+      textareaRef.current.style.height = '22px';
       const scrollHeight = textareaRef.current.scrollHeight;
       if (scrollHeight > 22) {
         textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
@@ -102,16 +140,13 @@ export const ChatInputArea = ({ onSendMessage, isStreaming }) => {
     }
   };
 
-  // Kích hoạt/dừng ghi âm giọng nói
   const toggleRecording = () => {
     if (!recognitionRef.current) {
-      // Fallback nếu trình duyệt không hỗ trợ Web Speech API
       if (isRecording) {
         setIsRecording(false);
       } else {
         setIsRecording(true);
         setText('');
-        // Giả lập ghi âm
         setTimeout(() => {
           setText('Quy trình xác thực sinh trắc học khi chuyển khoản trên 10 triệu đồng tại SHB?');
           setIsRecording(false);
@@ -144,7 +179,7 @@ export const ChatInputArea = ({ onSendMessage, isStreaming }) => {
     setShowModelMenu(false);
   };
 
-  // Phân loại Suggestions thành các tab chuyên nghiệp
+  // Suggestions phân loại
   const suggestions = {
     'tin-dung': [
       { label: 'Hạn mức vay SHB Mobile', query: 'Quy định hạn mức cho vay tiêu dùng online trên ứng dụng SHB Mobile?' },
@@ -164,17 +199,16 @@ export const ChatInputArea = ({ onSendMessage, isStreaming }) => {
   };
 
   const getModelShortLabel = (modelId) => {
-    switch (modelId) {
-      case 'shb-core': return 'Core-v2';
-      case 'gemini-pro': return 'G-Pro';
-      case 'gemini-flash': return 'G-Flash';
-      default: return 'Core-v2';
+    const found = availableModels.find(m => m.id === modelId);
+    if (found) {
+      return found.label.split('·')[0].trim();
     }
+    return 'Mặc định';
   };
 
   return (
     <div className="chat-input-container-panel">
-      {/* Smart Suggestion Deck (Cải tiến phân loại tab gợi ý) */}
+      {/* Smart Suggestion Deck */}
       <div className="chat-suggestions-deck panel">
         <div className="suggestions-tabs-header">
           <span className="suggestions-deck-title">RM gợi ý nhanh:</span>
@@ -220,7 +254,7 @@ export const ChatInputArea = ({ onSendMessage, isStreaming }) => {
       {/* Main Input Row */}
       <div className="chat-input-row-main">
         <div className="chat-input-left-controls">
-          {/* Voice AI Button với hiệu ứng Sóng âm chuyển động cực chất */}
+          {/* Voice AI Button */}
           <div className="voice-recorder-wrapper">
             <button 
               className={`btn-input-voice-tool ${isRecording ? 'recording-active' : ''}`}
@@ -258,40 +292,21 @@ export const ChatInputArea = ({ onSendMessage, isStreaming }) => {
 
             {showModelMenu && (
               <div className="chat-model-inline-popover panel signature-reveal">
-                <div className="inline-popover-header">Model RAG AI</div>
+                <div className="inline-popover-header">Model RAG AI Khả Dụng</div>
                 <div className="inline-popover-options">
-                  <div 
-                    className={`inline-model-option ${selectedModel === 'shb-core' ? 'selected' : ''}`}
-                    onClick={() => handleModelChange('shb-core')}
-                  >
-                    <div className="model-option-main">
-                      <span className="model-opt-name">SHB Core RAG-v2</span>
-                      {selectedModel === 'shb-core' && <LuCheck className="opt-check-icon" />}
+                  {availableModels.map((m) => (
+                    <div 
+                      key={m.id}
+                      className={`inline-model-option ${selectedModel === m.id ? 'selected' : ''}`}
+                      onClick={() => handleModelChange(m.id)}
+                    >
+                      <div className="model-option-main">
+                        <span className="model-opt-name">{m.label}</span>
+                        {selectedModel === m.id && <LuCheck className="opt-check-icon" />}
+                      </div>
+                      <span className="model-opt-desc">Nhà cung cấp: {m.provider}</span>
                     </div>
-                    <span className="model-opt-desc">Quy trình & quy chế nội bộ SHB</span>
-                  </div>
-
-                  <div 
-                    className={`inline-model-option ${selectedModel === 'gemini-pro' ? 'selected' : ''}`}
-                    onClick={() => handleModelChange('gemini-pro')}
-                  >
-                    <div className="model-option-main">
-                      <span className="model-opt-name">Gemini 1.5 Pro</span>
-                      {selectedModel === 'gemini-pro' && <LuCheck className="opt-check-icon" />}
-                    </div>
-                    <span className="model-opt-desc">Lập luận phức tạp, xung đột luật chéo</span>
-                  </div>
-
-                  <div 
-                    className={`inline-model-option ${selectedModel === 'gemini-flash' ? 'selected' : ''}`}
-                    onClick={() => handleModelChange('gemini-flash')}
-                  >
-                    <div className="model-option-main">
-                      <span className="model-opt-name">Gemini 1.5 Flash</span>
-                      {selectedModel === 'gemini-flash' && <LuCheck className="opt-check-icon" />}
-                    </div>
-                    <span className="model-opt-desc">Tốc độ cao, tóm tắt nhanh văn bản</span>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}

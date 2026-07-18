@@ -5,7 +5,6 @@ import {
   LuCloudUpload, 
   LuChevronLeft, 
   LuChevronRight,
-  LuSearch,
   LuSettings,
   LuLogOut,
   LuActivity,
@@ -35,7 +34,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
 
   // Lấy cấu hình model từ localStorage hoặc mặc định để hiển thị ở RAG status panel
   const [selectedModel, setSelectedModel] = useState(() => {
-    return localStorage.getItem('shb_selected_model') || 'shb-core';
+    return localStorage.getItem('shb_selected_model') || '';
   });
   const [deepSearch] = useState(() => {
     return localStorage.getItem('shb_deep_search') === 'true';
@@ -46,6 +45,39 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
     return localStorage.getItem('shb_app_theme') || 'dark';
   });
 
+  // Tải danh sách models động từ API để hiển thị nhãn chính xác ở Sidebar
+  const [availableModels, setAvailableModels] = useState([]);
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+          (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:8000'
+            : 'https://api.compliance.shb.com.vn');
+            
+        const response = await fetch(`${baseUrl}/models`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.models) {
+            setAvailableModels(data.models);
+          }
+        }
+      } catch (error) {
+        console.warn('Sidebar không thể kết nối API /models:', error);
+      }
+    };
+    fetchModels();
+  }, []);
+
+  const getModelLabel = (modelId) => {
+    const found = availableModels.find(m => m.id === modelId);
+    if (found) {
+      return found.label.split('·')[0].trim();
+    }
+    return modelId === '' ? 'Mặc định' : 'Mặc định';
+  };
+
   // Đồng bộ theme với body tag
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
@@ -55,7 +87,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
   // Đồng bộ model khi có thay đổi từ phía ChatInput
   useEffect(() => {
     const handleStorageUpdate = () => {
-      setSelectedModel(localStorage.getItem('shb_selected_model') || 'shb-core');
+      setSelectedModel(localStorage.getItem('shb_selected_model') || '');
     };
     window.addEventListener('storage', handleStorageUpdate);
     window.addEventListener('local-storage-update', handleStorageUpdate);
@@ -96,37 +128,31 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
   // Bộ lắng nghe phím tắt toàn cục (⌥1, ⌥2, ⌥3 và ⌘K / Ctrl+K)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Alt + 1 -> Chat
       if (e.altKey && e.key === '1') {
         e.preventDefault();
         setActiveTab('chat');
         showToast('Đã chuyển sang AI Chatbot', 'info');
       }
-      // Alt + 2 -> Graph
       if (e.altKey && e.key === '2') {
         e.preventDefault();
         setActiveTab('graph');
         showToast('Đã chuyển sang Đồ thị Tri thức', 'info');
       }
-      // Alt + 3 -> Admin
       if (e.altKey && e.key === '3') {
         e.preventDefault();
         setActiveTab('admin');
         showToast('Đã chuyển sang Quản trị văn bản', 'info');
       }
-      // Alt + 4 -> Documents
       if (e.altKey && e.key === '4') {
         e.preventDefault();
         setActiveTab('documents');
         showToast('Đã chuyển sang Kho Tài liệu', 'info');
       }
-      // Alt + 5 -> Evaluation
       if (e.altKey && e.key === '5') {
         e.preventDefault();
         setActiveTab('evaluation');
         showToast('Đã chuyển sang Đánh giá hiệu năng', 'info');
       }
-      // Cmd + K hoặc Ctrl + K -> Focus ô tìm kiếm nhanh
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCollapsed(false);
@@ -146,8 +172,6 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setLocalSearch(val);
-    
-    // Nếu đang ở tab Graph, tiến hành lọc đồ thị thời gian thực
     if (activeTab === 'graph') {
       searchGraph(val);
     }
@@ -157,29 +181,19 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
   const handleSearchSubmit = (e) => {
     if (e.key === 'Enter' && localSearch.trim()) {
       e.preventDefault();
-      
-      // Gửi tin nhắn qua ChatContext
       sendMessage(localSearch);
-      
-      // Chuyển sang tab Chat
       setActiveTab('chat');
-      
       showToast('Đã gửi câu hỏi tới AI Chatbot', 'success');
-      
-      // Clear ô tìm kiếm
       setLocalSearch('');
       if (activeTab === 'graph') {
         searchGraph('');
       }
-      
-      // Blur input
       if (searchInputRef.current) {
         searchInputRef.current.blur();
       }
     }
   };
 
-  // Bấm vào search icon khi đang collapsed
   const handleSearchIconClick = () => {
     if (isCollapsed) {
       setIsCollapsed(false);
@@ -224,8 +238,6 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
             {isCollapsed ? <LuChevronRight /> : <LuChevronLeft />}
           </button>
         </div>
-
-
 
         {/* Navigation Menu */}
         <nav className="sidebar-nav-menu">
@@ -333,7 +345,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
               <LuBrain className="status-row-icon" />
               <span className="status-row-label">RAG Engine:</span>
               <span className="status-row-value monospace text-highlight">
-                {selectedModel === 'shb-core' ? 'Core-v2' : selectedModel === 'gemini-pro' ? 'G-Pro' : 'G-Flash'}
+                {getModelLabel(selectedModel)}
               </span>
             </div>
             <div className="status-row">
