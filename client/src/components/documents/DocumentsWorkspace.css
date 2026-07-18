@@ -233,6 +233,10 @@
   border-color: var(--orange-signature);
 }
 
+.filter-dropdown-select.has-icon {
+  padding-left: 36px;
+}
+
 /* 5. TABLE PANEL */
 .documents-table-panel {
   flex: 1;

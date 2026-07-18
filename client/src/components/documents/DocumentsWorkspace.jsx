@@ -134,7 +134,7 @@ export const DocumentsWorkspace = () => {
               <div className="filter-select-wrapper">
                 <LuSlidersHorizontal className="filter-icon" />
                 <select 
-                  className="filter-dropdown-select"
+                  className="filter-dropdown-select has-icon"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
