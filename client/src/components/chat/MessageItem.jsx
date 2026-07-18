@@ -237,6 +237,30 @@ export const MessageItem = ({ message, onCitationClick }) => {
             <span className="bubble-message-time">{message.timestamp}</span>
           </div>
 
+          {/* Quá trình tiền xử lý và phân tích RAG */}
+          {isAi && message.steps && message.steps.length > 0 && (
+            <div className="message-rag-steps-container">
+              <div className="rag-steps-header">
+                <span className="rag-steps-title-text">Quá trình phân tích RAG</span>
+              </div>
+              <ul className="rag-steps-list">
+                {message.steps.map((step) => {
+                  const isSuccess = step.status === 'success';
+                  const isRunning = step.status === 'running';
+                  return (
+                    <li key={step.id} className={`rag-step-item ${step.status}`}>
+                      <span className="step-status-icon">
+                        {isSuccess && '✔'}
+                        {isRunning && <span className="step-spinner" />}
+                      </span>
+                      <span className="step-label-text">{step.label}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
           {/* Nội dung tin nhắn */}
           <div className="message-bubble-body">
             {parseText(message.text)}
