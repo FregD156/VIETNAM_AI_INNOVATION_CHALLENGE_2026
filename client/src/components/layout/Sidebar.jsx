@@ -14,7 +14,8 @@ import {
   LuSparkles,
   LuX,
   LuSun,
-  LuMoon
+  LuMoon,
+  LuFolderOpen
 } from 'react-icons/lu';
 import { useChatContext } from '../../context/ChatContext';
 import { useGraphContext } from '../../context/GraphContext';
@@ -112,6 +113,12 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
         e.preventDefault();
         setActiveTab('admin');
         showToast('Đã chuyển sang Quản trị văn bản', 'info');
+      }
+      // Alt + 4 -> Documents
+      if (e.altKey && e.key === '4') {
+        e.preventDefault();
+        setActiveTab('documents');
+        showToast('Đã chuyển sang Kho Tài liệu', 'info');
       }
       // Cmd + K hoặc Ctrl + K -> Focus ô tìm kiếm nhanh
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -250,6 +257,18 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
             </div>
             {!isCollapsed && <span className="nav-item-label">Quản trị Văn bản</span>}
             {!isCollapsed && <span className="nav-item-shortcut">⌥3</span>}
+          </button>
+
+          <button
+            className={`nav-menu-item ${activeTab === 'documents' ? 'active' : ''}`}
+            onClick={() => setActiveTab('documents')}
+            title="Kho Tài liệu (⌥4)"
+          >
+            <div className="nav-item-icon-wrapper">
+              <LuFolderOpen />
+            </div>
+            {!isCollapsed && <span className="nav-item-label">Kho Tài liệu</span>}
+            {!isCollapsed && <span className="nav-item-shortcut">⌥4</span>}
           </button>
         </nav>
       </div>

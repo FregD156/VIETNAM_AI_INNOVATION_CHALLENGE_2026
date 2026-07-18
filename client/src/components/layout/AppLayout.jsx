@@ -3,9 +3,10 @@ import Sidebar from './Sidebar';
 import ChatWorkspace from '../chat/ChatWorkspace';
 import GraphWorkspace from '../graph/GraphWorkspace';
 import AdminWorkspace from '../admin/AdminWorkspace';
+import DocumentsWorkspace from '../documents/DocumentsWorkspace';
 
 export const AppLayout = () => {
-  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'graph' | 'admin'
+  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'graph' | 'admin' | 'documents'
   const [isCollapsed, setIsCollapsed] = useState(false); // Sidebar collapse state
 
   // Lắng nghe sự kiện đổi tab toàn cục để hỗ trợ chuyển hướng liên kết
@@ -41,6 +42,10 @@ export const AppLayout = () => {
         
         <div className={`workspace-wrapper ${activeTab === 'admin' ? 'active' : ''}`}>
           <AdminWorkspace />
+        </div>
+
+        <div className={`workspace-wrapper ${activeTab === 'documents' ? 'active' : ''}`}>
+          <DocumentsWorkspace />
         </div>
       </main>
     </div>
