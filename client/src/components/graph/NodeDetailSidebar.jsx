@@ -7,7 +7,15 @@ import './NodeDetailSidebar.css';
 
 
 export const NodeDetailSidebar = () => {
-  const { selectedNode, setSelectedNode, graphData } = useGraphData();
+  const { 
+    selectedNode, 
+    setSelectedNode, 
+    graphData,
+    viewMode,
+    setViewMode,
+    activeDocId,
+    setActiveDocId
+  } = useGraphData();
 
   // Phân tách chuỗi dẹt từ Backend thành các dòng riêng biệt theo Chương/Điều/Khoản
   const formatLegalTextToLines = (rawText) => {
