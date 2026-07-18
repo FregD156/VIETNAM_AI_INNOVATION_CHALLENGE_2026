@@ -262,7 +262,7 @@
 }
 
 .documents-data-table th {
-  background-color: var(--navy-surface-raised);
+  background-color: var(--navy-surface-raised) !important;
   border-bottom: 1px solid var(--navy-hairline);
   padding: 14px 20px;
   font-weight: 700;
@@ -272,7 +272,7 @@
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100; /* Tăng z-index lên 100 để luôn nằm trên cùng khi cuộn */
 }
 
 .documents-data-table td {
@@ -421,7 +421,7 @@
 }
 
 [data-theme="light"] .documents-data-table th {
-  background-color: rgba(47, 158, 104, 0.04);
+  background-color: #E2E8F0 !important;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
