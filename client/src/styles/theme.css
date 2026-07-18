@@ -68,20 +68,20 @@
    Giao diện sáng cao cấp, tinh tế, không chói mắt
    ============================================================ */
 [data-theme="light"] {
-  --navy-abyss: #F5F7FA;          /* Nền chính sáng dịu */
-  --navy-surface: #FFFFFF;        /* Nền panel sáng */
-  --navy-surface-raised: #E2E8F0; /* Nền popover/modal sáng (Slate 200) */
-  --navy-hairline: rgba(15, 23, 42, 0.12); /* Viền tối mờ rõ nét hơn ở Light Mode */
+  --navy-abyss: #F0F4F1;          /* Nền chính Sage Mint dịu mát */
+  --navy-surface: #FFFFFF;        /* Nền panel trắng tinh nổi bật */
+  --navy-surface-raised: #E1EAE4; /* Nền popover/modal xanh mint nhạt */
+  --navy-hairline: rgba(28, 56, 41, 0.12); /* Viền xanh rừng mờ nhạt cực kỳ thanh lịch */
 
   /* Chữ trên nền sáng */
-  --text-primary: #0F172A;        /* Slate 900 */
-  --text-secondary: #334155;      /* Slate 700 - đậm hơn để dễ đọc */
-  --text-muted: #64748B;          /* Slate 500 - thay vì Slate 400 mờ */
+  --text-primary: #13221A;        /* Xanh rừng sẫm, tương phản tốt, dịu mắt */
+  --text-secondary: #344C3F;      /* Xanh xám */
+  --text-muted: #5C7467;          /* Xanh xám mờ */
 
   /* Shadow & Focus Rings tiêu chuẩn cho chế độ Sáng - KHÔNG cháy sáng */
-  --shadow-panel: 0 4px 15px rgba(15, 23, 42, 0.04);
-  --shadow-raised: 0 8px 30px rgba(15, 23, 42, 0.06);
-  --focus-ring: 0 0 0 3px rgba(240, 99, 29, 0.16);
+  --shadow-panel: 0 4px 15px rgba(28, 56, 41, 0.03);
+  --shadow-raised: 0 8px 30px rgba(28, 56, 41, 0.05);
+  --focus-ring: 0 0 0 3px rgba(47, 158, 104, 0.18); /* Vòng ring xanh mint dịu mắt */
 
   /* Điều chỉnh sắc độ mờ để giữ thẩm mỹ */
   --orange-wash: rgba(240, 99, 29, 0.08);
