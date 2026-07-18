@@ -205,7 +205,7 @@ export const MessageItem = ({ message, onCitationClick }) => {
                     key={cit.id} 
                     id={cit.id} 
                     label={cit.label} 
-                    onClick={handleCitationClick}
+                    onClick={onCitationClick}
                   />
                 ))}
               </div>
