@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuX, LuInfo, LuBookOpen, LuCalendar, LuTag, LuBrain, LuTriangleAlert, LuSparkles } from 'react-icons/lu';
+import { LuX, LuInfo, LuBookOpen, LuCalendar, LuTag, LuBrain, LuTriangleAlert, LuSparkles, LuArrowLeft } from 'react-icons/lu';
 import { useGraphData } from '../../hooks/useGraphData';
 import VersionTimeline from './VersionTimeline';
 import './NodeDetailSidebar.css';
