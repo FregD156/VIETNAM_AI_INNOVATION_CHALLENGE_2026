@@ -10,7 +10,7 @@ import ReactFlow, {
 import { useGraphData } from '../../hooks/useGraphData';
 import DocumentNode from './nodes/DocumentNode';
 import ClauseNode from './nodes/ClauseNode';
-import { LuMaximize } from 'react-icons/lu';
+import { LuMaximize, LuArrowLeft } from 'react-icons/lu';
 
 import 'reactflow/dist/style.css';
 import './GraphCanvas.css';
@@ -22,37 +22,32 @@ const nodeTypes = {
 };
 
 export const GraphCanvas = () => {
-  const { graphData, selectedNode, setSelectedNode } = useGraphData();
+  const { 
+    graphData, 
+    selectedNode, 
+    setSelectedNode,
+    viewMode,
+    setViewMode,
+    activeDocId,
+    setActiveDocId
+  } = useGraphData();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [layoutMode, setLayoutMode] = useState('original'); // 'original' | 'lr' | 'snowflake' | 'grid'
   
   const { setCenter, fitView } = useReactFlow();
 
-  // Lưu trữ danh sách các Document Node ID đang được mở rộng
-  const [expandedNodeIds, setExpandedNodeIds] = useState(new Set());
-
   // Quay về vị trí trung tâm và tự động reset độ thu phóng cho vừa vặn canvas
   const handleResetView = () => {
     fitView({ duration: 800, padding: 0.25 });
   };
 
-  // Tự động mở rộng tất cả các Document Node để hiển thị các liên kết chéo khi dữ liệu đồ thị sẵn sàng
-  useEffect(() => {
-    if (graphData && graphData.nodes) {
-      const docIds = graphData.nodes
-        .filter(n => n.type === 'documentNode')
-        .map(n => n.id);
-      setExpandedNodeIds(new Set(docIds));
-    }
-  }, [graphData]);
-
-  // Thuật toán sắp xếp toạ độ các Node động theo bố cục lựa chọn (Nén khoảng cách nhỏ gọn hơn để dễ nhìn liên kết)
+  // Thuật toán sắp xếp toạ độ các Node động theo bố cục lựa chọn (Nén khoảng cách nhỏ gọn hơn)
   const applyLayoutAlgorithms = (nodesList, edgesList, mode) => {
     const docNodes = nodesList.filter(n => n.type === 'documentNode');
     
     if (mode === 'lr') {
-      // Bố cục Trái -> Phải (Phân tầng từ văn bản gốc sang các điều khoản con - 2 Cột song song để tránh bị dài dòng)
+      // Bố cục Trái -> Phải (Phân tầng từ văn bản gốc sang các điều khoản con - 2 Cột song song)
       let currentY = 50;
       docNodes.forEach((doc) => {
         const children = nodesList.filter(n => {
@@ -64,27 +59,25 @@ export const GraphCanvas = () => {
         const rowCount = Math.ceil(children.length / cols) || 1;
         const groupHeight = Math.max(100, rowCount * 75);
         
-        // Căn giữa Document node theo chiều dọc của cụm Clause con
         doc.position = { x: 50, y: currentY + (groupHeight / 2) - 30 };
         
         children.forEach((child, childIdx) => {
           const row = Math.floor(childIdx / cols);
           const col = childIdx % cols;
           child.position = {
-            x: 350 + col * 240, // Khoảng cách cột 240px (rút ngắn từ 320px)
-            y: currentY + row * 75  // Khoảng cách dòng 75px (rút ngắn từ 110px)
+            x: 350 + col * 240,
+            y: currentY + row * 75
           };
         });
         
-        // Cộng dồn Y lũy kế cho văn bản tiếp theo kèm khoảng cách an toàn 80px
         currentY += groupHeight + 80;
       });
     } else if (mode === 'snowflake') {
-      // Bố cục Bông tuyết (Quy chế gốc ở tâm, các điều khoản tỏa tròn xung quanh - Tính toán tâm động chia thành 3 cột center gọn gàng)
+      // Bố cục Bông tuyết (Tài liệu gốc ở tâm, các điều khoản tỏa tròn xung quanh)
       docNodes.forEach((doc, idx) => {
         const center = { 
-          x: 250 + (idx % 3) * 480, // Khoảng cách X thu về 480px
-          y: 200 + Math.floor(idx / 3) * 440 // Khoảng cách Y thu về 440px
+          x: 250 + (idx % 3) * 480,
+          y: 200 + Math.floor(idx / 3) * 440
         };
         doc.position = center;
         
@@ -94,7 +87,7 @@ export const GraphCanvas = () => {
         });
         
         const count = children.length;
-        const radius = 150; // Bán kính nén về 150px để thấy rõ các đường liên kết nối ngắn
+        const radius = 150;
         children.forEach((child, childIdx) => {
           const angle = (childIdx * 2 * Math.PI) / (count || 1);
           child.position = {
@@ -104,7 +97,7 @@ export const GraphCanvas = () => {
         });
       });
     } else if (mode === 'grid') {
-      // Bố cục Dàn lưới gọn gàng (Xếp theo cụm lưới chữ nhật 3 cột tương ứng từng văn bản, giãn cách dọc lũy kế)
+      // Bố cục Dàn lưới gọn gàng
       let startY = 50;
       docNodes.forEach((doc) => {
         const children = nodesList.filter(n => {
@@ -116,15 +109,14 @@ export const GraphCanvas = () => {
         const rowCount = Math.ceil(children.length / cols) || 1;
         const groupHeight = rowCount * 75;
         
-        // Căn giữa Document node theo chiều dọc của lưới con
         doc.position = { x: 50, y: startY + (groupHeight / 2) - 20 };
         
         children.forEach((child, childIdx) => {
           const row = Math.floor(childIdx / cols);
           const col = childIdx % cols;
           child.position = {
-            x: 350 + col * 240, // Khoảng cách cột 240px
-            y: startY + row * 75  // Khoảng cách dòng 75px
+            x: 350 + col * 240,
+            y: startY + row * 75
           };
         });
         
@@ -133,92 +125,146 @@ export const GraphCanvas = () => {
     }
   };
 
-  // Tự động mở rộng node cha (nếu nó là Clause) hoặc chính nó (nếu nó là Document) khi có lựa chọn từ bên ngoài
+  // Bộ lọc Node và Edge động dựa trên ViewMode và ActiveDocId (Macro/Micro View)
   useEffect(() => {
-    if (selectedNode) {
-      const nodeId = selectedNode.id;
-      if (nodeId.startsWith('doc_')) {
-        setExpandedNodeIds(prev => {
-          const next = new Set(prev);
-          next.add(nodeId);
-          return next;
+    if (!graphData || !graphData.nodes) return;
+
+    let visibleNodes = [];
+    let visibleEdges = [];
+
+    if (viewMode === 'macro') {
+      // 1. CHẾ ĐỘ TỔNG QUAN (MACRO): Chỉ hiển thị các Document Node lớn
+      visibleNodes = graphData.nodes.filter(node => node.type === 'documentNode');
+      const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
+      
+      // Chỉ hiển thị các Edge sửa đổi/thay thế/dẫn chiếu giữa các Document lớn với nhau
+      visibleEdges = graphData.edges.filter(edge => 
+        visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
+      );
+
+      // Bố cục Circle Layout mặc định cho Macro view để các văn bản lớn nối tròn đều đẹp mắt
+      if (layoutMode === 'original') {
+        const radius = 220;
+        const centerX = 380;
+        const centerY = 280;
+        visibleNodes.forEach((node, idx) => {
+          const angle = (idx / visibleNodes.length) * 2 * Math.PI;
+          node.position = {
+            x: centerX + radius * Math.cos(angle),
+            y: centerY + radius * Math.sin(angle)
+          };
         });
-      } else if (nodeId.startsWith('clause_') && graphData) {
-        // Tìm Document cha của Clause này và tự động mở rộng nó
-        const edge = graphData.edges.find(e => e.target === nodeId && e.source.startsWith('doc_'));
-        if (edge) {
-          setExpandedNodeIds(prev => {
-            const next = new Set(prev);
-            next.add(edge.source);
-            return next;
-          });
+      } else {
+        applyLayoutAlgorithms(visibleNodes, visibleEdges, layoutMode);
+      }
+    } else {
+      // 2. CHẾ ĐỘ CHI TIẾT VĂN BẢN (MICRO): Drill-down cấu trúc cụ thể của activeDocId
+      const rootDocNode = graphData.nodes.find(n => n.id === activeDocId);
+      if (rootDocNode) {
+        visibleNodes.push(rootDocNode);
+      }
+
+      // Thuật toán BFS tìm toàn bộ các node con (Điều/Khoản) trực thuộc Document gốc
+      const queue = [activeDocId];
+      const visited = new Set([activeDocId]);
+      const childNodeIds = new Set();
+      
+      while (queue.length > 0) {
+        const currentId = queue.shift();
+        
+        // Quét tìm các liên kết chứa cấu trúc của node hiện tại
+        const childEdges = graphData.edges.filter(e => 
+          e.source === currentId && (e.type === 'contains' || e.type === 'HAS_CLAUSE')
+        );
+        
+        childEdges.forEach(e => {
+          if (!visited.has(e.target)) {
+            visited.add(e.target);
+            queue.push(e.target);
+            childNodeIds.add(e.target);
+            
+            const childNode = graphData.nodes.find(n => n.id === e.target);
+            if (childNode) {
+              visibleNodes.push(childNode);
+            }
+          }
+        });
+      }
+
+      const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
+      
+      // Chỉ vẽ edge kết nối giữa các node đang hiển thị
+      visibleEdges = graphData.edges.filter(edge => 
+        visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
+      );
+
+      // Sắp xếp dạng Cây Phân Cấp Trái -> Phải (Left-to-Right tree hierarchy) tuyệt đẹp
+      if (layoutMode === 'original') {
+        // Cột 1: Document gốc (X = 50, Y = Center)
+        // Cột 2: Các Article/Điều (X = 300, Y phân bố dọc)
+        // Cột 3: Các Clause/Khoản con (X = 550, Y phân bố dọc dưới từng Điều tương ứng)
+        
+        const articleEdges = visibleEdges.filter(e => e.source === activeDocId);
+        const articleNodes = articleEdges
+          .map(e => visibleNodes.find(n => n.id === e.target))
+          .filter(Boolean);
+        
+        let currentY = 50;
+        const X_STEP = 260;
+        const Y_STEP = 80;
+        
+        if (rootDocNode) {
+          rootDocNode.position = { 
+            x: 50, 
+            y: Math.max(160, (articleNodes.length * Y_STEP) / 2) 
+          };
         }
+        
+        articleNodes.forEach((art) => {
+          // Tìm các Khoản con trực thuộc Điều
+          const clauseEdges = visibleEdges.filter(e => e.source === art.id);
+          const clauseNodes = clauseEdges
+            .map(e => visibleNodes.find(n => n.id === e.target))
+            .filter(Boolean);
+          
+          // Định vị cho Điều
+          art.position = { 
+            x: 50 + X_STEP, 
+            y: currentY + (Math.max(1, clauseNodes.length) - 1) * Y_STEP / 2 
+          };
+          
+          // Định vị cho các Khoản
+          clauseNodes.forEach((cl) => {
+            cl.position = { x: 50 + X_STEP * 2, y: currentY };
+            currentY += Y_STEP;
+          });
+          
+          if (clauseNodes.length === 0) {
+            currentY += Y_STEP;
+          }
+          
+          currentY += 40; // Giãn cách giữa các nhóm Điều
+        });
+      } else {
+        applyLayoutAlgorithms(visibleNodes, visibleEdges, layoutMode);
       }
     }
-  }, [selectedNode, graphData]);
 
-  // Bộ lọc Node và Edge động dựa trên trạng thái expandedNodeIds (Click to Expand/Collapse)
-  useEffect(() => {
-    if (!graphData) return;
-
-    // 1. Phân loại node hiển thị
-    const visibleNodes = graphData.nodes.filter(node => {
-      // Document Node luôn hiển thị (Cấp Macro)
-      if (node.type === 'documentNode') {
-        return true;
-      }
-      
-      // Clause Node chỉ hiển thị nếu Document cha của nó nằm trong danh sách expandedNodeIds (Cấp Micro)
-      if (node.type === 'clauseNode') {
-        const parentDocEdge = graphData.edges.find(e => {
-          if (e.target !== node.id) return false;
-          // Tìm xem node nguồn có phải là document node hay không
-          const sourceNode = graphData.nodes.find(n => n.id === e.source);
-          return sourceNode && sourceNode.type === 'documentNode';
-        });
-        
-        if (parentDocEdge && expandedNodeIds.has(parentDocEdge.source)) {
-          return true;
-        }
-        
-        // Fallback: nếu node ID chứa ký tự "|" thì lấy phần trước "|" làm ID cha
-        if (node.id.includes('|')) {
-          const parentId = node.id.split('|')[0];
-          if (expandedNodeIds.has(parentId)) {
-            return true;
-          }
-        }
-      }
-      
-      return false;
-    }).map(node => {
-      // Gán trạng thái expand động vào data của Document Node để hiển thị biểu tượng ▼/▶
+    setNodes(visibleNodes.map(node => {
       if (node.type === 'documentNode') {
         return {
           ...node,
           data: {
             ...node.data,
-            isExpanded: expandedNodeIds.has(node.id)
+            isExpanded: viewMode === 'micro' && activeDocId === node.id
           }
         };
       }
       return node;
-    });
-
-    // 2. Phân loại edge hiển thị (Chỉ vẽ edge nếu cả source và target node đều đang hiển thị)
-    const visibleNodeIds = new Set(visibleNodes.map(n => n.id));
-    const visibleEdges = graphData.edges.filter(edge => {
-      return visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target);
-    });
-
-    // 3. Áp dụng sắp xếp bố cục đồ thị động nếu có cấu hình
-    if (layoutMode !== 'original') {
-      applyLayoutAlgorithms(visibleNodes, visibleEdges, layoutMode);
-    }
-
-    setNodes(visibleNodes);
+    }));
+    
     setEdges(visibleEdges);
-  }, [graphData, expandedNodeIds, layoutMode, setNodes, setEdges]);
+  }, [graphData, viewMode, activeDocId, layoutMode, setNodes, setEdges]);
 
   // Lắng nghe sự kiện focus node từ bên ngoài (như click CitationTag trong Chat)
   useEffect(() => {
@@ -228,13 +274,29 @@ export const GraphCanvas = () => {
       
       const targetNode = graphData.nodes.find(n => n.id === nodeId);
       if (targetNode) {
+        // Tự động chuyển sang chế độ drill-down Micro của Document cha
+        if (targetNode.type === 'clauseNode') {
+          const parentEdge = graphData.edges.find(edge => 
+            edge.target === nodeId && (edge.type === 'contains' || edge.type === 'HAS_CLAUSE')
+          );
+          if (parentEdge) {
+            setActiveDocId(parentEdge.source);
+            setViewMode('micro');
+          } else if (nodeId.includes('|')) {
+            setActiveDocId(nodeId.split('|')[0]);
+            setViewMode('micro');
+          }
+        } else if (targetNode.type === 'documentNode') {
+          setActiveDocId(targetNode.id);
+          setViewMode('micro');
+        }
         setSelectedNode(targetNode);
       }
     };
 
     window.addEventListener('focus-graph-node', handleFocusNode);
     return () => window.removeEventListener('focus-graph-node', handleFocusNode);
-  }, [graphData, setSelectedNode]);
+  }, [graphData, setSelectedNode, setViewMode, setActiveDocId]);
 
   // Smooth pan camera đến tâm Node khi được lựa chọn
   useEffect(() => {
@@ -249,18 +311,16 @@ export const GraphCanvas = () => {
 
   const handleNodeClick = (event, node) => {
     setSelectedNode(node);
+  };
 
-    // Bấm vào Document Node sẽ toggle mở rộng / thu gọn các Clause trực thuộc
+  const handleNodeDoubleClick = (event, node) => {
     if (node.type === 'documentNode') {
-      setExpandedNodeIds(prev => {
-        const next = new Set(prev);
-        if (next.has(node.id)) {
-          next.delete(node.id); // Thu gọn
-        } else {
-          next.add(node.id);    // Mở rộng
-        }
-        return next;
-      });
+      setActiveDocId(node.id);
+      setViewMode('micro');
+      // Tự động căn chỉnh màn hình cho vừa vặn các node con mới xuất hiện
+      setTimeout(() => {
+        fitView({ duration: 800, padding: 0.2 });
+      }, 100);
     }
   };
 
@@ -272,7 +332,28 @@ export const GraphCanvas = () => {
     <div className="graph-canvas-container">
       {/* Sắp xếp bố cục đồ thị Toolbar */}
       <div className="graph-layout-toolbar panel">
-        <span className="toolbar-label">Bố cục:</span>
+        {viewMode === 'micro' && (
+          <>
+            <button 
+              className="btn-layout-option back-to-macro-btn"
+              onClick={() => {
+                setViewMode('macro');
+                setActiveDocId(null);
+                setSelectedNode(null);
+                setTimeout(() => {
+                  fitView({ duration: 800, padding: 0.25 });
+                }, 100);
+              }}
+              title="Quay lại tổng quan văn bản"
+            >
+              <LuArrowLeft className="back-view-icon" /> Quay lại
+            </button>
+            <div className="toolbar-divider" />
+          </>
+        )}
+        <span className="toolbar-label">
+          {viewMode === 'macro' ? 'Bố cục (Tổng quan):' : 'Bố cục (Chi tiết):'}
+        </span>
         <button 
           className={`btn-layout-option ${layoutMode === 'original' ? 'active' : ''}`} 
           onClick={() => setLayoutMode('original')}
@@ -313,6 +394,7 @@ export const GraphCanvas = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
+        onNodeDoubleClick={handleNodeDoubleClick}
         onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         fitView
@@ -330,7 +412,7 @@ export const GraphCanvas = () => {
               return '#F0631D';
             }
             const status = n.data.status || 'Còn hiệu lực';
-            return (status === 'Còn hiệu lực' || status === 'active') ? '#2F9E68' : '#C0442C';
+            return (status === 'Còn hiệu lực' || status === 'active' || status === 'Còn hiệu lực một phần') ? '#2F9E68' : '#C0442C';
           }} 
           nodeColor={(n) => {
             if (n.type === 'documentNode') {
@@ -340,12 +422,18 @@ export const GraphCanvas = () => {
               return 'rgba(240, 99, 29, 0.25)';
             }
             const status = n.data.status || 'Còn hiệu lực';
-            return (status === 'Còn hiệu lực' || status === 'active') ? 'rgba(47, 158, 104, 0.25)' : 'rgba(192, 68, 44, 0.25)';
+            return (status === 'Còn hiệu lực' || status === 'active' || status === 'Còn hiệu lực một phần') ? 'rgba(47, 158, 104, 0.25)' : 'rgba(192, 68, 44, 0.25)';
           }} 
           nodeStrokeWidth={3}
         />
         <Background variant="dots" gap={12} size={1} />
       </ReactFlow>
+
+      {viewMode === 'macro' && (
+        <div className="graph-instructions-overlay panel">
+          <span>💡 Nhấp đúp (Double-click) vào một văn bản để khoan sâu (drill-down) xem chi tiết Điều & Khoản.</span>
+        </div>
+      )}
     </div>
   );
 };

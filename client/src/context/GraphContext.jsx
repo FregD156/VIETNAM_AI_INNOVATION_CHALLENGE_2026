@@ -171,12 +171,20 @@ export const GraphProvider = ({ children }) => {
     });
   }, []);
 
+  // State phân chia Đồ thị đa tầng: Macro (Tổng quan văn bản) và Micro (Chi tiết Điều Khoản con)
+  const [viewMode, setViewMode] = useState('macro'); // 'macro' | 'micro'
+  const [activeDocId, setActiveDocId] = useState(null);
+
   return (
     <GraphContext.Provider value={{
       graphData,
       selectedNode,
       searchQuery,
       activeFilters,
+      viewMode,
+      setViewMode,
+      activeDocId,
+      setActiveDocId,
       setSelectedNode,
       setSearchQuery,
       searchGraph,

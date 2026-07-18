@@ -172,7 +172,33 @@ export const NodeDetailSidebar = () => {
           </div>
         </div>
 
-
+        {selectedNode.type === 'documentNode' && (
+          <div className="detail-panel-section">
+            {viewMode === 'macro' ? (
+              <button 
+                className="btn-ask-ai-link btn-drilldown-action"
+                onClick={() => {
+                  setActiveDocId(selectedNode.id);
+                  setViewMode('micro');
+                }}
+              >
+                <LuSparkles /> Khoan sâu chi tiết (Drill-down)
+              </button>
+            ) : (
+              <button 
+                className="btn-ask-ai-link btn-back-macro-action"
+                onClick={() => {
+                  setViewMode('macro');
+                  setActiveDocId(null);
+                  setSelectedNode(null);
+                }}
+                style={{ background: 'var(--navy-surface-raised)', border: '1px solid var(--navy-hairline)', color: 'var(--text-primary)' }}
+              >
+                <LuArrowLeft /> Quay lại tổng quan
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Paper Surface for raw legal text */}
         {rawLabel === 'Clause' && (
