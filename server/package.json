@@ -1,0 +1,13 @@
+{
+  "name": "shb-rag-backend",
+  "version": "1.0.0",
+  "description": "Compliance RAG Graph Mock Server for SHB",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}
