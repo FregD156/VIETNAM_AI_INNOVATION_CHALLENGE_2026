@@ -213,6 +213,8 @@
   border-radius: var(--radius-circle); /* tròn */
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .detail-status-pill.active {

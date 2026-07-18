@@ -437,3 +437,12 @@
   background-color: #FFFFFF;
   border-color: rgba(15, 23, 42, 0.12);
 }
+
+.cell-status {
+  min-width: 125px;
+}
+
+.cell-action {
+  min-width: 105px;
+}
+
