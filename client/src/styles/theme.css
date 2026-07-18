@@ -87,7 +87,8 @@
   --orange-wash: rgba(240, 99, 29, 0.08);
   --sea-blue-wash: rgba(28, 114, 147, 0.08);
   --emerald-active-wash: rgba(47, 158, 104, 0.1);
-  --brick-expired-wash: rgba(192, 68, 44, 0.1);
+  --brick-expired: #E11D48;        /* Đỏ hồng light tươi sáng, chuyên nghiệp */
+  --brick-expired-wash: rgba(225, 29, 72, 0.08);
   
   /* Đổi màu xanh biển phụ sang sẫm hơn trên nền sáng */
   --sea-blue-light: #1C7293;
