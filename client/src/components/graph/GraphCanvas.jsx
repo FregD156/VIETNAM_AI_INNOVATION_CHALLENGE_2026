@@ -86,12 +86,23 @@ export const GraphCanvas = () => {
         fitViewOptions={{ padding: 0.2 }}
       >
         <Controls />
-        <MiniMap zoomable pannable nodeStrokeColor={(n) => {
-          if (n.type === 'documentNode') return '#d4af37';
-          return n.data.status === 'active' ? '#10b981' : '#ef4444';
-        }} nodeColor={(n) => {
-          return 'rgba(15, 23, 42, 0.8)';
-        }} />
+        <MiniMap 
+          zoomable 
+          pannable 
+          nodeStrokeColor={(n) => {
+            if (n.type === 'documentNode') {
+              return n.data.docType === 'NHNN' ? '#1C7293' : '#F0631D';
+            }
+            return n.data.status === 'active' ? '#2F9E68' : '#C0442C';
+          }} 
+          nodeColor={(n) => {
+            if (n.type === 'documentNode') {
+              return n.data.docType === 'NHNN' ? 'rgba(28, 114, 147, 0.25)' : 'rgba(240, 99, 29, 0.25)';
+            }
+            return n.data.status === 'active' ? 'rgba(47, 158, 104, 0.25)' : 'rgba(192, 68, 44, 0.25)';
+          }} 
+          nodeStrokeWidth={3}
+        />
         <Background variant="dots" gap={12} size={1} />
       </ReactFlow>
     </div>
