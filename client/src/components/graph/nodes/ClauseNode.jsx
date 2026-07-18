@@ -26,8 +26,8 @@ export const ClauseNode = ({ data }) => {
         {data.title}
       </div>
 
-      <div className="clause-node-text-preview" title={data.text}>
-        {data.text}
+      <div className="clause-node-text-preview" title={data.content || data.text || ''}>
+        {data.content || data.text || ''}
       </div>
 
       {/* Source handle */}

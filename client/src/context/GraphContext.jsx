@@ -104,7 +104,7 @@ export const GraphProvider = ({ children }) => {
           matchSearch = node.data.docType === 'NHNN' || node.id.includes('tt');
         } else {
           const title = (node.data.title || '').toLowerCase();
-          const text = (node.data.text || '').toLowerCase();
+          const text = (node.data.content || node.data.text || '').toLowerCase();
           matchSearch = title.includes(q) || text.includes(q);
         }
       }

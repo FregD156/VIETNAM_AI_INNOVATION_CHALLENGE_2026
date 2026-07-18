@@ -32,7 +32,7 @@ export const DocumentsWorkspace = () => {
   const filteredClauses = clauses.filter(c => {
     // Lọc theo từ khóa tìm kiếm
     const titleMatch = (c.data.title || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const textMatch = (c.data.text || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const textMatch = (c.data.content || c.data.text || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchSearch = titleMatch || textMatch;
 
     // Lọc theo trạng thái hiệu lực (tương thích cả active/expired và Còn hiệu lực/Hết hiệu lực)
@@ -195,7 +195,7 @@ export const DocumentsWorkspace = () => {
                             <span className="code-title">{clause.data.title}</span>
                           </td>
                           <td className="cell-text">
-                            <p className="clause-text-truncate">{clause.data.text}</p>
+                            <p className="clause-text-truncate">{clause.data.content || clause.data.text}</p>
                           </td>
                           <td className="cell-status" style={{ textAlign: 'center' }}>
                             <span className={`detail-status-pill ${isActive ? 'active' : 'expired'}`}>
