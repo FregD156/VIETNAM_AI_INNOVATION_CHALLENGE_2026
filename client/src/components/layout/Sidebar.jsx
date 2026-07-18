@@ -120,6 +120,12 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
         setActiveTab('documents');
         showToast('Đã chuyển sang Kho Tài liệu', 'info');
       }
+      // Alt + 5 -> Evaluation
+      if (e.altKey && e.key === '5') {
+        e.preventDefault();
+        setActiveTab('evaluation');
+        showToast('Đã chuyển sang Đánh giá hiệu năng', 'info');
+      }
       // Cmd + K hoặc Ctrl + K -> Focus ô tìm kiếm nhanh
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -269,6 +275,18 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
             </div>
             {!isCollapsed && <span className="nav-item-label">Kho Tài liệu</span>}
             {!isCollapsed && <span className="nav-item-shortcut">⌥4</span>}
+          </button>
+
+          <button
+            className={`nav-menu-item ${activeTab === 'evaluation' ? 'active' : ''}`}
+            onClick={() => setActiveTab('evaluation')}
+            title="Đánh giá Hiệu năng (⌥5)"
+          >
+            <div className="nav-item-icon-wrapper">
+              <LuActivity />
+            </div>
+            {!isCollapsed && <span className="nav-item-label">Đánh giá RAG</span>}
+            {!isCollapsed && <span className="nav-item-shortcut">⌥5</span>}
           </button>
         </nav>
       </div>
