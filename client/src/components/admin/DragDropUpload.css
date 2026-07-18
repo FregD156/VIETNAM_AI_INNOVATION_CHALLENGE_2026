@@ -170,7 +170,7 @@
 }
 
 .btn-remove-queue:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--navy-surface-raised);
   color: #ef4444;
 }
 
@@ -192,3 +192,19 @@
 .monospace {
   font-family: var(--font-data);
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE UPLOAD OVERRIDES
+   ============================================================ */
+[data-theme="light"] .dropzone {
+  background-color: rgba(15, 23, 42, 0.02);
+}
+
+[data-theme="light"] .dropzone:hover {
+  background-color: rgba(240, 99, 29, 0.02);
+}
+
+[data-theme="light"] .progress-bar-container {
+  background-color: rgba(15, 23, 42, 0.08);
+}
+

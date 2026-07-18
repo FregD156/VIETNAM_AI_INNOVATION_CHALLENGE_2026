@@ -83,7 +83,7 @@
   font-size: 11px;
   font-family: var(--font-data);
   color: var(--text-muted);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--navy-hairline);
   padding-bottom: 6px;
 }
 
@@ -199,3 +199,24 @@
 .animate-fade-in {
   animation: fadeIn var(--dur-fast) var(--ease-standard) forwards;
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE CHAT BUBBLE OVERRIDES
+   ============================================================ */
+[data-theme="light"] .message-bubble-box {
+  box-shadow: 0 4px 18px rgba(10, 22, 40, 0.04);
+}
+
+[data-theme="light"] .message-h3 {
+  color: var(--orange-signature); /* Dùng cam signature sẫm màu hơn */
+}
+
+[data-theme="light"] .message-bubble-body strong {
+  color: var(--orange-signature); /* Dùng cam signature để nổi chữ rõ ràng */
+}
+
+[data-theme="light"] .message-blockquote {
+  background-color: rgba(28, 114, 147, 0.06);
+  color: var(--text-primary); /* Chữ tối hơn để đảm bảo tương phản tốt */
+}
+

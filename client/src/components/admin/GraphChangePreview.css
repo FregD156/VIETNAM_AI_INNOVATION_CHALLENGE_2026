@@ -333,3 +333,32 @@
   color: var(--emerald-active) !important;
   font-weight: 600;
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE CHANGE PREVIEW OVERRIDES
+   ============================================================ */
+[data-theme="light"] .change-preview-container {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.04);
+}
+
+[data-theme="light"] .diff-paper-surface {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.05);
+  border: 1px solid var(--paper-ivory-line);
+}
+
+[data-theme="light"] .rel-card-item {
+  background-color: rgba(15, 23, 42, 0.02);
+}
+
+[data-theme="light"] .rel-card-item:hover {
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="light"] .rel-badge-pill.references {
+  color: var(--sea-blue); /* Sẫm hơn để dễ nhìn */
+}
+
+[data-theme="light"] .info-helper-text svg {
+  color: var(--sea-blue);
+}
+

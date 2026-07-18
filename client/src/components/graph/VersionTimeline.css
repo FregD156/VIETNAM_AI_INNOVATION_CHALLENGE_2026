@@ -130,3 +130,29 @@
 .monospace {
   font-family: var(--font-data);
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE TIMELINE OVERRIDES
+   ============================================================ */
+[data-theme="light"] .timeline-version-card {
+  background-color: rgba(15, 23, 42, 0.03);
+}
+
+[data-theme="light"] .timeline-version-card:hover {
+  background-color: rgba(15, 23, 42, 0.06);
+  border-color: var(--orange-signature);
+}
+
+[data-theme="light"] .timeline-version-card.active-version {
+  border-color: var(--emerald-active);
+  background-color: var(--emerald-active-wash);
+}
+
+[data-theme="light"] .timeline-indicator-dot.active {
+  box-shadow: 0 0 0 2px rgba(47, 158, 104, 0.25);
+}
+
+[data-theme="light"] .timeline-indicator-dot.expired {
+  box-shadow: 0 0 0 2px rgba(192, 68, 44, 0.25);
+}
+

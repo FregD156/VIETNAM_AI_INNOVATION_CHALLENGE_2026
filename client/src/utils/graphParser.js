@@ -67,28 +67,28 @@ export const parseNeo4jToReactFlow = (rawData) => {
     let strokeWidth = 1.5;
     let label = rel.type;
 
-    // Thiết lập màu và hiệu ứng cho từng mối quan hệ đặc thù
+    // Thiết lập màu và hiệu ứng cho từng mối quan hệ đặc thù sử dụng các biến CSS
     if (rel.type === 'SUPERSEDES') {
-      strokeColor = '#ef4444'; // Đỏ nguy cấp
+      strokeColor = 'var(--brick-expired)'; // Đỏ gạch thay thế
       animated = true;
       strokeWidth = 2;
       label = 'THAY THẾ (Supersedes)';
     } else if (rel.type === 'CONFLICTS_WITH') {
-      strokeColor = '#f59e0b'; // Vàng xung đột
+      strokeColor = 'var(--brick-expired)'; // Đỏ gạch xung đột
       animated = true;
       strokeWidth = 2.5;
       label = 'XUNG ĐỘT (Conflicts)';
     } else if (rel.type === 'REFERENCES') {
-      strokeColor = '#3b82f6'; // Xanh dẫn chiếu
+      strokeColor = 'var(--sea-blue)'; // Xanh dẫn chiếu
       strokeWidth = 1.8;
       label = 'DẪN CHIẾU (References)';
     } else if (rel.type === 'AMENDS') {
-      strokeColor = '#10b981'; // Xanh lá sửa đổi
+      strokeColor = 'var(--emerald-active)'; // Xanh lá sửa đổi
       strokeWidth = 1.8;
       label = 'SỬA ĐỔI (Amends)';
     } else if (rel.type === 'HAS_CLAUSE') {
-      strokeColor = 'rgba(255, 255, 255, 0.15)'; // Nối văn bản với điều khoản
-      strokeWidth = 1;
+      strokeColor = 'var(--navy-hairline)'; // Tự động đổi màu trắng mờ ở Dark Mode / xám đậm mờ ở Light Mode
+      strokeWidth = 1.2;
       label = '';
     }
 
@@ -104,10 +104,9 @@ export const parseNeo4jToReactFlow = (rawData) => {
         strokeWidth
       },
       labelStyle: {
-        fill: '#94a3b8',
+        fill: 'var(--text-muted)',
         fontSize: '9px',
-        fontWeight: 'bold',
-        background: '#0b1220'
+        fontWeight: 'bold'
       }
     };
   });

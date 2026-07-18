@@ -63,21 +63,45 @@
    Giao diện sáng cao cấp, tinh tế, không chói mắt
    ============================================================ */
 [data-theme="light"] {
-  --navy-abyss: #F4F6F9;          /* Nền chính sáng */
+  --navy-abyss: #F5F7FA;          /* Nền chính sáng dịu */
   --navy-surface: #FFFFFF;        /* Nền panel sáng */
-  --navy-surface-raised: #E9EDF2; /* Nền popover/modal sáng */
-  --navy-hairline: rgba(10, 22, 40, 0.08); /* Viền sẫm mờ trên nền sáng */
+  --navy-surface-raised: #E2E8F0; /* Nền popover/modal sáng (Slate 200) */
+  --navy-hairline: rgba(15, 23, 42, 0.12); /* Viền tối mờ rõ nét hơn ở Light Mode */
 
   /* Chữ trên nền sáng */
   --text-primary: #0F172A;        /* Slate 900 */
-  --text-secondary: #475569;      /* Slate 600 */
-  --text-muted: #94A3B8;          /* Slate 400 */
+  --text-secondary: #334155;      /* Slate 700 - đậm hơn để dễ đọc */
+  --text-muted: #64748B;          /* Slate 500 - thay vì Slate 400 mờ */
 
   /* Điều chỉnh sắc độ mờ để giữ thẩm mỹ */
-  --orange-wash: rgba(240, 99, 29, 0.06);
-  --sea-blue-wash: rgba(28, 114, 147, 0.06);
-  --emerald-active-wash: rgba(47, 158, 104, 0.08);
-  --brick-expired-wash: rgba(192, 68, 44, 0.08);
+  --orange-wash: rgba(240, 99, 29, 0.08);
+  --sea-blue-wash: rgba(28, 114, 147, 0.08);
+  --emerald-active-wash: rgba(47, 158, 104, 0.1);
+  --brick-expired-wash: rgba(192, 68, 44, 0.1);
+  
+  /* Đổi màu xanh biển phụ sang sẫm hơn trên nền sáng */
+  --sea-blue-light: #1C7293;
+}
+
+/* Ghi đè các hiệu ứng Glow phát sáng trên nền sáng để tránh nhòe chữ */
+[data-theme="light"] .glow-orange {
+  color: var(--orange-signature) !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .glow-emerald {
+  color: var(--emerald-active) !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .glow-brick {
+  color: var(--brick-expired) !important;
+  text-shadow: none !important;
+}
+
+[data-theme="light"] .glow-blue {
+  color: var(--sea-blue) !important;
+  text-shadow: none !important;
 }
 
 /* Glowing Text Shadow Utilities */

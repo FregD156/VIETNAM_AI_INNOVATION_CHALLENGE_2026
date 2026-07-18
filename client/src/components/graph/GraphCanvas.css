@@ -77,3 +77,23 @@
   color: var(--text-muted) !important;
   font-size: 8px !important;
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE GRAPH CANVAS OVERRIDES
+   ============================================================ */
+[data-theme="light"] .react-flow__background {
+  opacity: 0.18; /* Tăng độ rõ của lưới chấm nền ở Light Mode */
+}
+
+[data-theme="light"] .react-flow__controls {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.08) !important;
+}
+
+[data-theme="light"] .react-flow__minimap {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.08) !important;
+}
+
+[data-theme="light"] .react-flow__minimap-mask {
+  fill: rgba(255, 255, 255, 0.65) !important; /* Đổi mask tối thành sáng mờ ở Light Mode */
+}
+
