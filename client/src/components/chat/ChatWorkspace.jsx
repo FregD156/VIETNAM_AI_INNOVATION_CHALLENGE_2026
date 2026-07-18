@@ -37,6 +37,10 @@ export const ChatWorkspace = () => {
 
   const handleCitationClick = (citationId) => {
     setActiveCitationId(citationId);
+    // Gửi Custom Event để tab Đồ thị tự chọn node và pan camera
+    window.dispatchEvent(new CustomEvent('focus-graph-node', { detail: citationId }));
+    // Gửi Custom Event để AppLayout chuyển tab sang Đồ thị
+    window.dispatchEvent(new CustomEvent('change-tab', { detail: 'graph' }));
   };
 
   const handleCloseModal = () => {

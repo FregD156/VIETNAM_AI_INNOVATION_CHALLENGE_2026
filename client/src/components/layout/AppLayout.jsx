@@ -8,6 +8,17 @@ export const AppLayout = () => {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'graph' | 'admin'
   const [isCollapsed, setIsCollapsed] = useState(false); // Sidebar collapse state
 
+  // Lắng nghe sự kiện đổi tab toàn cục để hỗ trợ chuyển hướng liên kết
+  React.useEffect(() => {
+    const handleTabChange = (e) => {
+      if (e.detail) {
+        setActiveTab(e.detail);
+      }
+    };
+    window.addEventListener('change-tab', handleTabChange);
+    return () => window.removeEventListener('change-tab', handleTabChange);
+  }, []);
+
   return (
     <div className="app-container">
       {/* Navigation bar with collapse control */}

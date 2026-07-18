@@ -30,17 +30,31 @@
 }
 
 .dropzone.active {
-  border-color: var(--orange-signature);
-  background-color: var(--orange-wash);
-  box-shadow: 0 0 15px rgba(240, 99, 29, 0.15);
-  transform: scale(0.995);
+  border-color: var(--orange-signature) !important;
+  background-color: var(--orange-wash) !important;
+  border-style: dashed !important;
+  transform: scale(0.99);
+  animation: dashedPulse 1.2s infinite ease-in-out;
+}
+
+.dropzone.active .upload-icon {
+  animation: uploadIconBounce 1s infinite ease-in-out;
+}
+
+@keyframes dashedPulse {
+  0%, 100% { border-color: var(--orange-signature); }
+  50% { border-color: rgba(240, 99, 29, 0.3); }
+}
+
+@keyframes uploadIconBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 .upload-icon {
   font-size: 32px;
   color: var(--orange-signature);
   margin-bottom: 12px;
-  filter: drop-shadow(0 0 4px rgba(240, 99, 29, 0.3));
 }
 
 .upload-text {

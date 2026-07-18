@@ -1,4 +1,5 @@
 import React from 'react';
+import { ReactFlowProvider } from 'reactflow';
 import SearchBar from './SearchBar';
 import GraphCanvas from './GraphCanvas';
 import NodeDetailSidebar from './NodeDetailSidebar';
@@ -12,11 +13,13 @@ export const GraphWorkspace = () => {
   return (
     <div className="graph-workspace">
       {/* Vùng canvas chính vẽ đồ thị + Tìm kiếm nổi */}
-      <div className="graph-main-area">
-        <SearchBar />
-        <GraphCanvas />
-        <GraphLegend />
-      </div>
+      <ReactFlowProvider>
+        <div className="graph-main-area">
+          <SearchBar />
+          <GraphCanvas />
+          <GraphLegend />
+        </div>
+      </ReactFlowProvider>
 
       {/* Sidebar hiển thị thông tin chi tiết & lịch sử khi click Node */}
       {selectedNode && <NodeDetailSidebar />}

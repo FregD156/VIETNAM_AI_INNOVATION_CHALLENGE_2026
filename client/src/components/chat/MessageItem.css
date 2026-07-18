@@ -377,5 +377,91 @@
   color: var(--sea-blue);
 }
 
+/* ============================================================
+   SHB GRAPH-RAG — RAG CONFIDENCE GAUGE STYLES
+   ============================================================ */
+.rag-confidence-gauge-container {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gauge-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gauge-label-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gauge-shield-icon {
+  font-size: 13.5px;
+}
+
+.gauge-shield-icon.high { color: var(--emerald-active); }
+.gauge-shield-icon.medium { color: var(--orange-signature); }
+.gauge-shield-icon.low { color: var(--brick-expired); }
+
+.gauge-title-text {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.gauge-percent-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.gauge-bar-track {
+  height: 4px;
+  background-color: var(--navy-surface-raised);
+  border-radius: var(--radius-circle);
+  overflow: hidden;
+  width: 100%;
+}
+
+.gauge-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-circle);
+  width: 0;
+  animation: fillGauge 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.gauge-bar-fill.high { background-color: var(--emerald-active); }
+.gauge-bar-fill.medium { background-color: var(--orange-signature); }
+.gauge-bar-fill.low { background-color: var(--brick-expired); }
+
+@keyframes fillGauge {
+  from { width: 0; }
+  to { width: var(--target-width); }
+}
+
+/* Light mode overrides for Gauge */
+[data-theme="light"] .rag-confidence-gauge-container {
+  background-color: rgba(47, 158, 104, 0.02) !important;
+  border-color: rgba(47, 158, 104, 0.1) !important;
+}
+
+[data-theme="light"] .gauge-title-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] .gauge-bar-track {
+  background-color: rgba(28, 56, 41, 0.08) !important;
+}
+
+
 
 

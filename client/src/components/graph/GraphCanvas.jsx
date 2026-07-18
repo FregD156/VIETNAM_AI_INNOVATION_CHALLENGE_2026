@@ -4,7 +4,8 @@ import ReactFlow, {
   Controls, 
   Background, 
   useNodesState, 
-  useEdgesState 
+  useEdgesState,
+  useReactFlow
 } from 'reactflow';
 import { useGraphData } from '../../hooks/useGraphData';
 import DocumentNode from './nodes/DocumentNode';
@@ -20,9 +21,11 @@ const nodeTypes = {
 };
 
 export const GraphCanvas = () => {
-  const { graphData, setSelectedNode } = useGraphData();
+  const { graphData, selectedNode, setSelectedNode } = useGraphData();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  
+  const { setCenter } = useReactFlow();
 
   // Đồng bộ hóa dữ liệu từ context khi đồ thị thay đổi (nạp mới hoặc lọc tìm kiếm)
   useEffect(() => {
@@ -31,6 +34,35 @@ export const GraphCanvas = () => {
       setEdges(graphData.edges);
     }
   }, [graphData, setNodes, setEdges]);
+
+  // Lắng nghe sự kiện focus node từ bên ngoài (như click CitationTag trong Chat)
+  useEffect(() => {
+    const handleFocusNode = (e) => {
+      const nodeId = e.detail;
+      if (!nodeId || !graphData || !graphData.nodes) return;
+      
+      const targetNode = graphData.nodes.find(n => n.id === nodeId);
+      if (targetNode) {
+        setSelectedNode(targetNode);
+      }
+    };
+
+    window.addEventListener('focus-graph-node', handleFocusNode);
+    return () => window.removeEventListener('focus-graph-node', handleFocusNode);
+  }, [graphData, setSelectedNode]);
+
+  // Smooth pan camera đến tâm Node khi được lựa chọn
+  useEffect(() => {
+    if (selectedNode && nodes.length > 0) {
+      const nodeInFlow = nodes.find(n => n.id === selectedNode.id);
+      if (nodeInFlow && nodeInFlow.position) {
+        const { x, y } = nodeInFlow.position;
+        // React Flow node width thông thường là ~150px, height ~80px.
+        // Căn lề pan vào chính giữa node
+        setCenter(x + 75, y + 40, { zoom: 1.3, duration: 800 });
+      }
+    }
+  }, [selectedNode, nodes, setCenter]);
 
   const handleNodeClick = (event, node) => {
     setSelectedNode(node);
