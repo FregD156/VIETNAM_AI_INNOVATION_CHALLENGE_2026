@@ -1,555 +1,449 @@
-import os
+from __future__ import annotations
+
+import concurrent.futures
 import json
 import re
-from typing import List, Dict, Any, Generator, Optional
+from typing import Any, Generator, Optional
+
 from app.integrations.llm_client import ChatService
+from app.rag.citation_guard import CitationGuard
+from app.rag.conflict_detector import ConflictDetector
+from app.rag.effective_resolver import EffectiveResolver
+from app.rag.knowledge_graph import GraphService
 from app.rag.retrieval import SearchService
 
-# Định nghĩa Tool cho LLM
-SEARCH_TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search_referenced_document",
-            "description": (
-                "Tìm kiếm nội dung cụ thể trong một văn bản pháp luật được trích dẫn. "
-                "Sử dụng KHI VÀ CHỈ KHI ngữ cảnh hiện tại nhắc đến một văn bản khác (vd: Luật X, Thông tư Y) "
-                "và bạn BẮT BUỘC cần chi tiết từ văn bản đó để trả lời chính xác câu hỏi."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "doc_ref": {
-                        "type": "string",
-                        "description": "Số hiệu văn bản pháp luật ĐẦY ĐỦ (ví dụ: '36/2015/QĐ-TTg'). KHÔNG điền [1], [2].",
-                    },
-                    "dieu_filter": {
-                        "type": "string",
-                        "description": "(Tùy chọn) Chỉ ghi số điều, ví dụ 'Điều 74'.",
-                    },
-                    "khoan_filter": {
-                        "type": "string",
-                        "description": "(Tùy chọn) Chỉ ghi số khoản, ví dụ 'Khoản 3'.",
-                    },
-                    "content_query": {
-                        "type": "string",
-                        "description": "(Bắt buộc) Từ khóa hoặc chủ đề cần tìm trong văn bản đó.",
-                    },
-                },
-                "required": ["doc_ref", "content_query"],
-            },
-        },
-    }
-]
 
 SUB_QUERY_SCHEMA = {"type": "json_object"}
 
 
 class RAGPipeline:
-    def __init__(self):
-        self.chat_service = ChatService()
-        self.search_service = SearchService()
-        # Giới hạn số chunk tối đa trong context để tránh tràn token
-        self.MAX_CONTEXT_CHUNKS = 15
-        self.MAX_TOOL_ITERATIONS = 2
-        
-        # Tự động vô hiệu hóa tools khi chạy với FPT Cloud do lỗi API không tương thích
-        self.use_tools = True
-        base_url = os.getenv("CHAT_BASE_URL", "")
-        if "fptcloud" in base_url or "fpt" in base_url:
-            self.use_tools = False
+    MAX_CONTEXT_CHUNKS = 15
+    MAX_DIRECT_CHUNKS = 10
+    MAX_GRAPH_CHUNKS = 5
+    MAX_SUB_QUERIES = 4
 
-    def _tools_enabled_for_model(self, model: Optional[str]) -> bool:
-        """Determine tool-call support for the model selected in this chat."""
-        if not model:
-            return self.use_tools
-        provider = model.split("/", 1)[0].strip().lower()
-        return provider != "fpt"
-
-    def _parse_sub_queries(self, content: str) -> List[str]:
-        """Parse JSON response từ LLM để lấy danh sách sub-queries."""
-        try:
-            clean_content = re.sub(r'```json\s*|\s*```', '', content).strip()
-            # Xóa trailing comma để tránh lỗi JSON decode
-            clean_content = re.sub(r',\s*([\]}])', r'\1', clean_content)
-            data = json.loads(clean_content)
-            queries = data.get("queries", [])
-            if isinstance(queries, list) and len(queries) > 0:
-                result_queries = []
-                for q in queries:
-                    if isinstance(q, str):
-                        result_queries.append(q)
-                    elif isinstance(q, dict):
-                        for v in q.values():
-                            if isinstance(v, str):
-                                result_queries.append(v)
-                            elif isinstance(v, list):
-                                for item in v:
-                                    if isinstance(item, str):
-                                        result_queries.append(item)
-                if result_queries:
-                    return result_queries
-                return [str(q) for q in queries]
-            return [content]
-        except (json.JSONDecodeError, Exception):
-            return [content]
-
-    def _format_context(self, docs: List[Dict]) -> str:
-        """Format context thành dạng [1]: content, [2]: content..."""
-        if not docs:
-            return "Không có thông tin ngữ cảnh nào."
-        return "\n\n".join([f"[{i + 1}]: {d.get('content', '')}" for i, d in enumerate(docs)])
-
-    def _deduplicate_docs(self, docs: List[Dict]) -> List[Dict]:
-        """Loại bỏ các document trùng lặp dựa trên chunk_id."""
-        seen = set()
-        unique_docs = []
-        for doc in docs:
-            doc_id = doc.get('chunk_id') or hash(doc.get('content', ''))
-            if doc_id not in seen:
-                seen.add(doc_id)
-                unique_docs.append(doc)
-        return unique_docs
-
-    def _flatten_conversation(self, messages: List[Dict[str, str]]) -> str:
-        """Nối toàn bộ hội thoại (role + content) thành 1 khối text,
-        dùng để phân tích sub-query và semantic search."""
-        role_labels = {"user": "Người dùng", "assistant": "Trợ lý", "system": "Hệ thống"}
-        lines = []
-        for m in messages:
-            role = m.get("role", "user")
-            content = m.get("content", "") or ""
-            if not content:
-                continue
-            label = role_labels.get(role, role)
-            lines.append(f"{label}: {content}")
-        return "\n".join(lines)
-
-    def _get_last_user_question(self, messages: List[Dict[str, str]]) -> str:
-        """Lấy câu hỏi mới nhất của user, dùng để log / fallback."""
-        for m in reversed(messages):
-            if m.get("role") == "user":
-                return m.get("content", "")
-        return ""
-
-    def _with_no_think(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Trả về bản sao của messages, với '/no_think' được thêm vào cuối
-        content của MỌI message role='user' (để tắt chế độ thinking trong
-        LM Studio). Không sửa message gốc (tránh side-effect ngoài ý muốn),
-        và không đụng vào system/assistant/tool messages."""
-        result = []
-        for m in messages:
-            if m.get("role") == "user" and m.get("content"):
-                content = m["content"]
-                if not content.rstrip().endswith("/no_think"):
-                    content = f"{content} /no_think"
-                m = {**m, "content": content}
-            result.append(m)
-        return result
-
-    def _build_context_message(self, context_docs: List[Dict]) -> Dict[str, str]:
-        """Tạo 1 system/user message chứa ngữ cảnh + quy tắc trích dẫn,
-        được chèn vào NGAY TRƯỚC lượt hội thoại của user để LLM luôn thấy
-        context mới nhất mà không phá vỡ cấu trúc nhiều lượt hội thoại."""
-        context_text = self._format_context(context_docs)
-        return {
-            "role": "system",
-            "content": f"""Dựa trên ngữ cảnh pháp lý sau để trả lời câu hỏi mới nhất của người dùng trong hội thoại:
-{context_text}
-
-QUY TẮC TRÍCH DẪN BẮT BUỘC:
-- Mọi thông tin lấy từ ngữ cảnh đều phải trích dẫn nguồn.
-- Sử dụng CHÍNH XÁC định dạng [N] (ví dụ: [1], [2], [3]).
-- KHÔNG thêm khoảng trắng (không dùng [ 1 ]), KHÔNG dùng định dạng khác.
-- Đặt mã trích dẫn ở cuối câu hoặc cuối ý tương ứng.
-- Nếu ngữ cảnh NHẮC ĐẾN một văn bản khác (vd: "theo Luật X") và bạn CẦN chi tiết từ văn bản đó để trả lời
-  chính xác, hãy gọi tool `search_referenced_document` thay vì trả lời ngay.
-- Nếu không tìm thấy thông tin trong ngữ cảnh, hãy nói rõ là không có thông tin.
-- Hãy tham khảo các lượt hội thoại trước đó (nếu có) để hiểu đúng ý người dùng, nhưng chỉ trích dẫn [N]
-  cho thông tin lấy từ ngữ cảnh pháp lý ở trên.""",
-        }
-
-    def process(self, messages: List[Dict[str, str]], stream: bool = True, model: Optional[str] = None) -> Generator[Dict[str, Any], None, None]:
-        """Pipeline xử lý chính.
-
-        messages: lịch sử hội thoại dạng [{"role": "user"/"assistant", "content": "..."}]
-        theo đúng thứ tự thời gian, không cần chứa system prompt (pipeline tự thêm).
-        """
-
-        system_prompt = (
-            "Bạn là trợ lý pháp lý thông minh. Hãy trả lời chính xác, chuyên nghiệp dựa trên ngữ cảnh được cung cấp. "
-            "Nếu không tìm thấy thông tin trong ngữ cảnh, hãy nói rõ là không có thông tin."
+    def __init__(
+        self,
+        chat_service: Optional[ChatService] = None,
+        search_service: Optional[SearchService] = None,
+        graph_service: Optional[GraphService] = None,
+        resolver: Optional[EffectiveResolver] = None,
+        conflict_detector: Optional[ConflictDetector] = None,
+    ):
+        self.chat_service = chat_service or ChatService()
+        self.search_service = search_service or SearchService(
+            chat_service=self.chat_service
         )
+        self.graph_service = graph_service or GraphService(
+            self.search_service.database_file
+        )
+        self.graph_service.load_graph()
+        self.resolver = resolver or EffectiveResolver(self.search_service.database_file)
+        self.conflict_detector = conflict_detector or ConflictDetector(
+            self.search_service.database_file
+        )
+        self.citation_guard = CitationGuard()
 
-        # Lọc bỏ mọi system message người dùng gửi lên (pipeline tự quản lý system prompt)
-        conversation = [m for m in messages if m.get("role") in ("user", "assistant") and m.get("content")]
+    def process(
+        self,
+        messages: list[dict[str, str]],
+        stream: bool = True,
+        model: Optional[str] = None,
+        as_of: Optional[str] = None,
+    ) -> Generator[dict[str, Any], None, None]:
+        conversation = [
+            message
+            for message in messages
+            if message.get("role") in {"user", "assistant"} and message.get("content")
+        ]
         if not conversation:
-            yield {"step": "answer", "status": "error", "data": {"error": "Không có nội dung hội thoại hợp lệ."}}
+            yield self._error("Không có nội dung hội thoại hợp lệ.")
+            return
+        try:
+            resolved_date = self.resolver.normalize_as_of(as_of)
+        except ValueError:
+            yield self._error("as_of phải có định dạng YYYY-MM-DD.")
             return
 
-        question = self._get_last_user_question(conversation)
-        conversation_text = self._flatten_conversation(conversation)
+        question = self._last_user_question(conversation)
+        if not question:
+            yield self._error("Không tìm thấy câu hỏi của người dùng.")
+            return
 
-        # ==========================================
-        # BƯỚC 1: SUB-QUERY (Phân tích câu hỏi, dựa trên TOÀN BỘ hội thoại)
-        # ==========================================
         yield {"step": "sub_queries", "status": "processing", "data": None}
+        generated_queries = self._generate_sub_queries(conversation, question, model)
+        sub_queries = self._ensure_original_question(question, generated_queries)
+        yield {
+            "step": "sub_queries",
+            "status": "done",
+            "data": {"queries": sub_queries},
+        }
 
-        sub_query_prompt = (
-            f"Hãy phân tích đoạn hội thoại sau, tập trung vào ý định mới nhất của người dùng, "
-            f"và tách câu hỏi thành các sub-queries để tìm kiếm thông tin hiệu quả hơn.\n\n"
-            f"QUY TẮC BẮT BUỘC:\n"
-            f"- Mỗi sub-query PHẢI là một câu hỏi ĐẦY ĐỦ NGỮ CẢNH, có thể hiểu được "
-            f"độc lập mà không cần đọc các sub-query khác. TUYỆT ĐỐI KHÔNG được lược bỏ "
-            f"chủ thể/điều kiện chung của câu hỏi gốc (vd: đối tượng áp dụng, loại hợp đồng, "
-            f"trình độ chuyên môn, mốc thời gian...) khi tách ý.\n"
-            f"- Nếu câu hỏi gốc hỏi về tính hợp pháp, tính tuân thủ quy định, hoặc 'có đúng luật không', "
-            f"bạn BẮT BUỘC phải sinh thêm ít nhất 1 sub-query tập trung vào quy định tối đa, hạn mức trần "
-            f"hoặc quy chuẩn của Ngân hàng Nhà nước hoặc pháp luật quốc gia liên quan đến chủ đề đó.\n"
-            f"- Nếu câu hỏi gốc chỉ có MỘT ý chính, hoặc các ý nhỏ gắn chặt với nhau và không thể "
-            f"tách rời mà vẫn giữ đủ nghĩa, hãy trả về DUY NHẤT 1 sub-query giống với câu hỏi gốc "
-            f"(diễn đạt lại rõ ràng hơn nếu cần) thay vì cố tách ra nhiều ý.\n"
-            f"- Chỉ tách thành nhiều sub-query khi các ý thực sự có thể tìm kiếm ĐỘC LẬP mà không "
-            f"mất nghĩa (vd: hai chủ đề pháp lý khác nhau, không chia sẻ chung điều kiện/chủ thể).\n\n"
-            f"Trả về kết quả dưới dạng JSON thuần túy với key 'queries'.\n\n"
-            f"--- Hội thoại ---\n{conversation_text}"
-        )
-
-        try:
-            sub_query_response = ""
-            try:
-                for message in self.chat_service.generate_response(
-                    self._with_no_think([
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": sub_query_prompt},
-                    ]),
-                    response_format=SUB_QUERY_SCHEMA,
-                    stream=False,
-                    model=model,
-                ):
-                    if isinstance(message, dict) and "error" in message:
-                        raise Exception(message["error"])
-                    sub_query_response = getattr(message, "content", "") or ""
-            except Exception as schema_err:
-                print(f"Lỗi gọi sub-query với schema: {schema_err}. Tiến hành gọi không kèm schema...")
-                for message in self.chat_service.generate_response(
-                    self._with_no_think([
-                        {"role": "system", "content": system_prompt + " Trả về dạng JSON với key 'queries' chứa danh sách câu hỏi."},
-                        {"role": "user", "content": sub_query_prompt},
-                    ]),
-                    stream=False,
-                    model=model,
-                ):
-                    if isinstance(message, dict) and "error" in message:
-                        raise Exception(message["error"])
-                    sub_query_response = getattr(message, "content", "") or ""
-
-            # Tìm JSON trong text để tránh text rác bao quanh
-            json_match = re.search(r'\{.*\}', sub_query_response, re.DOTALL)
-            if json_match:
-                sub_query_response = json_match.group(0)
-            sub_queries = self._parse_sub_queries(sub_query_response)
-        except Exception as e:
-            print(f"Lỗi khi parse sub-queries: {e}")
-            sub_queries = [question]
-
-        yield {"step": "sub_queries", "status": "done", "data": {"queries": sub_queries}}
-
-        # ==========================================
-        # BƯỚC 2: SEARCH (Semantic Search ban đầu)
-        # ==========================================
         yield {"step": "retrieval", "status": "processing", "data": None}
-
-        retrieved_docs = []
-        import concurrent.futures
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(sub_queries)) as executor:
-            future_to_query = {executor.submit(self.search_service.semantic_search, sq, 5): sq for sq in sub_queries}
-            for future in concurrent.futures.as_completed(future_to_query):
-                sq = future_to_query[future]
-                try:
-                    docs = future.result()
-                    retrieved_docs.extend(docs)
-                except Exception as e:
-                    print(f"Lỗi search cho query '{sq}': {e}")
-
-        unique_docs = self._deduplicate_docs(retrieved_docs)
-        context_docs = unique_docs[:self.MAX_CONTEXT_CHUNKS]
-
+        search_outputs = self._run_searches(sub_queries, resolved_date)
+        retrieved = self._deduplicate(
+            [item for output in search_outputs for item in output["results"]]
+        )[: self.MAX_DIRECT_CHUNKS]
+        excluded = [item for output in search_outputs for item in output["excluded"]]
+        retrieval_trace = [output["trace"] for output in search_outputs]
         yield {
             "step": "retrieval",
             "status": "done",
-            "data": {"count": len(context_docs)},
+            "data": {
+                "count": len(retrieved),
+                "excluded_count": len(excluded),
+                "as_of": resolved_date,
+                "trace": retrieval_trace,
+            },
         }
-        citation_map: Dict[str, Any] = {str(i + 1): d for i, d in enumerate(context_docs)}
 
-        # ==========================================
-        # BƯỚC 2.5: CONTEXT READY
-        # ------------------------------------------
-        # Trả ra citations/sources NGAY khi vừa retrieval xong, TRƯỚC khi
-        # LLM bắt đầu trả lời — để sidebar tài liệu tham khảo hiện lên sớm
-        # cho người dùng xem trong lúc chờ LLM sinh câu trả lời.
-        #
-        # QUAN TRỌNG: KHÔNG dùng step="answer", status="done" ở đây, vì đó
-        # là tín hiệu "câu trả lời đã hoàn tất" thật sự ở cuối luồng — nếu
-        # dùng trùng, frontend sẽ tưởng câu trả lời xong ngay từ đầu (trong
-        # khi "text" chưa tồn tại) và có thể tắt luôn UI streaming.
-        # Dùng step riêng "context_ready" để frontend cập nhật sidebar mà
-        # không đụng vào logic xử lý "answer".
-        # ==========================================
+        yield {
+            "step": "temporal_resolution",
+            "status": "done",
+            "data": {
+                "as_of": resolved_date,
+                "included_count": len(retrieved),
+                "excluded_count": len(excluded),
+                "excluded": [self._trace_item(item) for item in excluded],
+            },
+        }
+
+        yield {"step": "graph_expansion", "status": "processing", "data": None}
+        graph_additions, graph_trace = self.graph_service.expand_evidence(
+            retrieved,
+            as_of=resolved_date,
+            max_hops=1,
+            node_budget=self.MAX_GRAPH_CHUNKS,
+        )
+        context_docs = self._deduplicate([*retrieved, *graph_additions])[
+            : self.MAX_CONTEXT_CHUNKS
+        ]
+        context_docs, final_excluded = self.resolver.resolve_documents(
+            context_docs, resolved_date
+        )
+        excluded.extend(final_excluded)
+        yield {
+            "step": "graph_expansion",
+            "status": "done",
+            "data": {
+                "added_count": len(graph_additions),
+                "trace": graph_trace,
+            },
+        }
+
+        citation_map = {
+            str(index + 1): document for index, document in enumerate(context_docs)
+        }
         yield {
             "step": "context_ready",
             "status": "done",
             "data": {
                 "citations": citation_map,
                 "sources": context_docs,
+                "as_of": resolved_date,
+                "temporal_trace": {
+                    "included": [self._trace_item(item) for item in context_docs],
+                    "excluded": [self._trace_item(item) for item in excluded],
+                },
+                "graph_trace": graph_trace,
             },
         }
 
-        # ==========================================================
-        # BƯỚC 3+4 (GỘP): LLM STREAM — vừa quyết định tool call vừa
-        # trả lời trực tiếp trong CÙNG một lần gọi, giống code mẫu.
-        # Lặp tối đa MAX_TOOL_ITERATIONS lần nếu LLM liên tục gọi tool.
-        # ==========================================================
-        # Cấu trúc: [system prompt, system context+quy tắc trích dẫn, ...toàn bộ hội thoại gốc]
-        # Giữ nguyên multi-turn để LLM hiểu đúng mạch hội thoại, thay vì gộp hết vào 1 user message.
-        llm_messages = [
-            {"role": "system", "content": system_prompt},
-            self._build_context_message(context_docs),
-            *conversation,
-        ]
-
-        full_answer = ""
-
-        for iteration in range(self.MAX_TOOL_ITERATIONS):
-            did_tool_call = False
-            did_content = False
-
-            # Buffer để gom các mảnh tool_call arguments bị chia nhỏ qua nhiều chunk
-            # key = index của tool call trong response (OpenAI có thể trả nhiều tool_calls song song)
-            tool_call_buffers: Dict[int, Dict[str, Any]] = {}
-
-            try:
-                response_stream = self.chat_service.generate_response(
-                    self._with_no_think(llm_messages),
-                    tools=SEARCH_TOOLS if self._tools_enabled_for_model(model) else None,
-                    stream=True,
-                    model=model,
-                )
-            except Exception as e:
-                yield {"step": "answer", "status": "error", "data": {"error": str(e)}}
-                return
-
-            if iteration == 0:
-                yield {"step": "tool_call", "status": "processing", "data": None}
-                yield {"step": "answer", "status": "start", "data": None}
-
-            try:
-                for chunk in response_stream:
-                    # ChatService yield {"error": ...} thay vì raise khi có lỗi ở giữa stream
-                    if isinstance(chunk, dict) and "error" in chunk:
-                        raise Exception(chunk["error"])
-                    if not getattr(chunk, "choices", None):
-                        continue
-                    delta = chunk.choices[0].delta
-
-                    # --- Trả lời trực tiếp (không cần tool) ---
-                    if getattr(delta, "content", None):
-                        did_content = True
-                        piece = delta.content
-                        full_answer += piece
-                        yield {
-                            "step": "answer",
-                            "status": "streaming",
-                            "data": {
-                                "chunk": piece,
-                                "citations": citation_map,
-                            },
-                        }
-
-                    # --- Tool call (có thể tới theo từng mảnh nhỏ) ---
-                    if getattr(delta, "tool_calls", None):
-                        did_tool_call = True
-                        for tc_delta in delta.tool_calls:
-                            idx = tc_delta.index
-                            if idx not in tool_call_buffers:
-                                tool_call_buffers[idx] = {
-                                    "id": tc_delta.id or "",
-                                    "name": "",
-                                    "arguments": "",
-                                }
-                            buf = tool_call_buffers[idx]
-                            if tc_delta.id:
-                                buf["id"] = tc_delta.id
-                            if tc_delta.function and tc_delta.function.name:
-                                buf["name"] += tc_delta.function.name
-                            if tc_delta.function and tc_delta.function.arguments:
-                                buf["arguments"] += tc_delta.function.arguments
-
-            except Exception as e:
-                yield {"step": "answer", "status": "error", "data": {"error": str(e)}}
-                return
-
-            # Nếu vòng này LLM không gọi tool -> đã trả lời xong, thoát loop
-            if not did_tool_call:
-                break
-
-            # ---- Xử lý các tool call đã gom được ----
-            assistant_tool_calls = []
-            for idx in sorted(tool_call_buffers.keys()):
-                buf = tool_call_buffers[idx]
-                assistant_tool_calls.append({
-                    "id": buf["id"],
-                    "type": "function",
-                    "function": {
-                        "name": buf["name"],
-                        "arguments": buf["arguments"],
+        if not context_docs:
+            yield {"step": "answer", "status": "start", "data": None}
+            yield {
+                "step": "answer",
+                "status": "done",
+                "data": {
+                    "text": CitationGuard.ABSTENTION,
+                    "citations": {},
+                    "sources": [],
+                    "citation_warnings": [
+                        "Không có bằng chứng đang hiệu lực tại thời điểm truy vấn."
+                    ],
+                    "conflicts": [],
+                    "conflict_status": "insufficient_evidence",
+                    "as_of": resolved_date,
+                    "temporal_trace": {
+                        "included": [],
+                        "excluded": [self._trace_item(item) for item in excluded],
                     },
-                })
+                    "graph_trace": graph_trace,
+                    "retrieval_trace": retrieval_trace,
+                },
+            }
+            return
 
-            # Thêm assistant message chứa tool_calls vào history (bắt buộc theo chuẩn OpenAI)
-            llm_messages.append({
-                "role": "assistant",
-                "content": None,
-                "tool_calls": assistant_tool_calls,
-            })
-
-            for tc in assistant_tool_calls:
-                if tc["function"]["name"] != "search_referenced_document":
-                    # tool lạ, bỏ qua an toàn
-                    llm_messages.append({
-                        "role": "tool",
-                        "tool_call_id": tc["id"],
-                        "content": "Tool không được hỗ trợ.",
-                    })
-                    continue
-
-                try:
-                    args = json.loads(tc["function"]["arguments"] or "{}")
-                except json.JSONDecodeError:
-                    args = {}
-
-                yield {"step": "tool_call", "status": "detected", "data": {"args": args}}
-
-                try:
-                    extra_docs = self.search_service.doc_ref_search(
-                        query=args.get("content_query", question),
-                        doc_ref=args.get("doc_ref"),
-                        article_filter=args.get("dieu_filter"),
-                        clause_filter=args.get("khoan_filter"),
-                        top_k=5,
-                    )
-                except Exception as e:
-                    print(f"Lỗi thực thi tool: {e}")
-                    extra_docs = []
-                    yield {"step": "tool_call", "status": "error", "data": {"error": str(e)}}
-
-                if extra_docs:
-                    context_docs = self._deduplicate_docs(context_docs + extra_docs)[:self.MAX_CONTEXT_CHUNKS]
-                    citation_map = {str(i + 1): d for i, d in enumerate(context_docs)}
-                    yield {"step": "tool_call", "status": "executed", "data": {"found_count": len(extra_docs)}}
-
-                    # Context vừa được bổ sung -> phát lại "context_ready" để
-                    # frontend cập nhật sidebar với danh sách tài liệu mới nhất.
-                    yield {
-                        "step": "context_ready",
-                        "status": "done",
-                        "data": {
-                            "citations": citation_map,
-                            "sources": context_docs,
-                        },
-                    }
-
-                    tool_result_content = (
-                        f"Đã tìm thấy {len(extra_docs)} đoạn trích từ văn bản {args.get('doc_ref')}. "
-                        f"Ngữ cảnh đầy đủ đã được cập nhật ở lượt tiếp theo."
-                    )
-                else:
-                    yield {"step": "tool_call", "status": "executed", "data": {"found_count": 0, "message": "Không tìm thấy thông tin"}}
-                    tool_result_content = f"Không tìm thấy thông tin bổ sung trong văn bản {args.get('doc_ref')}."
-
-                llm_messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc["id"],
-                    "content": tool_result_content,
-                })
-
-            # Cập nhật lại phần "ngữ cảnh" cho lượt gọi tiếp theo bằng cách
-            # thêm 1 user message mới chứa context đã bổ sung, để model
-            # thực sự "nhìn thấy" nội dung mới lấy được (không chỉ là message
-            # thông báo suông ở trên).
-            llm_messages.append({
-                "role": "user",
-                "content": (
-                    f"Đây là ngữ cảnh đầy đủ đã được cập nhật sau khi tra cứu thêm:\n\n"
-                    f"{self._format_context(context_docs)}\n\n"
-                    f"Hãy trả lời câu hỏi gốc: {question}\n"
-                    f"Nhớ tuân thủ quy tắc trích dẫn [N] như đã nêu. Nếu vẫn còn thiếu thông tin quan trọng "
-                    f"và cần tra cứu thêm văn bản khác, hãy tiếp tục gọi tool."
-                ),
-            })
-
-            yield {"step": "tool_call", "status": "done", "data": None}
-            # loop tiếp -> gọi lại LLM với context mới
-
-        # Nếu đã lặp hết số lần tối đa mà vẫn chưa có câu trả lời (do liên tục gọi tool)
-        # thì thực hiện một cuộc gọi cuối cùng ép LLM trả ra câu trả lời không kèm tool.
-        if not full_answer:
-            try:
-                response_stream = self.chat_service.generate_response(
-                    self._with_no_think(llm_messages),
-                    tools=None,
-                    stream=True,
-                    model=model,
-                )
-                yield {"step": "answer", "status": "start", "data": None}
-                for chunk in response_stream:
-                    if isinstance(chunk, dict) and "error" in chunk:
-                        raise Exception(chunk["error"])
-                    if not getattr(chunk, "choices", None):
-                        continue
-                    delta = chunk.choices[0].delta
-                    if getattr(delta, "content", None):
-                        piece = delta.content
-                        full_answer += piece
-                        yield {
-                            "step": "answer",
-                            "status": "streaming",
-                            "data": {
-                                "chunk": piece,
-                                "citations": citation_map,
-                            },
-                        }
-            except Exception as e:
-                yield {"step": "answer", "status": "error", "data": {"error": str(e)}}
-                return
-
-        # Run conflict detector on retrieved context docs
-        try:
-            from app.rag.conflict_detector import ConflictDetector
-            detector = ConflictDetector()
-            conflicts = detector.detect_conflicts(context_docs, model=model)
-            conflict_status = detector.last_status
-        except Exception as e:
-            print(f"Lỗi khi chạy ConflictDetector: {e}")
-            conflicts = []
-            conflict_status = "analysis_failed"
-
-        from app.rag.citation_guard import CitationGuard
-        full_answer, citation_map, citation_warnings = CitationGuard().validate(
-            full_answer, citation_map
+        conflicts = self.conflict_detector.detect_conflicts(
+            context_docs, model=model, as_of=resolved_date
+        )
+        conflict_status = self.conflict_detector.last_status
+        temporal_decision = self._temporal_decision(question, context_docs, excluded)
+        llm_messages = self._generation_messages(
+            conversation,
+            context_docs,
+            conflicts,
+            resolved_date,
+            temporal_decision,
         )
 
-        # ==========================================
-        # KẾT THÚC: phát tín hiệu answer/done thật sự
-        # ==========================================
+        yield {"step": "answer", "status": "start", "data": None}
+        full_answer = ""
+        try:
+            for piece in self._generate_answer(llm_messages, stream, model):
+                full_answer += piece
+                yield {
+                    "step": "answer",
+                    "status": "streaming",
+                    "data": {"chunk": piece, "citations": citation_map},
+                }
+        except Exception as error:
+            yield self._error(str(error))
+            return
+
+        full_answer = self._enforce_temporal_decision(full_answer, temporal_decision)
+        full_answer, used_citations, warnings = self.citation_guard.validate(
+            full_answer, citation_map
+        )
         yield {
             "step": "answer",
             "status": "done",
             "data": {
                 "text": full_answer,
-                "citations": citation_map,
-                "citation_warnings": citation_warnings,
+                "citations": used_citations,
+                "sources": context_docs,
+                "citation_warnings": warnings,
                 "conflicts": conflicts,
-                "conflict_status": conflict_status
+                "conflict_status": conflict_status,
+                "as_of": resolved_date,
+                "temporal_trace": {
+                    "included": [self._trace_item(item) for item in context_docs],
+                    "excluded": [self._trace_item(item) for item in excluded],
+                },
+                "graph_trace": graph_trace,
+                "retrieval_trace": retrieval_trace,
+                "temporal_decision": temporal_decision,
             },
         }
+
+    def _generate_sub_queries(
+        self,
+        conversation: list[dict[str, str]],
+        question: str,
+        model: Optional[str],
+    ) -> list[str]:
+        history = "\n".join(
+            f"{message['role']}: {message['content']}" for message in conversation
+        )
+        prompt = (
+            "Tạo tối đa 3 truy vấn tìm kiếm độc lập cho câu hỏi pháp lý cuối cùng. "
+            "Giữ nguyên số hiệu văn bản, Điều, Khoản, mốc thời gian và chủ thể. "
+            "Trả JSON thuần có dạng {\"queries\": [\"...\"]}.\n\n"
+            f"Hội thoại:\n{history}\n\nCâu hỏi cuối: {question}"
+        )
+        try:
+            content = ""
+            for message in self.chat_service.generate_response(
+                [
+                    {
+                        "role": "system",
+                        "content": "Bạn tối ưu truy vấn cho kho văn bản pháp lý Việt Nam.",
+                    },
+                    {"role": "user", "content": prompt + " /no_think"},
+                ],
+                response_format=SUB_QUERY_SCHEMA,
+                stream=False,
+                model=model,
+            ):
+                if isinstance(message, dict) and message.get("error"):
+                    raise RuntimeError(message["error"])
+                content = getattr(message, "content", "") or ""
+            match = re.search(r"\{.*\}", content, re.DOTALL)
+            payload = json.loads(match.group(0) if match else content)
+            return [
+                item.strip()
+                for item in payload.get("queries", [])
+                if isinstance(item, str) and item.strip()
+            ][:3]
+        except Exception as error:
+            print(f"Không thể tách sub-query, dùng câu hỏi gốc: {error}")
+            return []
+
+    def _run_searches(self, queries: list[str], as_of: str) -> list[dict[str, Any]]:
+        def run(query: str) -> dict[str, Any]:
+            return self.search_service.search(query, top_k=5, as_of=as_of)
+
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=min(len(queries), self.MAX_SUB_QUERIES)
+        ) as executor:
+            return list(executor.map(run, queries))
+
+    def _generation_messages(
+        self,
+        conversation: list[dict[str, str]],
+        context_docs: list[dict[str, Any]],
+        conflicts: list[dict[str, Any]],
+        as_of: str,
+        temporal_decision: Optional[dict[str, Any]],
+    ) -> list[dict[str, str]]:
+        context = []
+        chunk_to_citation = {}
+        for index, document in enumerate(context_docs, start=1):
+            chunk_to_citation[document["chunk_id"]] = str(index)
+            metadata = document.get("metadata", {})
+            provenance = (
+                "scenario_synthetic"
+                if metadata.get("is_synthetic")
+                else "official_text_snapshot_machine_normalized"
+            )
+            context.append(
+                f"[{index}] {metadata.get('doc_num')} · {metadata.get('article')} · "
+                f"{metadata.get('clause') or 'Toàn điều'} · valid_from "
+                f"{metadata.get('valid_from') or metadata.get('effective_date')} · "
+                f"valid_to {metadata.get('valid_to') or 'open'} · trạng thái tại {as_of}: "
+                f"{document.get('temporal_status', 'effective')} · provenance: {provenance}\n"
+                f"{document.get('content', '')}"
+            )
+        conflict_hints = []
+        for conflict in conflicts:
+            law_key = chunk_to_citation.get(conflict["law_chunk_id"])
+            policy_key = chunk_to_citation.get(conflict["policy_chunk_id"])
+            if law_key and policy_key:
+                conflict_hints.append(
+                    f"- Xung đột tiềm ẩn đã duyệt giữa [{policy_key}] và [{law_key}]: "
+                    f"{conflict['description']}"
+                )
+        conflict_text = "\n".join(conflict_hints) or "- Không có quan hệ xung đột đã duyệt trong evidence pack."
+        temporal_text = (
+            f"{temporal_decision['answer']} — {temporal_decision['reason']}"
+            if temporal_decision
+            else "Không áp dụng cho câu hỏi này."
+        )
+        system = (
+            "Bạn là trợ lý hỗ trợ tra cứu tuân thủ. Chỉ sử dụng evidence pack dưới đây. "
+            "Mọi kết luận pháp lý, ngày, số tiền và giới hạn phải có trích dẫn dạng [1] hoặc [2] ngay trên cùng dòng. "
+            "Chỉ dùng số citation thực có trong evidence pack; tuyệt đối không viết placeholder chữ như ngoặc vuông N. "
+            "Không được tạo số hiệu, điều khoản hoặc nguồn mới. Nếu bằng chứng không đủ, phải nói không đủ dữ liệu. "
+            "Phân biệt đúng provenance trong từng evidence: scenario_synthetic là dữ liệu kịch bản mô phỏng; "
+            "official_text_snapshot_machine_normalized là bản chụp nguồn pháp luật được chuẩn hóa máy và vẫn phải đối chiếu bản chính thức hiện hành. "
+            "Không gọi nguồn thứ hai là dữ liệu mô phỏng. Mọi kết quả đều không phải tư vấn pháp lý. "
+            "Nếu có KẾT LUẬN HIỆU LỰC XÁC ĐỊNH bên dưới, phải mở đầu bằng đúng từ CÓ hoặc KHÔNG đã cho; không được đảo dấu phủ định. "
+            f"Ngày đối chiếu hiệu lực: {as_of}.\n\nEVIDENCE PACK:\n"
+            + "\n\n".join(context)
+            + "\n\nKẾT LUẬN HIỆU LỰC XÁC ĐỊNH:\n"
+            + temporal_text
+            + "\n\nQUAN HỆ XUNG ĐỘT ĐÃ DUYỆT:\n"
+            + conflict_text
+        )
+        return [{"role": "system", "content": system}, *conversation]
+
+    @staticmethod
+    def _temporal_decision(
+        question: str,
+        included: list[dict[str, Any]],
+        excluded: list[dict[str, Any]],
+    ) -> Optional[dict[str, Any]]:
+        if "hiệu lực" not in question.lower():
+            return None
+        exact_excluded = [item for item in excluded if item.get("exact_match")]
+        if exact_excluded:
+            item = exact_excluded[0]
+            return {
+                "answer": "KHÔNG",
+                "chunk_id": item.get("chunk_id"),
+                "state": item.get("temporal_status"),
+                "reason": item.get("temporal_reason") or "Điều khoản không hiệu lực tại ngày đối chiếu.",
+            }
+        exact_included = [item for item in included if item.get("exact_match")]
+        if exact_included:
+            item = exact_included[0]
+            return {
+                "answer": "CÓ",
+                "chunk_id": item.get("chunk_id"),
+                "state": item.get("temporal_status", "effective"),
+                "reason": item.get("temporal_reason") or "Điều khoản có hiệu lực tại ngày đối chiếu.",
+            }
+        return None
+
+    @staticmethod
+    def _enforce_temporal_decision(
+        answer: str, decision: Optional[dict[str, Any]]
+    ) -> str:
+        text = (answer or "").strip()
+        if not decision:
+            return text
+        expected = decision["answer"].upper()
+        match = re.match(r"^(CÓ|KHÔNG)\b[\s,:.-]*", text, re.IGNORECASE)
+        if match:
+            remainder = text[match.end() :].lstrip()
+            return expected + (f". {remainder}" if remainder else ".")
+        return f"{expected}. {text}"
+
+    def _generate_answer(
+        self,
+        messages: list[dict[str, str]],
+        stream: bool,
+        model: Optional[str],
+    ) -> Generator[str, None, None]:
+        for response in self.chat_service.generate_response(
+            messages, stream=stream, model=model
+        ):
+            if isinstance(response, dict) and response.get("error"):
+                raise RuntimeError(response["error"])
+            if stream:
+                if not getattr(response, "choices", None):
+                    continue
+                piece = getattr(response.choices[0].delta, "content", None)
+            else:
+                piece = getattr(response, "content", None)
+            if piece:
+                yield piece
+
+    @staticmethod
+    def _ensure_original_question(question: str, generated: list[str]) -> list[str]:
+        result = [question]
+        seen = {re.sub(r"\s+", " ", question.strip().lower())}
+        for item in generated:
+            normalized = re.sub(r"\s+", " ", item.strip().lower())
+            if normalized not in seen:
+                result.append(item)
+                seen.add(normalized)
+            if len(result) == RAGPipeline.MAX_SUB_QUERIES:
+                break
+        return result
+
+    @staticmethod
+    def _deduplicate(documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        seen = set()
+        result = []
+        for document in documents:
+            chunk_id = document.get("chunk_id")
+            if not chunk_id or chunk_id in seen:
+                continue
+            seen.add(chunk_id)
+            result.append(document)
+        return result
+
+    @staticmethod
+    def _last_user_question(messages: list[dict[str, str]]) -> str:
+        for message in reversed(messages):
+            if message.get("role") == "user":
+                return message.get("content", "")
+        return ""
+
+    @staticmethod
+    def _trace_item(document: dict[str, Any]) -> dict[str, Any]:
+        metadata = document.get("metadata", {})
+        return {
+            "chunk_id": document.get("chunk_id"),
+            "doc_num": metadata.get("doc_num"),
+            "article": metadata.get("article"),
+            "clause": metadata.get("clause"),
+            "state": document.get("temporal_status", "effective"),
+            "reason": document.get("temporal_reason", ""),
+            "replacement_path": document.get("replacement_path", []),
+        }
+
+    @staticmethod
+    def _error(message: str) -> dict[str, Any]:
+        return {"step": "answer", "status": "error", "data": {"error": message}}

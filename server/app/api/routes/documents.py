@@ -1,9 +1,13 @@
+from typing import Optional
 import asyncio
+import os
+import secrets
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Header, Query, Request
 from fastapi.responses import JSONResponse
 
 from app.api.schemas.documents import AdminUploadRequest
+from app.core.config import env_enabled
 from app.rag.pipeline import RAGPipeline
 from app.services.ingestion_service import IngestionBusyError, IngestionError
 
@@ -56,7 +60,29 @@ async def admin_chunk_detail(request: Request, chunk_id: str):
 
 
 @router.post("/documents")
-async def admin_upload_document(request: Request, payload: AdminUploadRequest):
+async def admin_upload_document(
+    request: Request,
+    payload: AdminUploadRequest,
+    x_admin_token: Optional[str] = Header(default=None),
+):
+    if not env_enabled("ADMIN_WRITE_ENABLED"):
+        return JSONResponse(
+            status_code=403,
+            content={"error": "Chế độ quản trị công khai chỉ cho phép đọc."},
+        )
+
+    expected_token = os.getenv("ADMIN_WRITE_TOKEN", "")
+    if not expected_token:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Máy chủ chưa cấu hình khóa quản trị."},
+        )
+    if not x_admin_token or not secrets.compare_digest(x_admin_token, expected_token):
+        return JSONResponse(
+            status_code=401,
+            content={"error": "Khóa quản trị không hợp lệ."},
+        )
+
     try:
         result = await asyncio.to_thread(
             request.app.state.ingestion_service.ingest_markdown,

@@ -1,91 +1,119 @@
-import json
-import re
-from typing import List, Dict, Any, Optional
-from app.integrations.llm_client import ChatService
+from __future__ import annotations
 
-CONFLICT_SCHEMA = {"type": "json_object"}
+import sqlite3
+from contextlib import closing
+from typing import Any, Optional
+
+from app.core.paths import SQLITE_DATABASE_FILE
+from app.rag.effective_resolver import EffectiveResolver
+
 
 class ConflictDetector:
-    def __init__(self):
-        self.chat_service = ChatService()
+    """Return only reviewed conflicts whose exact evidence is in the pack."""
+
+    def __init__(self, database_file: Optional[str] = None):
+        self.database_file = database_file or str(SQLITE_DATABASE_FILE)
+        self.resolver = EffectiveResolver(self.database_file)
         self.last_status = "not_evaluated"
-        
-    def detect_conflicts(self, docs: List[Dict[str, Any]], model: Optional[str] = None) -> List[Dict[str, Any]]:
-        # 1. Check if we have both national law/circulars and SHB policies
-        has_national = False
-        has_shb = False
-        
-        for d in docs:
-            meta = d.get("metadata", {})
-            doc_num = meta.get("doc_num", "").upper()
-            title = meta.get("title", "").upper()
-            if "TT-NHNN" in doc_num or "QH" in doc_num or "LUẬT" in title or "THÔNG TƯ" in title:
-                has_national = True
-            if "SHB" in doc_num or "SHB" in title:
-                has_shb = True
-                
-        # If we don't have both, no conflict can exist between internal & external
-        if not (has_national and has_shb):
+
+    def detect_conflicts(
+        self,
+        docs: list[dict[str, Any]],
+        model: Optional[str] = None,
+        as_of: Optional[str] = None,
+    ) -> list[dict[str, Any]]:
+        del model  # The model may explain later; it cannot create runtime findings.
+        evidence_ids = {item.get("chunk_id") for item in docs if item.get("chunk_id")}
+        focus_ids = {
+            item.get("chunk_id")
+            for item in docs
+            if item.get("chunk_id") and item.get("exact_match")
+        }
+        if not evidence_ids:
             self.last_status = "insufficient_evidence"
             return []
-            
-        # 2. Prepare the prompt for LLM comparison
-        context = ""
-        for i, d in enumerate(docs):
-            context += f"[{i+1}]: {d.get('content')}\n"
-            
-        prompt = (
-            f"Hãy đối chiếu các đoạn văn bản pháp luật quốc gia (Thông tư, Luật) và quy định nội bộ ngân hàng (SHB) dưới đây. "
-            f"Phát hiện xem có sự mâu thuẫn, xung đột hoặc vi phạm pháp luật nào không (ví dụ: Quy chế nội bộ SHB vượt quá hạn mức cho phép của Ngân hàng Nhà nước, "
-            f"hoặc thiếu các điều kiện bắt buộc).\n\n"
-            f"--- Ngữ cảnh các điều khoản ---\n{context}\n\n"
-            f"Yêu cầu:\n"
-            f"1. Xác định rõ loại xung đột (type), mức độ nghiêm trọng (severity: 'high', 'medium', 'low'), mô tả chi tiết xung đột (description), "
-            f"điều khoản luật quốc gia tương ứng (law_clause), điều khoản quy chế nội bộ SHB tương ứng (policy_clause), và hướng khắc phục đề xuất (resolution).\n"
-            f"2. Trả về kết quả dưới dạng JSON thuần túy theo cấu trúc: {{'conflicts': [{{'type': '...', 'severity': '...', 'description': '...', 'law_clause': '...', 'policy_clause': '...', 'resolution': '...'}}]}}. Nếu không có mâu thuẫn nào, trả về mảng 'conflicts' rỗng."
+
+        has_internal = any(
+            str(item.get("metadata", {}).get("source_type", "")).startswith("internal")
+            for item in docs
         )
-        
-        try:
-            response_content = ""
-            messages = [
-                {"role": "system", "content": "Bạn là chuyên gia kiểm soát tuân thủ ngân hàng thông minh. Hãy phân tích các văn bản và phát hiện mâu thuẫn một cách chính xác. Trả về kết quả dạng JSON chứa key 'conflicts'."},
-                {"role": "user", "content": prompt + " /no_think"}
-            ]
-            
-            try:
-                for message in self.chat_service.generate_response(
-                    messages,
-                    response_format=CONFLICT_SCHEMA,
-                    stream=False,
-                    model=model
-                ):
-                    response_content = getattr(message, "content", "") or ""
-            except Exception as schema_err:
-                print(f"Lỗi gọi với schema: {schema_err}. Tiến hành gọi không kèm schema...")
-                for message in self.chat_service.generate_response(
-                    messages,
-                    stream=False,
-                    model=model
-                ):
-                    response_content = getattr(message, "content", "") or ""
-                
-            # Clean response text
-            clean_content = re.sub(r'```json\s*|\s*```', '', response_content).strip()
-            # Find JSON block
-            json_match = re.search(r'\{.*\}', clean_content, re.DOTALL)
-            if json_match:
-                clean_content = json_match.group(0)
-            
-            # Remove trailing commas
-            clean_content = re.sub(r',\s*([\]}])', r'\1', clean_content)
-            
-            data = json.loads(clean_content)
-            conflicts = data.get("conflicts", [])
-            required = {"type", "severity", "description", "law_clause", "policy_clause", "resolution"}
-            conflicts = [item for item in conflicts if isinstance(item, dict) and required <= set(item)]
-            self.last_status = "detected" if conflicts else "no_conflict_found"
-            return conflicts
-        except Exception as e:
-            print(f"Lỗi khi phát hiện mâu thuẫn: {e}")
-            self.last_status = "analysis_failed"
+        has_external = any(
+            str(item.get("metadata", {}).get("source_type", "")).startswith("external")
+            for item in docs
+        )
+        if not (has_internal and has_external):
+            self.last_status = "insufficient_evidence"
             return []
+
+        placeholders = ",".join("?" for _ in evidence_ids)
+        resolved_date = self.resolver.normalize_as_of(as_of)
+        with closing(sqlite3.connect(self.database_file)) as connection:
+            connection.row_factory = sqlite3.Row
+            rows = connection.execute(
+                f"""
+                SELECT cr.*, internal.article AS internal_article,
+                       internal.clause AS internal_clause,
+                       internal_doc.doc_num AS internal_doc_num,
+                       external.article AS external_article,
+                       external.clause AS external_clause,
+                       external_doc.doc_num AS external_doc_num
+                FROM conflict_relations cr
+                JOIN chunks internal ON internal.chunk_id = cr.internal_chunk_id
+                JOIN documents internal_doc ON internal_doc.doc_id = internal.doc_id
+                JOIN chunks external ON external.chunk_id = cr.external_chunk_id
+                JOIN documents external_doc ON external_doc.doc_id = external.doc_id
+                WHERE cr.status = 'reviewed'
+                  AND cr.internal_chunk_id IN ({placeholders})
+                  AND cr.external_chunk_id IN ({placeholders})
+                  AND (cr.effective_from IS NULL OR cr.effective_from <= ?)
+                  AND (cr.effective_to IS NULL OR cr.effective_to >= ?)
+                ORDER BY cr.id
+                """,
+                (*evidence_ids, *evidence_ids, resolved_date, resolved_date),
+            ).fetchall()
+
+        findings = []
+        for row in rows:
+            if focus_ids and not (
+                {row["internal_chunk_id"], row["external_chunk_id"]} & focus_ids
+            ):
+                continue
+            if not self.resolver.resolve(row["internal_chunk_id"], resolved_date)[
+                "is_effective"
+            ]:
+                continue
+            if not self.resolver.resolve(row["external_chunk_id"], resolved_date)[
+                "is_effective"
+            ]:
+                continue
+            findings.append(
+                {
+                    "type": f"Xung đột tiềm ẩn · {row['conflict_type']}",
+                    "severity": row["severity"],
+                    "description": row["description"],
+                    "law_clause": self._locator(
+                        row["external_doc_num"],
+                        row["external_article"],
+                        row["external_clause"],
+                    ),
+                    "policy_clause": self._locator(
+                        row["internal_doc_num"],
+                        row["internal_article"],
+                        row["internal_clause"],
+                    ),
+                    "law_chunk_id": row["external_chunk_id"],
+                    "policy_chunk_id": row["internal_chunk_id"],
+                    "evidence_ids": [
+                        row["external_chunk_id"],
+                        row["internal_chunk_id"],
+                    ],
+                    "resolution": row["resolution"],
+                    "review_status": row["status"],
+                }
+            )
+        self.last_status = "detected" if findings else "no_conflict_found"
+        return findings
+
+    @staticmethod
+    def _locator(doc_num: str, article: str, clause: Optional[str]) -> str:
+        return " · ".join(part for part in (doc_num, article, clause) if part)

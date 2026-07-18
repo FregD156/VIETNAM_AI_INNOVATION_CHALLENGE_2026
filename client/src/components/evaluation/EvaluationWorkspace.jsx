@@ -33,19 +33,21 @@ export const EvaluationWorkspace = () => {
   }, []);
 
   // Lấy các metrics động từ benchmark, hoặc fallback về dữ liệu tiêu chuẩn (có kiểm tra an toàn)
-  const standardPrecision = benchmarkData?.metrics?.standard_hit_rate !== undefined 
-    ? Math.round(benchmarkData.metrics.standard_hit_rate * 100) 
+  const standardPrecision = benchmarkData?.metrics?.standard?.recall_at_5 !== undefined 
+    ? Math.round(benchmarkData.metrics.standard.recall_at_5 * 100) 
     : 72;
-  const advancedPrecision = benchmarkData?.metrics?.advanced_hit_rate !== undefined 
-    ? Math.round(benchmarkData.metrics.advanced_hit_rate * 100) 
+  const advancedPrecision = benchmarkData?.metrics?.advanced?.recall_at_5 !== undefined 
+    ? Math.round(benchmarkData.metrics.advanced.recall_at_5 * 100) 
     : 98;
   
-  const standardSuperseded = benchmarkData?.metrics?.standard_superseded_results !== undefined 
-    ? benchmarkData.metrics.standard_superseded_results 
-    : 4;
-  const advancedSuperseded = benchmarkData?.metrics?.advanced_superseded_results !== undefined 
-    ? benchmarkData.metrics.advanced_superseded_results 
-    : 0;
+  // Tính số lượng tài liệu cũ bị rò rỉ từ results của CSDL mới
+  const getStaleCount = (type) => {
+    if (!benchmarkData?.results) return type === 'standard' ? 4 : 0;
+    return benchmarkData.results.filter(r => (r[type]?.stale_count || 0) > 0).length;
+  };
+
+  const standardSuperseded = getStaleCount('standard');
+  const advancedSuperseded = getStaleCount('advanced');
 
   // Các kịch bản truy vấn mẫu để so sánh Side-by-Side
   const scenarios = {

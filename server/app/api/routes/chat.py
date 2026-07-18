@@ -2,7 +2,7 @@ import asyncio
 import json
 import queue
 import threading
-from typing import Any, Optional, List
+from typing import Any, Optional
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -18,10 +18,11 @@ _SENTINEL = object()
 
 def _attach_evidence_graph(payload: dict[str, Any]) -> None:
     citations = payload.get("citations", {})
+    sources = payload.get("sources", [])
     chunk_ids = [
-        citation["chunk_id"]
-        for citation in citations.values()
-        if "chunk_id" in citation
+        item["chunk_id"]
+        for item in (sources or citations.values())
+        if "chunk_id" in item
     ]
     if not chunk_ids:
         payload["graph"] = {"nodes": [], "links": []}
@@ -36,10 +37,11 @@ def _attach_evidence_graph(payload: dict[str, Any]) -> None:
 
 def _run_pipeline_in_thread(
     pipeline,
-    conversation: List[dict],
+    conversation: list[dict],
     stream: bool,
     output_queue: queue.Queue,
     model: Optional[str] = None,
+    as_of: Optional[str] = None,
 ) -> None:
     """Run blocking model calls outside the ASGI event loop."""
     try:
@@ -47,6 +49,7 @@ def _run_pipeline_in_thread(
             messages=conversation,
             stream=stream,
             model=model,
+            as_of=as_of,
         ):
             output_queue.put(event)
     except Exception as error:
@@ -57,11 +60,13 @@ def _run_pipeline_in_thread(
         output_queue.put(_SENTINEL)
 
 
-async def _stream_events(pipeline, conversation: List[dict], model: Optional[str]):
+async def _stream_events(
+    pipeline, conversation: list[dict], model: Optional[str], as_of: Optional[str]
+):
     output_queue: queue.Queue = queue.Queue()
     threading.Thread(
         target=_run_pipeline_in_thread,
-        args=(pipeline, conversation, True, output_queue, model),
+        args=(pipeline, conversation, True, output_queue, model, as_of),
         daemon=True,
     ).start()
     loop = asyncio.get_running_loop()
@@ -118,7 +123,12 @@ async def chat_endpoint(request: Request, payload: ChatRequest):
     pipeline = request.app.state.pipeline
     if payload.stream:
         return StreamingResponse(
-            _stream_events(pipeline, conversation, payload.model),
+            _stream_events(
+                pipeline,
+                conversation,
+                payload.model,
+                payload.as_of.isoformat() if payload.as_of else None,
+            ),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
@@ -133,6 +143,7 @@ async def chat_endpoint(request: Request, payload: ChatRequest):
                 messages=conversation,
                 stream=False,
                 model=payload.model,
+                as_of=payload.as_of.isoformat() if payload.as_of else None,
             )
         )
 
@@ -165,6 +176,11 @@ async def chat_endpoint(request: Request, payload: ChatRequest):
                         "not_evaluated",
                     ),
                     "citation_warnings": data.get("citation_warnings", []),
+                    "as_of": data.get("as_of"),
+                    "temporal_trace": data.get("temporal_trace", {}),
+                    "graph_trace": data.get("graph_trace", []),
+                    "retrieval_trace": data.get("retrieval_trace", []),
+                    "temporal_decision": data.get("temporal_decision"),
                 }
             )
         _attach_evidence_graph(response)

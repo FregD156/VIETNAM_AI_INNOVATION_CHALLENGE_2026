@@ -1,0 +1,196 @@
+[
+  {
+    "id": "direct-overdue-interest",
+    "category": "scenario_direct",
+    "query": "39/2016/TT-NHNN Điều 13 Khoản 3 quy định lãi suất nợ quá hạn tối đa bao nhiêu?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["4_art_Điều13_cl_3"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "direct-loan-condition",
+    "category": "scenario_direct",
+    "query": "39/2016/TT-NHNN Điều 4 Khoản 1 quy định điều kiện vay vốn nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["4_art_Điều4_cl_1"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "direct-biometric",
+    "category": "scenario_direct",
+    "query": "17/2024/TT-NHNN Điều 16 Khoản 3 yêu cầu xác thực sinh trắc học thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["7_art_Điều16_cl_3"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "direct-record-retention",
+    "category": "scenario_direct",
+    "query": "SHB-eKYC-2023 Điều 10 Khoản 1 yêu cầu lưu trữ hồ sơ bao lâu?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["5_art_Điều10_cl_1"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "reference-ekyc-limit",
+    "category": "scenario_cross_reference",
+    "query": "SHB-eKYC-2024 Điều 3 Khoản 1 quy định hạn mức eKYC nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["10_art_Điều3_cl_1", "7_art_Điều16_cl_2"],
+    "forbidden_chunks": ["5_art_Điều5_cl_1"]
+  },
+  {
+    "id": "reference-elending-limit",
+    "category": "scenario_cross_reference",
+    "query": "SHB-Lending-2024 Điều 5 Khoản 3 quy định hạn mức e-Lending nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["6_art_Điều5_cl_3", "2_art_Điều1_cl_2"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "reference-prohibited-purpose",
+    "category": "scenario_cross_reference",
+    "query": "SHB-Lending-2024 Điều 12 Khoản 1 có cho vay mua vàng miếng không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["6_art_Điều12_cl_1", "2_art_Điều1_cl_1"],
+    "forbidden_chunks": ["4_art_Điều8_cl_3"]
+  },
+  {
+    "id": "temporal-current-ekyc",
+    "category": "scenario_temporal",
+    "query": "SHB-eKYC-2023 Điều 5 Khoản 1 hiện còn hiệu lực không và được thay thế thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["10_art_Điều1_cl_2", "10_art_Điều3_cl_1"],
+    "forbidden_chunks": ["5_art_Điều5_cl_1"]
+  },
+  {
+    "id": "temporal-historical-ekyc",
+    "category": "scenario_temporal",
+    "query": "SHB-eKYC-2023 Điều 5 Khoản 1 có hiệu lực tại ngày 2024-07-19 không?",
+    "as_of": "2024-07-19",
+    "expected_chunks": ["5_art_Điều5_cl_1"],
+    "forbidden_chunks": ["10_art_Điều3_cl_1"]
+  },
+  {
+    "id": "temporal-circular-amendment",
+    "category": "scenario_temporal",
+    "query": "39/2016/TT-NHNN Điều 8 Khoản 5 hiện còn áp dụng không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["2_art_Điều1_cl_1"],
+    "forbidden_chunks": ["4_art_Điều8_cl_5"]
+  },
+  {
+    "id": "conflict-ekyc",
+    "category": "scenario_conflict",
+    "query": "Hạn mức tại SHB-eKYC-2024 Điều 3 Khoản 1 có phù hợp 17/2024/TT-NHNN Điều 16 Khoản 2 không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["10_art_Điều3_cl_1", "7_art_Điều16_cl_2"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "conflict-elending",
+    "category": "scenario_conflict",
+    "query": "Hạn mức SHB-Lending-2024 Điều 5 Khoản 3 có phù hợp 06/2023/TT-NHNN Điều 1 Khoản 2 không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["6_art_Điều5_cl_3", "2_art_Điều1_cl_2"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-aml-customer-identification",
+    "category": "expanded_exact",
+    "query": "14/2022/QH15 Điều 9 Khoản 1 quy định nhận biết khách hàng gồm những việc gì?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["8_para_96"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-aml-high-risk",
+    "category": "expanded_exact",
+    "query": "14/2022/QH15 Điều 16 Khoản 2 Điểm c yêu cầu gì với khách hàng rủi ro rửa tiền cao?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["8_para_147"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-aml-report-deadline",
+    "category": "expanded_exact",
+    "query": "14/2022/QH15 Điều 37 Khoản 2 quy định thời hạn báo cáo giao dịch đáng ngờ bao lâu?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["8_para_303"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-aml-confidentiality",
+    "category": "expanded_exact",
+    "query": "14/2022/QH15 Điều 40 Khoản 2 có cho phép tiết lộ việc đã báo cáo giao dịch đáng ngờ không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["8_para_319"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-etransaction-legal-value",
+    "category": "expanded_exact",
+    "query": "20/2023/QH15 Điều 8 quy định giá trị pháp lý của thông điệp dữ liệu thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["11_para_66"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-e-signature-equivalence",
+    "category": "expanded_exact",
+    "query": "20/2023/QH15 Điều 23 Khoản 2 quy định giá trị của chữ ký điện tử chuyên dùng thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["11_para_169"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-automated-contract",
+    "category": "expanded_exact",
+    "query": "20/2023/QH15 Điều 34 Khoản 1 quy định giá trị hợp đồng do hệ thống tự động giao kết thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["11_para_253"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-transaction-history",
+    "category": "expanded_exact",
+    "query": "20/2023/QH15 Điều 46 Khoản 4 quy định giá trị chứng minh của lịch sử giao dịch thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["11_para_330"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-special-loan-rate",
+    "category": "expanded_exact",
+    "query": "96/2025/QH15 Điều 1 Khoản 1 quy định lãi suất cho vay đặc biệt bao nhiêu?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["9_para_17"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "expanded-collateral-seizure",
+    "category": "expanded_exact",
+    "query": "96/2025/QH15 Điều 198a Khoản 2 quy định quyền thu giữ tài sản bảo đảm thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["9_para_22"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "insufficient-mining",
+    "category": "insufficient",
+    "query": "Quy định về khai thác khoáng sản biển sâu là gì?",
+    "as_of": "2026-07-18",
+    "expected_chunks": [],
+    "forbidden_chunks": [],
+    "should_abstain": true
+  },
+  {
+    "id": "insufficient-missing-circular",
+    "category": "insufficient",
+    "query": "Thông tư 99/2099/TT-NHNN Điều 88 quy định giới hạn lượng tử nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": [],
+    "forbidden_chunks": [],
+    "should_abstain": true
+  }
+]

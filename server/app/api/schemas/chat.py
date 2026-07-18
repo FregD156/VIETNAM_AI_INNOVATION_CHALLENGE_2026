@@ -1,4 +1,5 @@
-from typing import Literal, Optional, List
+from datetime import date
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -9,6 +10,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    messages: List[ChatMessage]
+    messages: list[ChatMessage]
     stream: bool = True
     model: Optional[str] = None
+    as_of: Optional[date] = None

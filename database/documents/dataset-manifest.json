@@ -1,0 +1,87 @@
+{
+  "name": "SHB Legal Intelligence mixed verification corpus",
+  "version": "2026-07-18",
+  "language": "vi",
+  "purpose": "Demonstrate temporal Graph-RAG behavior for the hackathon prototype.",
+  "legal_notice": "Six scenario documents are synthetic or simplified demonstration material. Three additional public-law text snapshots are machine-normalized from bundled source files and linked to the official VBPL records. No passage may replace verification against the current official text or legal review.",
+  "review_status": "The 76 scenario chunks and their explicit relations are reviewed for deterministic demo behavior. The 500 public-law passages are structurally validated by code but have not been reviewed passage-by-passage by a legal expert.",
+  "documents": [
+    {
+      "doc_num": "17/2024/TT-NHNN",
+      "kind": "external_demo",
+      "is_synthetic": true,
+      "path": "seed/Circular-17-2024-TT-NHNN.md"
+    },
+    {
+      "doc_num": "06/2023/TT-NHNN",
+      "kind": "external_demo",
+      "is_synthetic": true,
+      "path": "seed/Circular-06-2023-TT-NHNN.md"
+    },
+    {
+      "doc_num": "39/2016/TT-NHNN",
+      "kind": "external_demo",
+      "is_synthetic": true,
+      "path": "seed/Circular-39-2016-TT-NHNN.md"
+    },
+    {
+      "doc_num": "SHB-eKYC-2023",
+      "kind": "internal_demo",
+      "is_synthetic": true,
+      "path": "seed/SHB-eKYC-Procedure-2023.md"
+    },
+    {
+      "doc_num": "SHB-eKYC-2024",
+      "kind": "internal_demo",
+      "is_synthetic": true,
+      "path": "seed/SHB-eKYC-Procedure-2024.md"
+    },
+    {
+      "doc_num": "SHB-Lending-2024",
+      "kind": "internal_demo",
+      "is_synthetic": true,
+      "path": "seed/SHB-Internal-Lending-Policy-2024.md"
+    },
+    {
+      "doc_num": "14/2022/QH15",
+      "kind": "official_text_snapshot",
+      "is_synthetic": false,
+      "review_level": "machine_normalized",
+      "path": "seed/law-2022-luat-phong-chong-rua-tien.md",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=157721",
+      "selected_chunks": 250
+    },
+    {
+      "doc_num": "20/2023/QH15",
+      "kind": "official_text_snapshot",
+      "is_synthetic": false,
+      "review_level": "machine_normalized",
+      "path": "seed/law-2023-luat-giao-dich-dien-tu.md",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=165913",
+      "selected_chunks": 200
+    },
+    {
+      "doc_num": "96/2025/QH15",
+      "kind": "official_text_snapshot",
+      "is_synthetic": false,
+      "review_level": "machine_normalized",
+      "path": "seed/law-2025-luat-sua-doi-bo-sung-mot-so-dieu-cua-luat-cac-to-chuc-tin-dung.md",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=179292",
+      "selected_chunks": 50
+    }
+  ],
+  "generated_counts": {
+    "documents": 9,
+    "chunks": 576,
+    "references": 9,
+    "supersessions": 3,
+    "amendments": 2,
+    "conflicts": 2,
+    "missing_article": 0,
+    "missing_metadata": 0,
+    "scenario_chunks": 76,
+    "machine_normalized_chunks": 500,
+    "official_documents": 3,
+    "vectors": 576
+  }
+}

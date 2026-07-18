@@ -1,182 +1,270 @@
-import os
-import re
+from __future__ import annotations
+
+import sqlite3
+from contextlib import closing
+from typing import Any, Optional
+
 import networkx as nx
-from typing import List, Dict, Any
+
 from app.core.paths import SQLITE_DATABASE_FILE
+from app.rag.effective_resolver import EffectiveResolver
+
 
 class GraphService:
-    def __init__(self):
+    def __init__(self, database_file: Optional[str] = None):
+        self.database_file = database_file or str(SQLITE_DATABASE_FILE)
         self.graph = nx.DiGraph()
-        
-    def build_graph(self):
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.database_file)
+        connection.row_factory = sqlite3.Row
+        return connection
+
+    def build_graph(self) -> None:
         self.graph.clear()
-        import sqlite3
-        sqlite_db_path = str(SQLITE_DATABASE_FILE)
-        if not os.path.exists(sqlite_db_path):
-            print("SQLite data.db not found, cannot build graph.")
-            return
+        with closing(self._connect()) as connection:
+            documents = connection.execute(
+                """
+                SELECT doc_id, document_uid, doc_num, title, issued_date,
+                       effective_date, expiration_date, status, source_type,
+                       source_url, is_synthetic, version, reviewed, review_level,
+                       valid_from, valid_to
+                FROM documents
+                """
+            ).fetchall()
+            for document in documents:
+                data = dict(document)
+                self.graph.add_node(
+                    document["doc_num"],
+                    type="document",
+                    label=document["title"] or document["doc_num"],
+                    **data,
+                )
 
-        conn = sqlite3.connect(sqlite_db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+            chunks = connection.execute(
+                """
+                SELECT c.chunk_id, c.doc_id, c.provision_id, c.version_id,
+                       c.article, c.clause, c.point, c.embed_text,
+                       c.valid_from, c.valid_to, c.reviewed, c.review_level,
+                       d.doc_num, d.title, d.status, d.source_type,
+                       d.source_url, d.is_synthetic, d.effective_date
+                FROM chunks c JOIN documents d ON d.doc_id = c.doc_id
+                ORDER BY c.faiss_index
+                """
+            ).fetchall()
+            for chunk in chunks:
+                doc_num = chunk["doc_num"]
+                article_key = f"{doc_num}|{chunk['article']}"
+                if not self.graph.has_node(article_key):
+                    self.graph.add_node(
+                        article_key,
+                        type="article",
+                        label=chunk["article"],
+                        article=chunk["article"],
+                        doc_num=doc_num,
+                    )
+                    self.graph.add_edge(doc_num, article_key, type="contains")
 
-        # 1. Fetch documents
-        cursor.execute("SELECT doc_id, doc_num, title, effective_date, expiration_date, status FROM documents")
-        docs = cursor.fetchall()
-        for doc in docs:
-            doc_num = doc["doc_num"]
-            self.graph.add_node(
-                doc_num,
-                type="document",
-                label=doc["title"] or doc_num,
-                doc_num=doc_num,
-                effective_date=doc["effective_date"],
-                expiration_date=doc["expiration_date"],
-                status=doc["status"]
-            )
+                data = dict(chunk)
+                self.graph.add_node(
+                    chunk["chunk_id"],
+                    type="clause",
+                    label=chunk["clause"] or chunk["article"],
+                    content=chunk["embed_text"],
+                    **{key: value for key, value in data.items() if key != "embed_text"},
+                )
+                self.graph.add_edge(article_key, chunk["chunk_id"], type="contains")
 
-        # 2. Fetch chunks (clauses)
-        cursor.execute("""
-            SELECT c.chunk_id, c.doc_id, c.article, c.clause, c.embed_text, d.doc_num, d.title, d.effective_date, d.expiration_date, d.status
-            FROM chunks c
-            JOIN documents d ON c.doc_id = d.doc_id
-        """)
-        chunks = cursor.fetchall()
-        for chunk in chunks:
-            chunk_id = chunk["chunk_id"]
-            doc_num = chunk["doc_num"]
-            article = chunk["article"]
-            clause = chunk["clause"]
+            relations = connection.execute(
+                """
+                SELECT source_chunk_id, target_chunk_id, relation_type, scope,
+                       effective_from, effective_to, status, evidence_text
+                FROM provision_relations WHERE status = 'reviewed'
+                ORDER BY id
+                """
+            ).fetchall()
+            for relation in relations:
+                source = relation["source_chunk_id"]
+                target = relation["target_chunk_id"]
+                if self.graph.has_node(source) and self.graph.has_node(target):
+                    self.graph.add_edge(
+                        source,
+                        target,
+                        **{
+                            key: value
+                            for key, value in dict(relation).items()
+                            if key not in {"source_chunk_id", "target_chunk_id"}
+                        },
+                        type=relation["relation_type"],
+                    )
 
-            # Article Node
-            art_key = f"{doc_num}|{article}" if article else None
-            if art_key and not self.graph.has_node(art_key):
-                self.graph.add_node(art_key, type="article", label=article, article=article, doc_num=doc_num)
-                self.graph.add_edge(doc_num, art_key, type="contains")
-
-            # Clause Node
-            self.graph.add_node(
-                chunk_id,
-                type="clause",
-                label=clause or article or chunk_id,
-                clause=clause,
-                article=article,
-                doc_num=doc_num,
-                content=chunk["embed_text"],
-                effective_date=chunk["effective_date"],
-                expiration_date=chunk["expiration_date"],
-                status=chunk["status"]
-            )
-
-            if art_key:
-                self.graph.add_edge(art_key, chunk_id, type="contains")
-            else:
-                self.graph.add_edge(doc_num, chunk_id, type="contains")
-
-        # 3. Add relational edges from SQLite
-        # A. Supersedes relation
-        cursor.execute("SELECT source_chunk_id, target_doc_num, target_article, target_clause FROM supersedes_relations")
-        for rel in cursor.fetchall():
-            chunk_id = rel["source_chunk_id"]
-            target_doc = rel["target_doc_num"]
-            target_art = rel["target_article"]
-
-            target_node = None
-            if target_doc:
-                if target_art:
-                    target_node = f"{target_doc}|{target_art}"
-                else:
-                    target_node = target_doc
-
-            if target_node and self.graph.has_node(target_node):
-                self.graph.add_edge(chunk_id, target_node, type="supersedes")
-
-        # B. References relation
-        cursor.execute("SELECT source_chunk_id, target_doc_num FROM references_relations")
-        for rel in cursor.fetchall():
-            chunk_id = rel["source_chunk_id"]
-            ref_doc = rel["target_doc_num"]
-            text = self.graph.nodes[chunk_id].get("content", "")
-
-            # Match e.g. "Điều 8 Thông tư 39" or similar
-            art_match = re.search(r'Điều\s+(\w+)\s+[^.\n]*?' + re.escape(ref_doc.split('/')[0]), text, re.IGNORECASE)
-            target_node = ref_doc
-            if art_match:
-                possible_art_key = f"{ref_doc}|Điều {art_match.group(1)}"
-                if self.graph.has_node(possible_art_key):
-                    target_node = possible_art_key
-
-            if self.graph.has_node(target_node):
-                self.graph.add_edge(chunk_id, target_node, type="references")
-
-        conn.close()
-
-    def save_graph(self):
-        # Since SQLite is the only storage, we don't save to JSON.
-        pass
-
-    def load_graph(self):
-        # Dynamically build graph from SQLite
+    def load_graph(self) -> None:
         self.build_graph()
-            
-    def get_related_nodes(self, chunk_id: str) -> Dict[str, List[Dict[str, Any]]]:
-        """Finds references and supersedes connections for a given chunk."""
-        if not self.graph.has_node(chunk_id):
-            return {"references": [], "supersedes": [], "superseded_by": []}
-            
-        references = []
-        supersedes = []
-        superseded_by = []
-        
-        # Outgoing edges from chunk_id
-        for u, v, d in self.graph.out_edges(chunk_id, data=True):
-            edge_type = d.get("type")
-            node_data = self.graph.nodes[v]
-            if edge_type == "references":
-                references.append({"node_id": v, "type": node_data.get("type"), "label": node_data.get("label")})
-            elif edge_type == "supersedes":
-                supersedes.append({"node_id": v, "type": node_data.get("type"), "label": node_data.get("label")})
-                
-        # Incoming edges to chunk_id
-        for u, v, d in self.graph.in_edges(chunk_id, data=True):
-            edge_type = d.get("type")
-            node_data = self.graph.nodes[u]
-            if edge_type == "supersedes":
-                superseded_by.append({"node_id": u, "type": node_data.get("type"), "label": node_data.get("label")})
-                
-        return {"references": references, "supersedes": supersedes, "superseded_by": superseded_by}
 
-    def get_subgraph(self, chunk_ids: List[str]) -> Dict[str, Any]:
-        """Trích xuất một đồ thị con cảm ứng (induced subgraph) dựa trên danh sách chunk_id."""
+    def get_related_nodes(self, chunk_id: str) -> dict[str, list[dict[str, Any]]]:
         if not self.graph:
             self.load_graph()
-            
-        nodes_to_keep = set()
-        for cid in chunk_ids:
-            if self.graph.has_node(cid):
-                nodes_to_keep.add(cid)
-                
-                # Thêm các nút có liên kết đi (references / supersedes)
-                for u, v, d in self.graph.out_edges(cid, data=True):
-                    nodes_to_keep.add(v)
-                    
-                # Thêm các nút có liên kết đến
-                for u, v, d in self.graph.in_edges(cid, data=True):
-                    nodes_to_keep.add(u)
-                    
-                # Thêm các nút phân cấp cha (Article và Document)
-                meta = self.graph.nodes[cid]
-                doc_num = meta.get("doc_num")
-                article = meta.get("article")
-                if doc_num:
-                    nodes_to_keep.add(doc_num)
-                    if article:
-                        art_key = f"{doc_num}|{article}"
-                        nodes_to_keep.add(art_key)
-                        
-        # Tạo đồ thị con cảm ứng
-        sub_g = self.graph.subgraph(nodes_to_keep)
-        
-        # Chuyển đổi sang định dạng node-link của NetworkX
-        data = nx.node_link_data(sub_g)
-        return data
+        result = {
+            "references": [],
+            "supersedes": [],
+            "superseded_by": [],
+            "conflicts_with": [],
+        }
+        if not self.graph.has_node(chunk_id):
+            return result
+        for _, target, edge in self.graph.out_edges(chunk_id, data=True):
+            relation_type = edge.get("type")
+            if relation_type in result:
+                result[relation_type].append(self._related_payload(target, edge))
+        for source, _, edge in self.graph.in_edges(chunk_id, data=True):
+            if edge.get("type") == "supersedes":
+                result["superseded_by"].append(self._related_payload(source, edge))
+        return result
+
+    def expand_evidence(
+        self,
+        documents: list[dict[str, Any]],
+        as_of: Optional[str] = None,
+        max_hops: int = 1,
+        node_budget: int = 8,
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Deterministically expand reviewed graph relations server-side."""
+        if not self.graph:
+            self.load_graph()
+        resolver = EffectiveResolver(self.database_file)
+        seen = {item.get("chunk_id") for item in documents}
+        frontier = [(item.get("chunk_id"), 0, [item.get("chunk_id")]) for item in documents]
+        additions: list[dict[str, Any]] = []
+        trace: list[dict[str, Any]] = []
+        allowed = {"references", "amends", "conflicts_with", "supersedes"}
+
+        while frontier and len(additions) < node_budget:
+            current, depth, path = frontier.pop(0)
+            if not current or depth >= max_hops or not self.graph.has_node(current):
+                continue
+            candidates: list[tuple[str, dict[str, Any], str]] = []
+            for _, target, edge in self.graph.out_edges(current, data=True):
+                if edge.get("type") in allowed:
+                    candidates.append((target, edge, "outgoing"))
+            for source, _, edge in self.graph.in_edges(current, data=True):
+                if edge.get("type") == "supersedes":
+                    candidates.append((source, edge, "incoming"))
+
+            for target, edge, direction in candidates:
+                if target in seen or not self.graph.has_node(target):
+                    continue
+                node = self.graph.nodes[target]
+                if node.get("type") != "clause":
+                    continue
+                validity = resolver.resolve(target, as_of)
+                entry = {
+                    "from": current,
+                    "to": target,
+                    "relation_type": edge.get("type"),
+                    "direction": direction,
+                    "path": [*path, target],
+                    "included": validity["is_effective"],
+                    "reason": validity["reason"],
+                    "evidence_text": edge.get("evidence_text", ""),
+                }
+                trace.append(entry)
+                seen.add(target)
+                if not validity["is_effective"]:
+                    for successor in validity.get("replacement_path", [])[1:]:
+                        if successor in seen or not self.graph.has_node(successor):
+                            continue
+                        successor_node = self.graph.nodes[successor]
+                        successor_validity = resolver.resolve(successor, as_of)
+                        successor_entry = {
+                            "from": target,
+                            "to": successor,
+                            "relation_type": "resolved_to_successor",
+                            "direction": "temporal",
+                            "path": [*path, target, successor],
+                            "included": successor_validity["is_effective"],
+                            "reason": successor_validity["reason"],
+                            "evidence_text": validity["reason"],
+                        }
+                        trace.append(successor_entry)
+                        seen.add(successor)
+                        if successor_validity["is_effective"]:
+                            additions.append(
+                                self._document_from_node(
+                                    successor,
+                                    successor_node,
+                                    {"type": "resolved_to_successor", "evidence_text": validity["reason"]},
+                                    successor_entry["path"],
+                                )
+                            )
+                            frontier.append((successor, depth + 1, successor_entry["path"]))
+                        if len(additions) >= node_budget:
+                            break
+                    continue
+                additions.append(self._document_from_node(target, node, edge, entry["path"]))
+                frontier.append((target, depth + 1, entry["path"]))
+                if len(additions) >= node_budget:
+                    break
+        return additions, trace
+
+    def get_subgraph(self, chunk_ids: list[str]) -> dict[str, Any]:
+        if not self.graph:
+            self.load_graph()
+        nodes_to_keep: set[str] = set()
+        for chunk_id in chunk_ids:
+            if not self.graph.has_node(chunk_id):
+                continue
+            nodes_to_keep.add(chunk_id)
+            for source, target, _ in self.graph.out_edges(chunk_id, data=True):
+                nodes_to_keep.update((source, target))
+            for source, target, _ in self.graph.in_edges(chunk_id, data=True):
+                nodes_to_keep.update((source, target))
+            node = self.graph.nodes[chunk_id]
+            doc_num = node.get("doc_num")
+            article = node.get("article")
+            if doc_num:
+                nodes_to_keep.add(doc_num)
+                if article:
+                    nodes_to_keep.add(f"{doc_num}|{article}")
+        return nx.node_link_data(self.graph.subgraph(nodes_to_keep))
+
+    def _related_payload(self, node_id: str, edge: dict[str, Any]) -> dict[str, Any]:
+        node = self.graph.nodes[node_id]
+        return {
+            "node_id": node_id,
+            "type": node.get("type"),
+            "label": node.get("label"),
+            "relation_type": edge.get("type"),
+            "evidence_text": edge.get("evidence_text", ""),
+        }
+
+    @staticmethod
+    def _document_from_node(
+        chunk_id: str,
+        node: dict[str, Any],
+        edge: dict[str, Any],
+        path: list[str],
+    ) -> dict[str, Any]:
+        metadata_keys = (
+            "doc_id",
+            "doc_num",
+            "title",
+            "article",
+            "clause",
+            "point",
+            "effective_date",
+            "status",
+            "source_type",
+            "source_url",
+            "is_synthetic",
+            "review_level",
+        )
+        return {
+            "chunk_id": chunk_id,
+            "content": node.get("content", ""),
+            "score": 0.0,
+            "metadata": {key: node.get(key) for key in metadata_keys},
+            "retrieval_origin": "graph",
+            "relation_type": edge.get("type"),
+            "relation_path": path,
+            "relation_reason": edge.get("evidence_text", ""),
+        }

@@ -1,0 +1,121 @@
+[
+  {
+    "id": "direct-overdue-interest",
+    "category": "direct",
+    "query": "39/2016/TT-NHNN Điều 13 Khoản 3 quy định lãi suất nợ quá hạn tối đa bao nhiêu?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["4_art_Điều13_cl_3"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "direct-loan-condition",
+    "category": "direct",
+    "query": "39/2016/TT-NHNN Điều 4 Khoản 1 quy định điều kiện vay vốn nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["4_art_Điều4_cl_1"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "direct-biometric",
+    "category": "direct",
+    "query": "17/2024/TT-NHNN Điều 16 Khoản 3 yêu cầu xác thực sinh trắc học thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["7_art_Điều16_cl_3"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "direct-record-retention",
+    "category": "direct",
+    "query": "SHB-eKYC-2023 Điều 10 Khoản 1 yêu cầu lưu trữ hồ sơ bao lâu?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["5_art_Điều10_cl_1"],
+    "forbidden_chunks": []
+  },
+  {
+    "id": "reference-ekyc-limit",
+    "category": "cross_reference",
+    "query": "SHB-eKYC-2024 Điều 3 Khoản 1 quy định hạn mức eKYC nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["10_art_Điều3_cl_1", "7_art_Điều16_cl_2"],
+    "forbidden_chunks": ["5_art_Điều5_cl_1"],
+    "required_graph_target": "7_art_Điều16_cl_2"
+  },
+  {
+    "id": "reference-elending-limit",
+    "category": "cross_reference",
+    "query": "SHB-Lending-2024 Điều 5 Khoản 3 quy định hạn mức e-Lending nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["6_art_Điều5_cl_3", "2_art_Điều1_cl_2"],
+    "forbidden_chunks": [],
+    "required_graph_target": "2_art_Điều1_cl_2"
+  },
+  {
+    "id": "reference-prohibited-purpose",
+    "category": "cross_reference",
+    "query": "SHB-Lending-2024 Điều 12 Khoản 1 có cho vay mua vàng miếng không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["6_art_Điều12_cl_1", "2_art_Điều1_cl_1"],
+    "forbidden_chunks": ["4_art_Điều8_cl_3"],
+    "required_graph_target": "2_art_Điều1_cl_1"
+  },
+  {
+    "id": "temporal-current-ekyc",
+    "category": "temporal",
+    "query": "SHB-eKYC-2023 Điều 5 Khoản 1 hiện còn hiệu lực không và được thay thế thế nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["10_art_Điều1_cl_2", "10_art_Điều3_cl_1"],
+    "forbidden_chunks": ["5_art_Điều5_cl_1"]
+  },
+  {
+    "id": "temporal-historical-ekyc",
+    "category": "temporal",
+    "query": "SHB-eKYC-2023 Điều 5 Khoản 1 có hiệu lực tại ngày 2024-07-19 không?",
+    "as_of": "2024-07-19",
+    "expected_chunks": ["5_art_Điều5_cl_1"],
+    "forbidden_chunks": ["10_art_Điều3_cl_1"]
+  },
+  {
+    "id": "temporal-circular-amendment",
+    "category": "temporal",
+    "query": "39/2016/TT-NHNN Điều 8 Khoản 5 hiện còn áp dụng không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["2_art_Điều1_cl_1"],
+    "forbidden_chunks": ["4_art_Điều8_cl_5"]
+  },
+  {
+    "id": "conflict-ekyc",
+    "category": "conflict",
+    "query": "Hạn mức tại SHB-eKYC-2024 Điều 3 Khoản 1 có phù hợp 17/2024/TT-NHNN Điều 16 Khoản 2 không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["10_art_Điều3_cl_1", "7_art_Điều16_cl_2"],
+    "forbidden_chunks": [],
+    "expected_conflict": true
+  },
+  {
+    "id": "conflict-elending",
+    "category": "conflict",
+    "query": "Hạn mức SHB-Lending-2024 Điều 5 Khoản 3 có phù hợp 06/2023/TT-NHNN Điều 1 Khoản 2 không?",
+    "as_of": "2026-07-18",
+    "expected_chunks": ["6_art_Điều5_cl_3", "2_art_Điều1_cl_2"],
+    "forbidden_chunks": [],
+    "expected_conflict": true
+  },
+  {
+    "id": "insufficient-mining",
+    "category": "insufficient",
+    "query": "Quy định về khai thác khoáng sản biển sâu là gì?",
+    "as_of": "2026-07-18",
+    "expected_chunks": [],
+    "forbidden_chunks": [],
+    "should_abstain": true
+  },
+  {
+    "id": "insufficient-missing-circular",
+    "category": "insufficient",
+    "query": "Thông tư 99/2099/TT-NHNN Điều 88 quy định giới hạn lượng tử nào?",
+    "as_of": "2026-07-18",
+    "expected_chunks": [],
+    "forbidden_chunks": [],
+    "should_abstain": true
+  }
+]

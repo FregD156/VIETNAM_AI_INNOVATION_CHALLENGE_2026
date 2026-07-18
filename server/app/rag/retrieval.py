@@ -1,256 +1,293 @@
-import faiss
-import os
-import numpy as np
-import json
+from __future__ import annotations
+
 import re
-from typing import List, Optional, Dict, Any
+import sqlite3
+from contextlib import closing
+from typing import Any, Optional
+
+import faiss
+import numpy as np
+from rank_bm25 import BM25Okapi
+
 from app.core.paths import FAISS_INDEX_FILE, SQLITE_DATABASE_FILE
 from app.integrations.llm_client import ChatService
+from app.rag.effective_resolver import EffectiveResolver
 
-FAISS_INDEX_FILE = str(FAISS_INDEX_FILE)
-SQLITE_DATABASE_FILE = str(SQLITE_DATABASE_FILE)
 
 class SearchService:
-    def __init__(self, threshold=0.5):
+    DOMAIN_TERMS = {
+        "ngân hàng",
+        "tổ chức tín dụng",
+        "khách hàng",
+        "tài khoản",
+        "giao dịch",
+        "chuyển tiền",
+        "thanh toán",
+        "cho vay",
+        "khoản vay",
+        "tín dụng",
+        "lãi suất",
+        "hạn mức",
+        "nợ quá hạn",
+        "tài sản bảo đảm",
+        "rửa tiền",
+        "ekyc",
+        "lending",
+        "shb-",
+        "định danh",
+        "sinh trắc học",
+        "chữ ký điện tử",
+        "chữ ký số",
+        "thông điệp dữ liệu",
+        "hợp đồng điện tử",
+        "tuân thủ",
+        "thông tư",
+        "ngân hàng nhà nước",
+    }
+    LEXICAL_STOPWORDS = {
+        "có",
+        "cho",
+        "của",
+        "là",
+        "nào",
+        "quy",
+        "định",
+        "theo",
+        "trong",
+        "và",
+        "về",
+        "được",
+        "không",
+    }
+    def __init__(
+        self,
+        threshold: float = 0.5,
+        database_file: Optional[str] = None,
+        faiss_file: Optional[str] = None,
+        chat_service: Optional[ChatService] = None,
+    ):
         self.threshold = threshold
-        self.chat_service = ChatService() # Dùng để embed query
-        
-        # Load dữ liệu tĩnh
-        if not os.path.exists(FAISS_INDEX_FILE):
-            raise FileNotFoundError(f"Không tìm thấy file index: {FAISS_INDEX_FILE}")
-        self.index = faiss.read_index(FAISS_INDEX_FILE)
-        
-        # Initialize database structures
-        self.faiss_id_map = {}
-        self.chunk_map = {}
-        self.article_index_map = {}
-        self.chunks_text_map = {}
+        self.database_file = database_file or str(SQLITE_DATABASE_FILE)
+        self.faiss_file = faiss_file or str(FAISS_INDEX_FILE)
+        self.chat_service = chat_service or ChatService()
+        self.resolver = EffectiveResolver(self.database_file)
+        self.index = faiss.read_index(self.faiss_file)
+        self.faiss_id_map: dict[int, str] = {}
+        self.chunk_map: dict[str, dict[str, Any]] = {}
+        self.chunks_text_map: dict[str, str] = {}
+        self.article_index_map: dict[str, list[str]] = {}
+        self._load_database()
 
-        # Initialize database structures
-        self.faiss_id_map = {}
-        self.chunk_map = {}
-        self.article_index_map = {}
-        self.chunks_text_map = {}
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.database_file)
+        connection.row_factory = sqlite3.Row
+        return connection
 
-        sqlite_db_path = SQLITE_DATABASE_FILE
-        if not os.path.exists(sqlite_db_path):
-            raise FileNotFoundError(f"SQLite database not found at {sqlite_db_path}")
+    def _load_database(self) -> None:
+        with closing(self._connect()) as connection:
+            rows = connection.execute(
+                """
+                SELECT c.chunk_id, c.article, c.clause, c.point, c.embed_text,
+                       c.faiss_index, c.provision_id, c.version_id,
+                       c.valid_from, c.valid_to, c.reviewed, c.review_level,
+                       d.doc_id, d.doc_num, d.title, d.effective_date,
+                       d.expiration_date, d.status, d.source_type, d.source_url,
+                       d.is_synthetic, d.version,
+                       d.review_level AS document_review_level
+                FROM chunks c JOIN documents d ON d.doc_id = c.doc_id
+                ORDER BY c.faiss_index
+                """
+            ).fetchall()
+        for row in rows:
+            data = dict(row)
+            chunk_id = data.pop("chunk_id")
+            content = data.pop("embed_text") or ""
+            faiss_index = data.pop("faiss_index")
+            self.chunk_map[chunk_id] = data
+            self.chunks_text_map[chunk_id] = content
+            if faiss_index is not None:
+                self.faiss_id_map[int(faiss_index)] = chunk_id
+            article_key = f"{data['doc_id']}|{data.get('article') or ''}"
+            self.article_index_map.setdefault(article_key, []).append(chunk_id)
 
-        import sqlite3
-        conn = sqlite3.connect(sqlite_db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        # 1. Load faiss_id_map and temporary chunks_text_map
-        temp_chunks_text_map = {}
-        cursor.execute("SELECT chunk_id, embed_text, faiss_index FROM chunks")
-        for row in cursor.fetchall():
-            chunk_id = row["chunk_id"]
-            temp_chunks_text_map[chunk_id] = row["embed_text"] or ""
-            if row["faiss_index"] is not None:
-                self.faiss_id_map[int(row["faiss_index"])] = chunk_id
-                
-        # 2. Load chunk_map
-        cursor.execute("""
-            SELECT c.chunk_id, c.article, c.clause, d.title, d.doc_num, d.doc_id,
-                   d.effective_date, d.expiration_date, d.status
-            FROM chunks c
-            JOIN documents d ON c.doc_id = d.doc_id
-        """)
-        for row in cursor.fetchall():
-            chunk_id = row["chunk_id"]
-            self.chunk_map[chunk_id] = {
-                "title": row["title"],
-                "doc_num": row["doc_num"],
-                "doc_id": row["doc_id"],
-                "effective_date": row["effective_date"],
-                "expiration_date": row["expiration_date"],
-                "status": row["status"]
+        self.bm25_chunks = list(self.chunk_map)
+        corpus = [self._tokenize(self.chunks_text_map[item]) for item in self.bm25_chunks]
+        self.bm25 = BM25Okapi(corpus)
+
+    @staticmethod
+    def _tokenize(text: str) -> list[str]:
+        return re.findall(r"\w+", (text or "").lower(), re.UNICODE)
+
+    @staticmethod
+    def _normalize(text: str) -> str:
+        return re.sub(r"\s+", " ", (text or "").strip().lower())
+
+    def search(
+        self,
+        query: str,
+        top_k: int = 20,
+        include_superseded: bool = False,
+        as_of: Optional[str] = None,
+    ) -> dict[str, Any]:
+        requested = max(1, top_k)
+        candidate_limit = min(max(requested * 4, 20), len(self.chunk_map))
+        requested_doc_num = self._extract_doc_num(query)
+        if requested_doc_num and not any(
+            self._normalize(metadata.get("doc_num", ""))
+            == self._normalize(requested_doc_num)
+            for metadata in self.chunk_map.values()
+        ):
+            return {
+                "results": [],
+                "excluded": [],
+                "trace": {
+                    "query": query,
+                    "exact_candidates": 0,
+                    "vector_candidates": 0,
+                    "bm25_candidates": 0,
+                    "fused_candidates": 0,
+                    "excluded_count": 0,
+                    "as_of": self.resolver.normalize_as_of(as_of),
+                    "unknown_identifier": requested_doc_num,
+                },
             }
-            if row["article"]:
-                self.chunk_map[chunk_id]["article"] = row["article"]
-            if row["clause"]:
-                self.chunk_map[chunk_id]["clause"] = row["clause"]
-                
-        # 3. Load article_index_map
-        cursor.execute("""
-            SELECT doc_id, article, faiss_index 
-            FROM chunks 
-            WHERE article IS NOT NULL AND faiss_index IS NOT NULL
-        """)
-        for row in cursor.fetchall():
-            key = f"{row['doc_id']}|{row['article']}"
-            self.article_index_map.setdefault(key, []).append(int(row["faiss_index"]))
-            
-        conn.close()
-        print("Loaded database configuration from SQLite data.db successfully.")
-            
-        self._init_bm25(temp_chunks_text_map)
+        if not requested_doc_num and not self._is_in_domain_query(query):
+            return {
+                "results": [],
+                "excluded": [],
+                "trace": {
+                    "query": query,
+                    "exact_candidates": 0,
+                    "vector_candidates": 0,
+                    "bm25_candidates": 0,
+                    "fused_candidates": 0,
+                    "excluded_count": 0,
+                    "as_of": self.resolver.normalize_as_of(as_of),
+                    "out_of_domain": True,
+                },
+            }
+        exact_results = self._exact_identifier_candidates(query)
 
-    def _init_bm25(self, temp_chunks_text_map):
-        from rank_bm25 import BM25Okapi
-        self.bm25_chunks = list(self.chunk_map.keys())
-        corpus_tokens = []
-        for cid in self.bm25_chunks:
-            content = temp_chunks_text_map.get(cid, "")
-            corpus_tokens.append(self._tokenize(content))
-        self.bm25 = BM25Okapi(corpus_tokens)
-
-    def _tokenize(self, text: str) -> List[str]:
-        if not text:
-            return []
-        return [w for w in re.findall(r'\w+', text.lower()) if w]
-
-    def _get_chunk_content(self, chunk_id: str) -> str:
-        """Lấy nội dung full của chunk từ SQLite."""
-        sqlite_db_path = SQLITE_DATABASE_FILE
-        if os.path.exists(sqlite_db_path):
-            import sqlite3
-            try:
-                conn = sqlite3.connect(sqlite_db_path)
-                cursor = conn.cursor()
-                cursor.execute("SELECT embed_text FROM chunks WHERE chunk_id = ?", (chunk_id,))
-                row = cursor.fetchone()
-                conn.close()
-                if row:
-                    return row[0] or ""
-            except Exception as e:
-                print(f"Error querying chunk content from SQLite: {e}")
-        
-        meta = self.chunk_map.get(chunk_id, {})
-        parts = []
-        if meta.get("title"): parts.append(meta["title"])
-        if meta.get("article"): parts.append(meta["article"])
-        if meta.get("content"): parts.append(meta["content"])
-        return " | ".join(parts)
-        
-    def _is_superseded(self, chunk_id: str) -> bool:
-        if not hasattr(self, 'graph_service'):
-            from app.rag.knowledge_graph import GraphService
-            self.graph_service = GraphService()
-            self.graph_service.load_graph()
-            
-        g = self.graph_service.graph
-        if not g.has_node(chunk_id):
-            return False
-            
-        # 1. Check if chunk has incoming supersedes edge
-        for u, v, d in g.in_edges(chunk_id, data=True):
-            if d.get("type") == "supersedes":
-                return True
-                
-        # 2. Check if parent Article has incoming supersedes edge
-        meta = self.chunk_map.get(chunk_id, {})
-        doc_num = meta.get("doc_num")
-        article = meta.get("article")
-        if doc_num and article:
-            art_key = f"{doc_num}|{article}"
-            if g.has_node(art_key):
-                for u, v, d in g.in_edges(art_key, data=True):
-                    if d.get("type") == "supersedes":
-                        return True
-                        
-        # 3. Check if parent Document has incoming supersedes edge
-        if doc_num and g.has_node(doc_num):
-            for u, v, d in g.in_edges(doc_num, data=True):
-                if d.get("type") == "supersedes":
-                    return True
-                    
-        # 4. Fallback metadata check
-        if meta.get("status") == "Hết hiệu lực":
-            return True
-            
-        return False
-
-    def semantic_search(self, query: str, top_k: int = 20, include_superseded: bool = False) -> List[Dict[str, Any]]:
-        """
-        Tìm kiếm kết hợp (Hybrid Search): Vector (FAISS) + BM25 xếp hạng bằng Reciprocal Rank Fusion (RRF),
-        sau đó áp dụng Reranking. Loại bỏ các phần đã bị thay thế (superseded) nếu include_superseded=False.
-        """
-        # 1. Vector Search
-        vec_results = []
-        vec = self.chat_service.get_embedding(query)
-        if vec:
-            vec_np = np.array([vec], dtype=np.float32)
-            scores, ids = self.index.search(vec_np, min(top_k * 4, self.index.ntotal))
-            for score, faiss_idx in zip(scores[0], ids[0]):
-                if faiss_idx < 0: continue
-                chunk_id = self.faiss_id_map.get(int(faiss_idx))
+        vector_results: list[str] = []
+        vector_scores: dict[str, float] = {}
+        vector = self.chat_service.get_embedding(query)
+        if vector and len(vector) == self.index.d:
+            values = np.asarray([vector], dtype=np.float32)
+            scores, identifiers = self.index.search(values, candidate_limit)
+            for score, identifier in zip(scores[0], identifiers[0]):
+                chunk_id = self.faiss_id_map.get(int(identifier))
                 if chunk_id:
-                    vec_results.append(chunk_id)
+                    vector_results.append(chunk_id)
+                    vector_scores[chunk_id] = float(score)
 
-        # 2. BM25 Search
-        query_tokens = self._tokenize(query)
-        bm25_scores = self.bm25.get_scores(query_tokens)
-        top_bm25_indices = np.argsort(bm25_scores)[::-1][:top_k * 4]
-        bm25_results = [self.bm25_chunks[idx] for idx in top_bm25_indices if bm25_scores[idx] > 0]
+        bm25_scores_array = self.bm25.get_scores(self._tokenize(query))
+        bm25_order = np.argsort(bm25_scores_array)[::-1][:candidate_limit]
+        bm25_results = [
+            self.bm25_chunks[index]
+            for index in bm25_order
+            if float(bm25_scores_array[index]) > 0
+        ]
+        bm25_scores = {
+            self.bm25_chunks[index]: float(bm25_scores_array[index])
+            for index in bm25_order
+            if float(bm25_scores_array[index]) > 0
+        }
 
-        # 3. Reciprocal Rank Fusion (RRF)
-        rrf_scores = {}
-        k_rrf = 60
-        for rank, chunk_id in enumerate(vec_results):
-            rrf_scores[chunk_id] = rrf_scores.get(chunk_id, 0.0) + 1.0 / (k_rrf + rank + 1)
-        for rank, chunk_id in enumerate(bm25_results):
-            rrf_scores[chunk_id] = rrf_scores.get(chunk_id, 0.0) + 1.0 / (k_rrf + rank + 1)
+        rrf_scores: dict[str, float] = {}
+        for results, weight in (
+            (exact_results, 2.0),
+            (vector_results, 1.0),
+            (bm25_results, 1.0),
+        ):
+            for rank, chunk_id in enumerate(results):
+                rrf_scores[chunk_id] = rrf_scores.get(chunk_id, 0.0) + weight / (
+                    60 + rank + 1
+                )
+        ranked_ids = sorted(rrf_scores, key=rrf_scores.get, reverse=True)
 
-        # Sắp xếp theo RRF Score
-        sorted_chunks = sorted(rrf_scores.keys(), key=lambda x: rrf_scores[x], reverse=True)[:top_k * 4]
+        raw_candidates = []
+        for chunk_id in ranked_ids:
+            exact_match = chunk_id in exact_results
+            vector_score = vector_scores.get(chunk_id)
+            overlap_count, lexical_coverage = self._lexical_relevance(
+                query, self.chunks_text_map.get(chunk_id, "")
+            )
+            vector_relevant = vector_score is not None and vector_score >= self.threshold
+            # A large legal corpus contains generic words such as "tài sản" and
+            # "khai thác" in unrelated contexts.  Requiring broad query-token
+            # coverage prevents those coincidental overlaps from turning an
+            # out-of-domain question into legal evidence.
+            lexical_relevant = overlap_count >= 2 and lexical_coverage >= 0.60
+            if not (exact_match or vector_relevant or lexical_relevant):
+                continue
+            item = self._result(
+                chunk_id,
+                rrf_score=rrf_scores[chunk_id],
+                vector_score=vector_score,
+                bm25_score=bm25_scores.get(chunk_id),
+                exact_match=exact_match,
+            )
+            item["lexical_overlap"] = overlap_count
+            item["lexical_coverage"] = lexical_coverage
+            raw_candidates.append(item)
+        if include_superseded:
+            included, excluded = raw_candidates, []
+        else:
+            included, excluded = self.resolver.resolve_documents(raw_candidates, as_of)
+            replacement_candidates = []
+            for item in excluded:
+                replacement_candidates.extend(
+                    (item.get("chunk_id"), chunk_id)
+                    for chunk_id in item.get("replacement_path", [])[1:]
+                )
+            for replaced_chunk_id, chunk_id in replacement_candidates:
+                if chunk_id not in self.chunk_map or any(
+                    item["chunk_id"] == chunk_id for item in included
+                ):
+                    continue
+                replacement = self.get_chunk(chunk_id)
+                replacement["retrieval_origin"] = "temporal_replacement"
+                replacement["relation_type"] = "superseded_by"
+                replacement["relation_path"] = [replaced_chunk_id, chunk_id]
+                resolved_replacements, _ = self.resolver.resolve_documents(
+                    [replacement], as_of
+                )
+                included.extend(resolved_replacements)
 
-        # Lọc bỏ các chunk hết hiệu lực
-        if not include_superseded:
-            sorted_chunks = [cid for cid in sorted_chunks if not self._is_superseded(cid)]
+        candidates = included[: max(requested * 2, requested)]
+        rerank_scores = self.chat_service.get_rerank_scores(
+            query, [candidate["content"] for candidate in candidates]
+        )
+        for index, candidate in enumerate(candidates):
+            candidate["rerank_score"] = (
+                float(rerank_scores[index]) if index < len(rerank_scores) else 0.0
+            )
+        candidates.sort(
+            key=lambda item: (item["rerank_score"], item["rrf_score"]),
+            reverse=True,
+        )
+        return {
+            "results": candidates[:requested],
+            "excluded": excluded,
+            "trace": {
+                "query": query,
+                "exact_candidates": len(exact_results),
+                "vector_candidates": len(vector_results),
+                "bm25_candidates": len(bm25_results),
+                "fused_candidates": len(ranked_ids),
+                "excluded_count": len(excluded),
+                "as_of": self.resolver.normalize_as_of(as_of),
+            },
+        }
 
-        sorted_chunks = sorted_chunks[:top_k * 2]
-
-        # Bulk query chunk contents to avoid multiple single connections
-        chunk_contents = {}
-        sqlite_db_path = SQLITE_DATABASE_FILE
-        if os.path.exists(sqlite_db_path) and sorted_chunks:
-            import sqlite3
-            try:
-                conn = sqlite3.connect(sqlite_db_path)
-                cursor = conn.cursor()
-                placeholders = ",".join("?" for _ in sorted_chunks)
-                cursor.execute(f"SELECT chunk_id, embed_text FROM chunks WHERE chunk_id IN ({placeholders})", sorted_chunks)
-                for row in cursor.fetchall():
-                    chunk_contents[row[0]] = row[1] or ""
-                conn.close()
-            except Exception as e:
-                print(f"Error bulk querying chunk contents from SQLite: {e}")
-
-        candidates = []
-        docs_text_for_rerank = []
-        for chunk_id in sorted_chunks:
-            meta = self.chunk_map.get(chunk_id, {})
-            content = chunk_contents.get(chunk_id) or self._get_chunk_content(chunk_id)
-            candidates.append({
-                "chunk_id": chunk_id,
-                "rrf_score": rrf_scores[chunk_id],
-                "metadata": meta,
-                "content": content
-            })
-            docs_text_for_rerank.append(content)
-
-        if not candidates:
-            return []
-
-        # 4. Rerank
-        rerank_scores = self.chat_service.get_rerank_scores(query, docs_text_for_rerank)
-        for i, candidate in enumerate(candidates):
-            candidate["rerank_score"] = rerank_scores[i]
-
-        candidates.sort(key=lambda x: x["rerank_score"], reverse=True)
-
-        # 5. Build final list
-        final_results = []
-        for item in candidates[:top_k]:
-            final_results.append({
-                "chunk_id": item["chunk_id"],
-                "score": item["rerank_score"],
-                "metadata": item["metadata"],
-                "content": item["content"]
-            })
-        return final_results
+    def semantic_search(
+        self,
+        query: str,
+        top_k: int = 20,
+        include_superseded: bool = False,
+        as_of: Optional[str] = None,
+    ) -> list[dict[str, Any]]:
+        return self.search(query, top_k, include_superseded, as_of)["results"]
 
     def doc_ref_search(
         self,
@@ -259,124 +296,128 @@ class SearchService:
         article_filter: Optional[str] = None,
         clause_filter: Optional[str] = None,
         top_k: int = 10,
-        include_superseded: bool = False
-    ) -> List[Dict[str, Any]]:
-        """
-        Tìm kiếm trong văn bản cụ thể (dùng cho tool).
-        Hỗ trợ lọc theo Số hiệu, Điều, Khoản trước khi Semantic Rank.
-        """
-        extracted_doc_num = self._extract_doc_num(doc_ref)
-        ref_norm = self._normalize_doc_ref(extracted_doc_num or doc_ref)
-        
-        # 1. Lọc chunk_map theo doc_ref
-        matched_ids: List[str] = []
-        
-        # Ưu tiên match chính xác doc_num
-        if extracted_doc_num:
-            extracted_norm = self._normalize_doc_ref(extracted_doc_num)
-            for chunk_id, meta in self.chunk_map.items():
-                doc_num_norm = self._normalize_doc_ref(meta.get("doc_num", ""))
-                if doc_num_norm == extracted_norm:
-                    matched_ids.append(chunk_id)
-        
-        # Fallback match mờ nếu không tìm thấy
-        if not matched_ids:
-            for chunk_id, meta in self.chunk_map.items():
-                doc_num_norm = self._normalize_doc_ref(meta.get("doc_num", ""))
-                title_norm = self._normalize_doc_ref(meta.get("title", ""))
-                if (ref_norm in doc_num_norm or ref_norm in title_norm or 
-                    doc_num_norm in ref_norm or title_norm in ref_norm):
-                    matched_ids.append(chunk_id)
-                    
-        if not matched_ids:
-            return []
-            
-        # Lọc bỏ các chunk hết hiệu lực
+        include_superseded: bool = False,
+        as_of: Optional[str] = None,
+    ) -> list[dict[str, Any]]:
+        ref = self._normalize(self._extract_doc_num(doc_ref) or doc_ref)
+        matched = []
+        for chunk_id, metadata in self.chunk_map.items():
+            doc_num = self._normalize(metadata.get("doc_num", ""))
+            title = self._normalize(metadata.get("title", ""))
+            if ref not in {doc_num, title} and ref not in doc_num and ref not in title:
+                continue
+            if article_filter and self._normalize(article_filter) not in self._normalize(
+                metadata.get("article", "")
+            ):
+                continue
+            if clause_filter and self._normalize(clause_filter) not in self._normalize(
+                metadata.get("clause", "")
+            ):
+                continue
+            matched.append(
+                self._result(
+                    chunk_id,
+                    rrf_score=1.0,
+                    vector_score=None,
+                    bm25_score=None,
+                    exact_match=True,
+                    retrieval_origin="document_reference",
+                )
+            )
         if not include_superseded:
-            matched_ids = [cid for cid in matched_ids if not self._is_superseded(cid)]
+            matched, _ = self.resolver.resolve_documents(matched, as_of)
+        if len(matched) <= top_k:
+            return matched
+        query_tokens = set(self._tokenize(query))
+        matched.sort(
+            key=lambda item: len(query_tokens & set(self._tokenize(item["content"]))),
+            reverse=True,
+        )
+        return matched[:top_k]
 
-        if not matched_ids:
-            return []
+    def get_chunk(self, chunk_id: str) -> Optional[dict[str, Any]]:
+        if chunk_id not in self.chunk_map:
+            return None
+        return self._result(
+            chunk_id,
+            rrf_score=0.0,
+            vector_score=None,
+            bm25_score=None,
+            exact_match=True,
+            retrieval_origin="graph",
+        )
 
-        # 2. Lọc theo Điều/Khoản nếu có
-        if article_filter:
-            dieu_norm = self._normalize_doc_ref(article_filter)
-            # Thử match key trong article_index_map trước
-            doc_id = self.chunk_map[matched_ids[0]].get("doc_id")
-            article_key = f"{doc_id}|{article_filter.strip()}"
-            
-            faiss_ids_for_article = self.article_index_map.get(article_key)
-            if faiss_ids_for_article:
-                ids_from_article = {
-                    self.faiss_id_map[fid] for fid in faiss_ids_for_article 
-                    if fid in self.faiss_id_map
-                }
-                matched_ids = [cid for cid in matched_ids if cid in ids_from_article]
-            else:
-                # Fallback scan metadata
-                matched_ids = [
-                    cid for cid in matched_ids 
-                    if dieu_norm in self._normalize_doc_ref(self.chunk_map[cid].get("article", ""))
-                ]
-        
-        if clause_filter:
-            khoan_norm = self._normalize_doc_ref(clause_filter)
-            matched_ids = [
-                cid for cid in matched_ids 
-                if khoan_norm in self._normalize_doc_ref(self.chunk_map[cid].get("clause", ""))
-            ]
-            
-        if not matched_ids:
-            return []
-            
-        # 3. Semantic Ranking trong tập đã lọc
-        if len(matched_ids) > 1:
-            vec = self.chat_service.get_embedding(query)
-            if vec:
-                vec_np = np.array([vec], dtype=np.float32)
-                chunk_to_faiss = {v: k for k, v in self.faiss_id_map.items()}
-                matched_faiss_ids = [chunk_to_faiss[cid] for cid in matched_ids if cid in chunk_to_faiss]
-                
-                if matched_faiss_ids:
-                    k_search = min(len(matched_faiss_ids) + 5, self.index.ntotal)
-                    scores, ids = self.index.search(vec_np, k_search)
-                    
-                    scored_matches = []
-                    faiss_id_set = set(matched_faiss_ids)
-                    
-                    for score, fid in zip(scores[0], ids[0]):
-                        if fid in faiss_id_set and float(score) >= self.threshold:
-                            cid = self.faiss_id_map[int(fid)]
-                            scored_matches.append((float(score), cid))
-                    
-                    scored_matches.sort(reverse=True)
-                    matched_ids = [cid for _, cid in scored_matches[:top_k]]
-        
-        # 4. Build result
+    def _exact_identifier_candidates(self, query: str) -> list[str]:
+        normalized = self._normalize(query)
+        doc_matches = [
+            doc_num
+            for doc_num in {item.get("doc_num", "") for item in self.chunk_map.values()}
+            if doc_num and self._normalize(doc_num) in normalized
+        ]
+        article_match = re.search(r"\bđiều\s+([\w.-]+)", normalized, re.UNICODE)
+        clause_match = re.search(r"\bkhoản\s+([\w.-]+)", normalized, re.UNICODE)
         results = []
-        for cid in matched_ids[:top_k]:
-            meta = self.chunk_map.get(cid, {})
-            content = self._get_chunk_content(cid)
-            results.append({
-                "chunk_id": cid,
-                "score": 1.0,
-                "metadata": meta,
-                "content": content,
-                "source": "doc_ref_search"
-            })
-            
+        for chunk_id, metadata in self.chunk_map.items():
+            if doc_matches and metadata.get("doc_num") not in doc_matches:
+                continue
+            if article_match and self._normalize(metadata.get("article", "")) != self._normalize(
+                f"Điều {article_match.group(1)}"
+            ):
+                continue
+            if clause_match and self._normalize(metadata.get("clause", "")) != self._normalize(
+                f"Khoản {clause_match.group(1)}"
+            ):
+                continue
+            if doc_matches or article_match or clause_match:
+                results.append(chunk_id)
         return results
 
-    def _normalize_doc_ref(self, text: str) -> str:
-        if not text: return ""
-        return re.sub(r'\s+', ' ', text.strip().lower())
+    def _lexical_relevance(self, query: str, content: str) -> tuple[int, float]:
+        query_tokens = {
+            token
+            for token in self._tokenize(query)
+            if token not in self.LEXICAL_STOPWORDS and len(token) > 1
+        }
+        if not query_tokens:
+            return 0, 0.0
+        content_tokens = set(self._tokenize(content))
+        overlap = len(query_tokens & content_tokens)
+        return overlap, overlap / len(query_tokens)
 
-    def _extract_doc_num(self, text: str) -> Optional[str]:
-        if not text: return None
+    @classmethod
+    def _is_in_domain_query(cls, query: str) -> bool:
+        normalized = cls._normalize(query)
+        return any(term in normalized for term in cls.DOMAIN_TERMS)
+
+    def _result(
+        self,
+        chunk_id: str,
+        *,
+        rrf_score: float,
+        vector_score: Optional[float],
+        bm25_score: Optional[float],
+        exact_match: bool,
+        retrieval_origin: str = "hybrid",
+    ) -> dict[str, Any]:
+        return {
+            "chunk_id": chunk_id,
+            "content": self.chunks_text_map.get(chunk_id, ""),
+            "metadata": dict(self.chunk_map.get(chunk_id, {})),
+            "score": rrf_score,
+            "rrf_score": rrf_score,
+            "vector_score": vector_score,
+            "bm25_score": bm25_score,
+            "exact_match": exact_match,
+            "retrieval_origin": retrieval_origin,
+        }
+
+    @staticmethod
+    def _extract_doc_num(text: str) -> Optional[str]:
         match = re.search(
-            r'\d+[A-Za-z]*\s*/\s*\d{4}\s*/\s*[A-ZĐƯƠ]+(?:-[A-ZĐƯƠ]+)*',
-            text, flags=re.UNICODE
+            r"\d+[A-Za-z]*\s*/\s*\d{4}\s*/\s*[A-ZĐƯƠ][A-Z0-9ĐƯƠ]*(?:-[A-Z0-9ĐƯƠ]+)*",
+            text or "",
+            flags=re.UNICODE,
         )
-        if not match: return None
-        raw = match.group(0)
-        return re.sub(r'\s*/\s*', '/', raw).strip()
+        if not match:
+            return None
+        return re.sub(r"\s*/\s*", "/", match.group(0)).strip()

@@ -128,11 +128,21 @@ def run_tests():
     status, data = make_request("/evaluation/benchmark")
     if status == 200:
         metrics = data.get("metrics", {})
+        standard = metrics.get("standard", {})
+        advanced = metrics.get("advanced", {})
+        
+        std_hit = standard.get("recall_at_5", 0.0)
+        adv_hit = advanced.get("recall_at_5", 0.0)
+        
+        results = data.get("results", [])
+        std_stale_count = sum(1 for r in results if r.get("standard", {}).get("stale_count", 0) > 0)
+        adv_stale_count = sum(1 for r in results if r.get("advanced", {}).get("stale_count", 0) > 0)
+
         print_success("Đã hoàn tất chạy Benchmark đối sánh hiệu năng:")
-        print(f"  - Standard Hit Rate (RAG thường): {BOLD}{metrics.get('standard_hit_rate') * 100:.1f}%{END}")
-        print(f"  - Advanced Hit Rate (Graph-RAG): {BOLD}{metrics.get('advanced_hit_rate') * 100:.1f}%{END}")
-        print(f"  - Số tài liệu cũ lọt lưới (Standard): {BOLD}{metrics.get('standard_superseded_results')}{END} lần")
-        print(f"  - Số tài liệu cũ lọt lưới (Advanced): {BOLD}{metrics.get('advanced_superseded_results')}{END} lần")
+        print(f"  - Standard Hit Rate (RAG thường): {BOLD}{std_hit * 100:.1f}%{END}")
+        print(f"  - Advanced Hit Rate (Graph-RAG): {BOLD}{adv_hit * 100:.1f}%{END}")
+        print(f"  - Số tài liệu cũ lọt lưới (Standard): {BOLD}{std_stale_count}{END} lần")
+        print(f"  - Số tài liệu cũ lọt lưới (Advanced): {BOLD}{adv_stale_count}{END} lần")
     else:
         print_error("Không thể chạy hoặc tải kết quả Benchmark.", data.get("error"))
 
