@@ -18,7 +18,7 @@ export const DocumentNode = ({ data }) => {
       
       <div className="document-node-header">
         <span className={`document-node-tag ${isNhnn ? 'nhnn' : 'shb'}`}>
-          {isNhnn ? 'NHNN Regulation' : 'SHB Internal'}
+          {isNhnn ? 'NHNN Regulation' : 'SHB Internal'} {data.isExpanded ? '▼' : '▶'}
         </span>
         <span className="document-node-date monospace">{data.effective_date}</span>
       </div>
