@@ -5,9 +5,12 @@ export const useGraphData = () => {
     graphData,
     selectedNode,
     searchQuery,
+    activeFilters,
     setSelectedNode,
     setSearchQuery,
     searchGraph,
+    toggleFilter,
+    clearFilters,
     addNodeAndRelationships
   } = useGraphContext();
 
@@ -15,9 +18,12 @@ export const useGraphData = () => {
     graphData,
     selectedNode,
     searchQuery,
+    activeFilters,
     setSelectedNode,
     setSearchQuery,
     searchGraph,
+    toggleFilter,
+    clearFilters,
     addNodeAndRelationships
   };
 };

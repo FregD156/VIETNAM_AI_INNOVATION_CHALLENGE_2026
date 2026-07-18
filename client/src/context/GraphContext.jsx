@@ -9,59 +9,121 @@ export const GraphProvider = ({ children }) => {
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
   const [selectedNode, setSelectedNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilters, setActiveFilters] = useState({
+    shb: false,
+    nhnn: false,
+    active: false,
+    expired: false
+  });
 
-  // Nạp và phân tích dữ liệu đồ thị khi mount
+  // Toggle filter
+  const toggleFilter = useCallback((filterKey) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      [filterKey]: !prev[filterKey]
+    }));
+  }, []);
+
+  // Xóa toàn bộ bộ lọc màu
+  const clearFilters = useCallback(() => {
+    setActiveFilters({
+      shb: false,
+      nhnn: false,
+      active: false,
+      expired: false
+    });
+  }, []);
+
+  // Lọc và highlight đồ thị dựa trên searchQuery và activeFilters
   useEffect(() => {
     const parsed = parseNeo4jToReactFlow(rawData);
-    setGraphData(parsed);
-  }, [rawData]);
+    
+    const isDocTypeSelected = activeFilters.shb || activeFilters.nhnn;
+    const isStatusSelected = activeFilters.active || activeFilters.expired;
+    const hasSearch = searchQuery.trim() !== '';
+    const hasActiveFilters = isDocTypeSelected || isStatusSelected || hasSearch;
+    
+    if (!hasActiveFilters) {
+      setGraphData(parsed);
+      return;
+    }
+    
+    const highlightedNodeIds = new Set();
+    
+    const updatedNodes = parsed.nodes.map(node => {
+      // 1. Kiểm tra nhóm Loại tài liệu
+      let matchDocType = true;
+      if (isDocTypeSelected) {
+        const isSHB = node.data.docType === 'SHB' || node.data.docType === 'SHB_Internal' || node.id.includes('shb') || node.id.includes('qd') || node.id.includes('tietkiem');
+        const isNHNN = node.data.docType === 'NHNN' || node.id.includes('tt');
+        
+        matchDocType = (activeFilters.shb && isSHB) || (activeFilters.nhnn && isNHNN);
+      }
+
+      // 2. Kiểm tra nhóm Hiệu lực
+      let matchStatus = true;
+      if (isStatusSelected) {
+        const status = node.data.status;
+        matchStatus = (activeFilters.active && status === 'active') || (activeFilters.expired && status === 'expired');
+      }
+
+      // 3. Kiểm tra Ô Tìm kiếm
+      let matchSearch = true;
+      if (hasSearch) {
+        const q = searchQuery.toLowerCase().trim();
+        if (q === ':active') {
+          matchSearch = node.data.status === 'active';
+        } else if (q === ':expired') {
+          matchSearch = node.data.status === 'expired';
+        } else if (q === ':shb') {
+          matchSearch = node.data.docType === 'SHB' || node.id.includes('shb') || node.id.includes('qd') || node.id.includes('tietkiem');
+        } else if (q === ':nhnn') {
+          matchSearch = node.data.docType === 'NHNN' || node.id.includes('tt');
+        } else {
+          const title = (node.data.title || '').toLowerCase();
+          const text = (node.data.text || '').toLowerCase();
+          matchSearch = title.includes(q) || text.includes(q);
+        }
+      }
+
+      const isHighlighted = matchDocType && matchStatus && matchSearch;
+      if (isHighlighted) {
+        highlightedNodeIds.add(node.id);
+      }
+
+      return {
+        ...node,
+        style: {
+          ...node.style,
+          opacity: isHighlighted ? 1 : 0.15,
+          border: isHighlighted ? '2px solid var(--orange-signature)' : 'none',
+          boxShadow: isHighlighted ? '0 0 15px rgba(240, 99, 29, 0.4)' : 'none'
+        }
+      };
+    });
+
+    // Làm mờ các edges nếu một trong hai đầu node bị mờ
+    const updatedEdges = parsed.edges.map(edge => {
+      const sourceHighlighted = highlightedNodeIds.has(edge.source);
+      const targetHighlighted = highlightedNodeIds.has(edge.target);
+      const isHighlighted = sourceHighlighted && targetHighlighted;
+      
+      return {
+        ...edge,
+        style: {
+          ...edge.style,
+          opacity: isHighlighted ? 1 : 0.15
+        }
+      };
+    });
+
+    setGraphData({ nodes: updatedNodes, edges: updatedEdges });
+  }, [rawData, searchQuery, activeFilters]);
 
   // Thực hiện tìm kiếm và highlight các Node khớp trên Canvas
   const searchGraph = useCallback((query) => {
     setSearchQuery(query);
-    if (!query.trim()) {
-      // Nếu rỗng, khôi phục màu sắc mặc định
-      const parsed = parseNeo4jToReactFlow(rawData);
-      setGraphData(parsed);
-      return;
-    }
-
-    const q = query.toLowerCase().trim();
-    setGraphData(prev => {
-      const updatedNodes = prev.nodes.map(node => {
-        let isMatched = false;
-        
-        if (q === ':active') {
-          isMatched = node.data.status === 'active';
-        } else if (q === ':expired') {
-          isMatched = node.data.status === 'expired';
-        } else if (q === ':shb') {
-          isMatched = node.data.docType === 'SHB' || node.id.includes('shb') || node.id.includes('qd') || node.id.includes('tietkiem');
-        } else if (q === ':nhnn') {
-          isMatched = node.data.docType === 'NHNN' || node.id.includes('tt');
-        } else {
-          const title = (node.data.title || '').toLowerCase();
-          const text = (node.data.text || '').toLowerCase();
-          isMatched = title.includes(q) || text.includes(q);
-        }
-        
-        return {
-          ...node,
-          style: {
-            ...node.style,
-            opacity: isMatched ? 1 : 0.15,
-            border: isMatched ? '2px solid var(--orange-signature)' : 'none',
-            boxShadow: isMatched ? '0 0 15px rgba(240, 99, 29, 0.4)' : 'none'
-          }
-        };
-      });
-
-      return {
-        ...prev,
-        nodes: updatedNodes
-      };
-    });
-  }, [rawData]);
+  }, []);
 
   // Thêm một node mới động (phục vụ tính năng phê duyệt tài liệu của Admin)
   const addNodeAndRelationships = useCallback((newNode, newRels) => {
@@ -91,9 +153,12 @@ export const GraphProvider = ({ children }) => {
       graphData,
       selectedNode,
       searchQuery,
+      activeFilters,
       setSelectedNode,
       setSearchQuery,
       searchGraph,
+      toggleFilter,
+      clearFilters,
       addNodeAndRelationships
     }}>
       {children}

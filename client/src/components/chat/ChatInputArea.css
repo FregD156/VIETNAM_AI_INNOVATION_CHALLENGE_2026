@@ -437,3 +437,138 @@
   box-shadow: none !important;
 }
 
+/* ============================================================
+   CẢI TIẾN: SMART SUGGESTIONS DECK & AUDIO WAVEFORM
+   ============================================================ */
+.chat-suggestions-deck {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestions-tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.suggestions-deck-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.suggestions-tabs-list {
+  display: flex;
+  gap: 6px;
+}
+
+.suggestion-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 3px 10px;
+  border-radius: var(--radius-circle);
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.suggestion-tab-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--navy-surface-raised);
+}
+
+.suggestion-tab-btn.active {
+  background-color: var(--orange-wash);
+  border-color: var(--orange-signature);
+  color: var(--orange-signature);
+}
+
+.suggestion-chips-list-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Ghi đè gợi ý cũ */
+.chat-suggestions-wrapper {
+  display: none !important; /* Thay bằng deck mới */
+}
+
+/* Sóng âm Microphone */
+.voice-recorder-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.voice-audio-waveform {
+  position: absolute;
+  left: 44px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+  padding: 0 8px;
+  background-color: var(--navy-surface-raised);
+  border: 1px solid var(--brick-expired);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(192, 68, 44, 0.2);
+  z-index: 10;
+  animation: fadeIn var(--dur-fast) var(--ease-standard);
+}
+
+.audio-wave-bar {
+  width: 2px;
+  height: 6px;
+  background-color: var(--brick-expired);
+  border-radius: var(--radius-circle);
+  animation: voice-wave-play 1.2s ease-in-out infinite;
+}
+
+.audio-wave-bar.bar1 { animation-delay: 0.1s; height: 10px; }
+.audio-wave-bar.bar2 { animation-delay: 0.3s; height: 16px; }
+.audio-wave-bar.bar3 { animation-delay: 0.5s; height: 8px; }
+.audio-wave-bar.bar4 { animation-delay: 0.2s; height: 14px; }
+.audio-wave-bar.bar5 { animation-delay: 0.4s; height: 6px; }
+
+@keyframes voice-wave-play {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1.6);
+  }
+}
+
+/* Light mode overrides cho Suggestions Deck & Waveform */
+[data-theme="light"] .chat-suggestions-deck {
+  background-color: #F8FAF9;
+  border-color: rgba(15, 23, 42, 0.08);
+}
+[data-theme="light"] .suggestion-tab-btn:hover {
+  background-color: rgba(15, 23, 42, 0.04);
+}
+[data-theme="light"] .suggestion-tab-btn.active {
+  background-color: var(--orange-wash);
+  border-color: var(--orange-signature);
+  color: var(--orange-signature);
+}
+[data-theme="light"] .voice-audio-waveform {
+  background-color: #FFFFFF;
+  border-color: var(--brick-expired);
+  box-shadow: 0 2px 8px rgba(192, 68, 44, 0.15);
+}
+
+

@@ -13,7 +13,10 @@
     { "id": "clause_12_tt16", "label": "Clause", "properties": { "id": "clause_12_tt16", "title": "Điều 12 - Thông tư 16", "text": "Ngân hàng thương mại mở tài khoản thanh toán bằng eKYC phải áp dụng hạn mức tối đa 100 triệu đồng/tháng.", "status": "active", "effective_date": "2020-12-04" } },
     
     { "id": "doc_qd104", "label": "Document", "properties": { "id": "qd104", "title": "Quyết định 104/2024/SHB", "type": "SHB_Internal", "effective_date": "2024-01-10" } },
-    { "id": "clause_9_qd104", "label": "Clause", "properties": { "id": "clause_9_qd104", "title": "Điều 9 - QĐ 104/2024/SHB", "text": "Mở tài khoản eKYC phải thu thập CCCD gắn chip, hạn mức giao dịch không vượt quá 100 triệu đồng/tháng.", "status": "active", "effective_date": "2024-01-10" } }
+    { "id": "clause_9_qd104", "label": "Clause", "properties": { "id": "clause_9_qd104", "title": "Điều 9 - QĐ 104/2024/SHB", "text": "Mở tài khoản eKYC phải thu thập CCCD gắn chip, hạn mức giao dịch không vượt quá 100 triệu đồng/tháng.", "status": "active", "effective_date": "2024-01-10" } },
+    
+    { "id": "doc_qd_tietkiem", "label": "Document", "properties": { "id": "qd_tietkiem", "title": "Quy chế Tiết kiệm SHB 2025", "type": "SHB_Internal", "effective_date": "2025-01-01" } },
+    { "id": "clause_5_qd_tietkiem", "label": "Clause", "properties": { "id": "clause_5_qd_tietkiem", "title": "Điều 5 - Quy chế Tiết kiệm SHB", "text": "Trường hợp đến ngày đến hạn mà người gửi tiền không đến rút, tổ chức tín dụng sẽ tự động gia hạn cả gốc và lãi sang kỳ hạn mới tương đương kỳ hạn cũ. Lãi suất áp dụng là lãi suất công bố của SHB tại ngày tái tục.", "status": "active", "effective_date": "2025-01-01" } }
   ],
   "rawRelationships": [
     { "id": "rel1", "type": "HAS_CLAUSE", "start": "doc_tt39", "end": "clause_5_tt39" },
@@ -25,6 +28,7 @@
     { "id": "rel_amend", "type": "AMENDS", "start": "doc_tt06", "end": "doc_tt39" },
     { "id": "rel_super", "type": "SUPERSEDES", "start": "clause_5_tt06", "end": "clause_5_tt39" },
     { "id": "rel_conflict", "type": "CONFLICTS_WITH", "start": "clause_5_tt06", "end": "clause_14_qd214" },
-    { "id": "rel_ref", "type": "REFERENCES", "start": "clause_9_qd104", "end": "clause_12_tt16" }
+    { "id": "rel_ref", "type": "REFERENCES", "start": "clause_9_qd104", "end": "clause_12_tt16" },
+    { "id": "rel6", "type": "HAS_CLAUSE", "start": "doc_qd_tietkiem", "end": "clause_5_qd_tietkiem" }
   ]
 }

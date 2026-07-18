@@ -462,6 +462,44 @@
   background-color: rgba(28, 56, 41, 0.08) !important;
 }
 
+/* ============================================================
+   CẢI TIẾN: HIGHLIGHT VÀ BADGE CHO VĂN BẢN PHÁP LÝ
+   ============================================================ */
+.legal-highlight {
+  background-color: var(--orange-wash);
+  color: var(--orange-ember);
+  padding: 1px 4px;
+  border-radius: var(--radius-tag);
+  font-weight: 600;
+  border: 1px dashed rgba(240, 99, 29, 0.3);
+}
+
+[data-theme="light"] .legal-highlight {
+  background-color: rgba(240, 99, 29, 0.08);
+  color: var(--orange-signature);
+  border-color: rgba(240, 99, 29, 0.4);
+}
+
+.legal-code-badge {
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  font-weight: 500;
+  background-color: var(--navy-abyss);
+  border: 1px solid var(--navy-hairline);
+  color: var(--sea-blue-light);
+  padding: 1px 5px;
+  border-radius: var(--radius-tag);
+  display: inline-block;
+  margin: 0 2px;
+}
+
+[data-theme="light"] .legal-code-badge {
+  background-color: rgba(28, 114, 147, 0.06);
+  border-color: rgba(28, 114, 147, 0.15);
+  color: var(--sea-blue);
+}
+
+
 
 
 

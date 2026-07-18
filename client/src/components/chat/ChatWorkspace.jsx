@@ -35,6 +35,18 @@ export const ChatWorkspace = () => {
     };
   }, []);
 
+  // Lắng nghe sự kiện gửi tin nhắn tự động từ Đồ thị sang
+  useEffect(() => {
+    const handleAutoSend = (e) => {
+      const query = e.detail;
+      if (query && sendMessage) {
+        sendMessage(query);
+      }
+    };
+    window.addEventListener('auto-send-chat', handleAutoSend);
+    return () => window.removeEventListener('auto-send-chat', handleAutoSend);
+  }, [sendMessage]);
+
   const handleCitationClick = (citationId) => {
     setActiveCitationId(citationId);
     // Gửi Custom Event để tab Đồ thị tự chọn node và pan camera

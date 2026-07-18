@@ -47,12 +47,12 @@ const TIMELINE_DATA = {
   ]
 };
 
-export const VersionTimeline = ({ nodeId }) => {
+export const VersionTimeline = ({ nodeId = '' }) => {
   // Xác định dòng thời gian tương ứng với Node đang chọn
   let timelineKey = 'loan_limit';
-  if (nodeId.includes('tt16') || nodeId.includes('qd104') || nodeId.includes('ekyc')) {
+  if (nodeId && (nodeId.includes('tt16') || nodeId.includes('qd104') || nodeId.includes('ekyc'))) {
     timelineKey = 'ekyc';
-  } else if (nodeId.includes('tt39') || nodeId.includes('tietkiem') || nodeId.includes('deposit')) {
+  } else if (nodeId && (nodeId.includes('tt39') || nodeId.includes('tietkiem') || nodeId.includes('deposit'))) {
     timelineKey = 'deposit';
   }
 

@@ -30,7 +30,11 @@ export const parseNeo4jToReactFlow = (rawData) => {
     
     // Quyết định 104 & Clause
     doc_qd104: { x: 550, y: 450 },
-    clause_9_qd104: { x: 550, y: 600 }
+    clause_9_qd104: { x: 550, y: 600 },
+    
+    // Quy chế Tiết kiệm & Clause
+    doc_qd_tietkiem: { x: 850, y: 450 },
+    clause_5_qd_tietkiem: { x: 850, y: 600 }
   };
 
   // 1. Chuyển đổi Nodes

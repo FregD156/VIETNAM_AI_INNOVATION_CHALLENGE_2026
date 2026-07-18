@@ -19,7 +19,16 @@ export const MessageItem = ({ message, onCitationClick }) => {
   const isAi = message.sender === 'ai';
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState(null); // null | 'up' | 'down'
-  const [isPlayingTTS, setIsPlayingTTS] = useState(false); // Giả lập giọng đọc TTS
+  const [isPlayingTTS, setIsPlayingTTS] = useState(false); // Trạng thái phát âm thật
+
+  // Dọn dẹp âm thanh khi component unmount
+  React.useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Sao chép câu trả lời vào clipboard
   const handleCopyText = () => {
@@ -29,9 +38,51 @@ export const MessageItem = ({ message, onCitationClick }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Giả lập phát giọng nói câu trả lời
+  // Đọc to câu trả lời tiếng Việt bằng SpeechSynthesis của trình duyệt
   const toggleTTS = () => {
-    setIsPlayingTTS(!isPlayingTTS);
+    if (!window.speechSynthesis) {
+      // Fallback nếu trình duyệt không hỗ trợ TTS
+      setIsPlayingTTS(!isPlayingTTS);
+      return;
+    }
+
+    if (isPlayingTTS) {
+      window.speechSynthesis.cancel();
+      setIsPlayingTTS(false);
+    } else {
+      window.speechSynthesis.cancel();
+      
+      // Làm sạch markdown text để phát âm tự nhiên hơn
+      const cleanText = message.text
+        .replace(/\*\*+/g, '')
+        .replace(/###\s+/g, '')
+        .replace(/##\s+/g, '')
+        .replace(/>\s+/g, '')
+        .replace(/[-*]\s+/g, ', ');
+
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'vi-VN';
+      utterance.rate = 1.0; // Tốc độ đọc vừa phải
+      
+      // Cố gắng chọn giọng đọc tiếng Việt tốt nhất
+      const voices = window.speechSynthesis.getVoices();
+      const viVoice = voices.find(v => v.lang.includes('vi') || v.lang.includes('VI'));
+      if (viVoice) {
+        utterance.voice = viVoice;
+      }
+
+      utterance.onend = () => {
+        setIsPlayingTTS(false);
+      };
+
+      utterance.onerror = (e) => {
+        console.error('Lỗi phát giọng đọc:', e);
+        setIsPlayingTTS(false);
+      };
+
+      setIsPlayingTTS(true);
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
   // Nâng cấp parser Markdown đơn giản bằng JS thuần để render văn bản pháp quy đẹp mắt
@@ -43,13 +94,59 @@ export const MessageItem = ({ message, onCitationClick }) => {
     let listItems = [];
     const elements = [];
 
+    const parseKeywords = (text) => {
+      if (typeof text !== 'string') return text;
+
+      // Regex 1: nhận diện Thông tư / Quyết định (ví dụ: TT 06/2023, QĐ 214/2022/QĐ-SHB)
+      const docRegexStr = '\\b((?:TT|QĐ)\\s*\\d+\\/\\d+(?:\\/(?:TT-NHNN|QĐ-SHB|SHB))?)\\b';
+      
+      // Regex 2: nhận diện số tiền, hạn mức giao dịch (ví dụ: 500 triệu, 100.000.000 VNĐ)
+      const moneyRegexStr = '\\b(\\d+(?:\\.\\d+)*\\s*(?:triệu|tỷ)(?:\\s*(?:đồng|VNĐ))?(?:\\/tháng)?|\\d{1,3}(?:\\.\\d{3})+(?:\\s*(?:VNĐ|đồng))?(?:\\/tháng)?)\\b';
+
+      const combinedRegex = new RegExp(`${docRegexStr}|${moneyRegexStr}`, 'gi');
+      
+      const res = [];
+      let lastIdx = 0;
+      let match;
+      let key = 0;
+      
+      while ((match = combinedRegex.exec(text)) !== null) {
+        if (match.index > lastIdx) {
+          res.push(text.substring(lastIdx, match.index));
+        }
+        
+        const matchedText = match[0];
+        if (matchedText.match(/(?:TT|QĐ)/i)) {
+          res.push(
+            <span key={`doc-${key++}`} className="legal-code-badge">
+              {matchedText}
+            </span>
+          );
+        } else {
+          res.push(
+            <span key={`money-${key++}`} className="legal-highlight">
+              {matchedText}
+            </span>
+          );
+        }
+        
+        lastIdx = combinedRegex.lastIndex;
+      }
+      
+      if (lastIdx < text.length) {
+        res.push(text.substring(lastIdx));
+      }
+      
+      return res.length > 0 ? res : text;
+    };
+
     const parseBold = (str) => {
       const parts = str.split('**');
       return parts.map((part, index) => {
         if (index % 2 === 1) {
-          return <strong key={index}>{part}</strong>;
+          return <strong key={index}>{parseKeywords(part)}</strong>;
         }
-        return part;
+        return <span key={index}>{parseKeywords(part)}</span>;
       });
     };
 

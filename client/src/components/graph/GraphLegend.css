@@ -40,50 +40,115 @@
   gap: 5px;
 }
 
+.legend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.btn-legend-reset {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--radius-circle);
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.btn-legend-reset:hover {
+  color: var(--orange-signature);
+  background-color: var(--navy-surface-raised);
+}
+
 .legend-item {
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.legend-item.filterable {
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: 4px;
+}
+
+.legend-item.filterable:hover {
+  background-color: var(--navy-surface-raised);
+}
+
+.legend-item.filterable.active {
+  background-color: rgba(240, 99, 29, 0.08);
+}
+
+.legend-item.filterable.active .legend-item-text {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.legend-item.filterable.inactive {
+  opacity: 0.45;
 }
 
 .legend-item-text {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--text-secondary);
 }
 
 .legend-divider {
   height: 1px;
   background-color: var(--navy-hairline);
+  margin: 4px 0;
 }
 
 /* Indicators styling */
 .dot-color-indicator {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   border-radius: var(--radius-circle); /* tròn */
   flex-shrink: 0;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.legend-item.filterable:hover .dot-color-indicator {
+  transform: scale(1.15);
+}
+
+.legend-check-icon {
+  color: var(--navy-abyss);
+  font-size: 9px;
+  stroke-width: 4px; /* làm dày nét */
 }
 
 /* Node Colors mapping */
 .dot-color-indicator.node-shb {
   background-color: var(--orange-signature);
-  box-shadow: 0 0 4px var(--orange-signature);
+  box-shadow: 0 0 6px rgba(240, 99, 29, 0.4);
 }
 
 .dot-color-indicator.node-nhnn {
   background-color: var(--sea-blue-light);
-  box-shadow: 0 0 4px var(--sea-blue-light);
+  box-shadow: 0 0 6px rgba(79, 168, 201, 0.4);
 }
 
 .dot-color-indicator.node-active {
   background-color: var(--emerald-active);
-  box-shadow: 0 0 4px var(--emerald-active);
+  box-shadow: 0 0 6px rgba(47, 158, 104, 0.4);
 }
 
 .dot-color-indicator.node-expired {
   background-color: var(--brick-expired);
-  box-shadow: 0 0 4px var(--brick-expired);
+  box-shadow: 0 0 6px rgba(192, 68, 44, 0.4);
 }
 
 /* Edge Lines mapping */
