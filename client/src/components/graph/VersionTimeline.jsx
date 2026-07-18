@@ -1,62 +1,91 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useGraphData } from '../../hooks/useGraphData';
 import './VersionTimeline.css';
 
-// Chuỗi phiên bản đã được sắp xếp trước theo năm
-const TIMELINE_DATA = {
-  loan_limit: [
-    {
-      year: '2022',
-      status: 'expired',
-      version: 'v1.0',
-      text: 'Đối với vay tiêu dùng tín chấp dành cho đối tác liên kết của SHB, hạn mức cho vay tối đa là 500.000.000 VNĐ. Thời hạn vay tối đa 60 tháng.'
-    },
-    {
-      year: '2023',
-      status: 'active',
-      version: 'v2.0',
-      text: 'Riêng đối với các khoản cho vay được duyệt online thông qua ứng dụng SHB Mobile, dư nợ cho vay tối đa đối với một khách hàng không vượt quá 100.000.000 VNĐ theo Thông tư 06/2023/TT-NHNN.'
-    }
-  ],
-  ekyc: [
-    {
-      year: '2020',
-      status: 'expired',
-      version: 'v1.0',
-      text: 'Ngân hàng thương mại mở tài khoản thanh toán bằng eKYC phải áp dụng hạn mức tối đa 100 triệu đồng/tháng.'
-    },
-    {
-      year: '2024',
-      status: 'active',
-      version: 'v1.1',
-      text: 'Mở tài khoản eKYC phải thu thập CCCD gắn chip, thực hiện đối chiếu dữ liệu sinh trắc học với Cơ sở dữ liệu quốc gia về dân cư. Hạn mức giao dịch giữ nguyên 100 triệu đồng/tháng.'
-    }
-  ],
-  deposit: [
-    {
-      year: '2016',
-      status: 'expired',
-      version: 'v1.0',
-      text: 'Phương thức gia hạn nợ và lãi suất gia hạn do TCTD tự thỏa thuận. Nếu hết kỳ hạn khách hàng không đến rút, toàn bộ số dư được bảo lưu lãi suất không kỳ hạn.'
-    },
-    {
-      year: '2025',
-      status: 'active',
-      version: 'v2.0',
-      text: 'Tự động gia hạn cả gốc và lãi sang kỳ hạn mới tương đương kỳ hạn cũ. Lãi suất áp dụng là lãi suất công bố của SHB tại ngày tái tục.'
-    }
-  ]
-};
-
 export const VersionTimeline = ({ nodeId = '' }) => {
-  // Xác định dòng thời gian tương ứng với Node đang chọn
-  let timelineKey = 'loan_limit';
-  if (nodeId && (nodeId.includes('tt16') || nodeId.includes('qd104') || nodeId.includes('ekyc'))) {
-    timelineKey = 'ekyc';
-  } else if (nodeId && (nodeId.includes('tt39') || nodeId.includes('tietkiem') || nodeId.includes('deposit'))) {
-    timelineKey = 'deposit';
-  }
+  const { graphData } = useGraphData();
 
-  const timelineItems = TIMELINE_DATA[timelineKey] || [];
+  // Tự động tính toán và trích xuất dòng thời gian từ đồ thị tri thức RAG
+  const timelineItems = useMemo(() => {
+    if (!nodeId || !graphData || !graphData.nodes) return [];
+    
+    // 1. Tìm node hiện tại đang chọn để lấy bối cảnh làm gốc đối sánh
+    const currentNode = graphData.nodes.find(n => n.id === nodeId);
+    if (!currentNode || !currentNode.data) {
+      // Fallback nếu click từ trích dẫn chatbot chưa load kịp node đồ thị
+      return [
+        {
+          year: '2026',
+          status: 'active',
+          version: 'Hiện tại',
+          text: 'Văn bản được trích lục trực tiếp từ bối cảnh RAG.'
+        }
+      ];
+    }
+    
+    const d = currentNode.data;
+    const currentProvId = d.provision_id;
+    const currentArticle = d.article;
+    const currentClause = d.clause;
+    
+    // 2. Quét đồ thị để tìm tất cả các phiên bản liên quan (cùng provision_id hoặc cùng số điều + khoản)
+    const relatedNodes = graphData.nodes.filter(n => {
+      // Chỉ quan tâm tới các node điều khoản
+      if (n.type !== 'clauseNode' && n.data?.rawLabel !== 'Clause') return false;
+      
+      const nd = n.data || {};
+      if (currentProvId && nd.provision_id) {
+        return nd.provision_id === currentProvId;
+      }
+      
+      // Fallback so khớp theo tên Điều và Khoản (ví dụ: "Điều 3", "Khoản 1")
+      return nd.article === currentArticle && nd.clause === currentClause;
+    });
+    
+    // 3. Map sang cấu trúc dữ liệu hiển thị của dòng thời gian
+    const items = relatedNodes.map(n => {
+      const nd = n.data || {};
+      
+      // Trích xuất năm hiệu lực
+      let year = 'Ban hành';
+      if (nd.effective_date) {
+        const parts = nd.effective_date.split('-');
+        if (parts.length > 0) year = parts[0];
+      }
+      
+      // Trạng thái hiệu lực
+      const isStatusActive = nd.status === 'active' || nd.status === 'Còn hiệu lực';
+      const status = isStatusActive ? 'active' : 'expired';
+      
+      // Định nghĩa số phiên bản thông minh dựa theo thứ tự thời gian
+      const version = nd.version_id || nd.version || (isStatusActive ? 'v2.0' : 'v1.0');
+      
+      return {
+        id: n.id,
+        year: year,
+        date: nd.effective_date || '',
+        status: status,
+        version: version,
+        text: nd.content || nd.text || '',
+        docNum: nd.doc_num || ''
+      };
+    });
+    
+    // 4. Sắp xếp theo ngày hiệu lực tăng dần từ cũ nhất tới mới nhất
+    return items.sort((a, b) => {
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      return dateA.localeCompare(dateB);
+    });
+  }, [nodeId, graphData]);
+
+  if (timelineItems.length === 0) {
+    return (
+      <div className="version-timeline-empty">
+        <p className="timeline-empty-text">Không tìm thấy lịch sử phiên bản của điều khoản này trên đồ thị.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="version-timeline-container">
@@ -72,7 +101,9 @@ export const VersionTimeline = ({ nodeId = '' }) => {
             {/* Card Header metadata */}
             <div className="timeline-card-header">
               <span className="timeline-version-badge monospace">{item.version}</span>
-              <span className="timeline-year-text monospace">Năm ban hành: {item.year}</span>
+              <span className="timeline-year-text monospace">
+                Năm ban hành: {item.year} {item.docNum && `(${item.docNum})`}
+              </span>
             </div>
 
             {/* Card Text Content */}
