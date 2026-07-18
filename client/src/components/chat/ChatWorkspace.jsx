@@ -49,11 +49,30 @@ export const ChatWorkspace = () => {
   }, [sendMessage]);
 
   // Click vào trích dẫn sẽ mở trực tiếp Sidebar chi tiết (không chuyển tab)
-  const handleCitationClick = (citationId) => {
+  const handleCitationClick = (citationId, sourceText) => {
     if (graphData && graphData.nodes) {
       const targetNode = graphData.nodes.find(n => n.id === citationId);
       if (targetNode) {
-        setSelectedNode(targetNode);
+        setSelectedNode({
+          ...targetNode,
+          data: {
+            ...targetNode.data,
+            highlightText: sourceText
+          }
+        });
+      } else {
+        // Fallback tự sinh Node giả lập từ citation nếu node đó chưa load kịp
+        setSelectedNode({
+          id: citationId,
+          data: {
+            title: citationId,
+            text: sourceText,
+            highlightText: sourceText,
+            status: 'active',
+            docType: 'SHB',
+            rawLabel: 'Clause'
+          }
+        });
       }
     }
   };

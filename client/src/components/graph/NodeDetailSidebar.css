@@ -457,4 +457,58 @@
   box-shadow: none !important;
 }
 
+/* ============================================================
+   CẢI TIẾN HIGHLIGHT TRÍCH DẪN & RAG CHUNK NOTICE
+   ============================================================ */
+.legal-highlight-match {
+  background-color: rgba(240, 99, 29, 0.25); /* Glow cam thương hiệu */
+  color: var(--orange-ember);
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: var(--radius-tag);
+  border: 1px dashed var(--orange-signature);
+  box-shadow: 0 0 8px rgba(240, 99, 29, 0.15);
+}
+
+[data-theme="light"] .legal-highlight-match {
+  background-color: rgba(240, 99, 29, 0.12) !important;
+  color: var(--orange-signature) !important;
+  border-color: rgba(240, 99, 29, 0.4) !important;
+}
+
+.rag-chunk-extracted-notice {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background-color: rgba(28, 114, 147, 0.05); /* Sea Blue Wash */
+  border-left: 3px solid var(--sea-blue);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+}
+
+.rag-chunk-extracted-notice .notice-title {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sea-blue-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.rag-chunk-extracted-notice .notice-content {
+  font-family: var(--font-legal);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+[data-theme="light"] .rag-chunk-extracted-notice {
+  background-color: rgba(28, 114, 147, 0.04) !important;
+}
+
+[data-theme="light"] .rag-chunk-extracted-notice .notice-content {
+  color: var(--text-primary) !important;
+}
+
 

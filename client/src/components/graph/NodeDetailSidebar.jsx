@@ -164,7 +164,39 @@ export const NodeDetailSidebar = () => {
           <div className="detail-panel-section">
             <span className="section-label-text block-margin">Nội dung văn bản gốc</span>
             <div className="detail-paper-surface-text paper-surface">
-              <p className="legal-paragraph">{text}</p>
+              {(() => {
+                const highlightText = selectedNode.data.highlightText;
+                if (!highlightText) {
+                  return <p className="legal-paragraph">{text}</p>;
+                }
+                
+                const cleanText = text.replace(/\s+/g, ' ');
+                const cleanHighlight = highlightText.replace(/\s+/g, ' ').trim();
+                
+                const index = cleanText.toLowerCase().indexOf(cleanHighlight.toLowerCase());
+                if (index !== -1) {
+                  const before = cleanText.substring(0, index);
+                  const match = cleanText.substring(index, index + cleanHighlight.length);
+                  const after = cleanText.substring(index + cleanHighlight.length);
+                  return (
+                    <p className="legal-paragraph">
+                      {before}
+                      <span className="legal-highlight-match">{match}</span>
+                      {after}
+                    </p>
+                  );
+                }
+                
+                return (
+                  <>
+                    <div className="rag-chunk-extracted-notice">
+                      <span className="notice-title">Đoạn được RAG trích xuất & đối sánh:</span>
+                      <p className="notice-content">{highlightText}</p>
+                    </div>
+                    <p className="legal-paragraph">{text}</p>
+                  </>
+                );
+              })()}
               <div className="legal-paper-watermark">SHB COMPLIANCE ORIGINAL</div>
             </div>
           </div>
