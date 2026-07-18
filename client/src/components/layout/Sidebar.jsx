@@ -12,8 +12,6 @@ import {
   LuDatabase,
   LuBrain,
   LuSparkles,
-  LuTrash2,
-  LuCheck,
   LuX,
   LuSun,
   LuMoon
@@ -23,23 +21,22 @@ import { useGraphContext } from '../../context/GraphContext';
 import './Sidebar.css';
 
 export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
-  const { sendMessage, clearChat } = useChatContext();
-  const { searchGraph, searchQuery, setSearchQuery } = useGraphContext();
+  const { sendMessage } = useChatContext();
+  const { searchGraph, searchQuery } = useGraphContext();
   
   const [localSearch, setLocalSearch] = useState('');
   const [showSettings, setShowSettings] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // Modal xác nhận
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success'); // 'success' | 'info' | 'error'
   
   const searchInputRef = useRef(null);
   const settingsRef = useRef(null);
 
-  // Lấy cấu hình model từ localStorage hoặc mặc định
+  // Lấy cấu hình model từ localStorage hoặc mặc định để hiển thị ở RAG status panel
   const [selectedModel, setSelectedModel] = useState(() => {
     return localStorage.getItem('shb_selected_model') || 'shb-core';
   });
-  const [deepSearch, setDeepSearch] = useState(() => {
+  const [deepSearch] = useState(() => {
     return localStorage.getItem('shb_deep_search') === 'true';
   });
 
@@ -53,6 +50,19 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('shb_app_theme', theme);
   }, [theme]);
+
+  // Đồng bộ model khi có thay đổi từ phía ChatInput
+  useEffect(() => {
+    const handleStorageUpdate = () => {
+      setSelectedModel(localStorage.getItem('shb_selected_model') || 'shb-core');
+    };
+    window.addEventListener('storage', handleStorageUpdate);
+    window.addEventListener('local-storage-update', handleStorageUpdate);
+    return () => {
+      window.removeEventListener('storage', handleStorageUpdate);
+      window.removeEventListener('local-storage-update', handleStorageUpdate);
+    };
+  }, []);
 
   // Hiển thị thông báo (toast)
   const showToast = (message, type = 'success') => {
@@ -154,34 +164,6 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
         searchInputRef.current.blur();
       }
     }
-  };
-
-  // Lưu cấu hình Model
-  const handleModelChange = (modelId) => {
-    setSelectedModel(modelId);
-    localStorage.setItem('shb_selected_model', modelId);
-    window.dispatchEvent(new Event('local-storage-update'));
-    showToast(`Đã chuyển sang model ${modelId === 'shb-core' ? 'SHB Core RAG-v2' : modelId === 'gemini-pro' ? 'Gemini 1.5 Pro' : 'Gemini 1.5 Flash'}`, 'success');
-  };
-
-  // Lưu cấu hình Deep Search
-  const toggleDeepSearch = () => {
-    const nextVal = !deepSearch;
-    setDeepSearch(nextVal);
-    localStorage.setItem('shb_deep_search', String(nextVal));
-    showToast(nextVal ? 'Đã bật Chế độ Phân tích Sâu (Deep Graph Search)' : 'Đã tắt Chế độ Phân tích Sâu', 'info');
-  };
-
-  // Kích hoạt Modal xác nhận xóa
-  const handleQuickClearChat = () => {
-    setShowConfirmModal(true);
-  };
-
-  const executeClearChat = () => {
-    clearChat();
-    showToast('Đã xóa sạch lịch sử chat', 'success');
-    setShowSettings(false);
-    setShowConfirmModal(false);
   };
 
   // Bấm vào search icon khi đang collapsed
@@ -297,85 +279,32 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
         </nav>
       </div>
 
-      {/* Interactive Settings Popover */}
+      {/* Interactive Settings Popover (Chỉ giữ chức năng Đăng xuất và cấu hình profile RM) */}
       {showSettings && (
         <div className="settings-popover panel signature-reveal" ref={settingsRef}>
           <div className="popover-header">
-            <span className="popover-title">Cấu hình RM & RAG AI</span>
+            <span className="popover-title">Quản lý Tài khoản RM</span>
             <button className="popover-close-btn" onClick={() => setShowSettings(false)}>
               <LuX />
             </button>
           </div>
           
-          <div className="popover-section">
-            <span className="popover-section-label">LỰA CHỌN MODEL AI RAG</span>
-            <div className="model-select-group">
-              <div 
-                className={`model-option ${selectedModel === 'shb-core' ? 'selected' : ''}`}
-                onClick={() => handleModelChange('shb-core')}
-              >
-                <div className="model-option-top">
-                  <span className="model-option-name">SHB Core RAG-v2</span>
-                  {selectedModel === 'shb-core' && <LuCheck className="check-icon" />}
-                </div>
-                <span className="model-option-desc">Tối ưu thuật ngữ luật và quy định nội bộ SHB</span>
-              </div>
-
-              <div 
-                className={`model-option ${selectedModel === 'gemini-pro' ? 'selected' : ''}`}
-                onClick={() => handleModelChange('gemini-pro')}
-              >
-                <div className="model-option-top">
-                  <span className="model-option-name">Gemini 1.5 Pro</span>
-                  {selectedModel === 'gemini-pro' && <LuCheck className="check-icon" />}
-                </div>
-                <span className="model-option-desc">Phù hợp lập luận phức tạp và phát hiện mâu thuẫn chéo</span>
-              </div>
-
-              <div 
-                className={`model-option ${selectedModel === 'gemini-flash' ? 'selected' : ''}`}
-                onClick={() => handleModelChange('gemini-flash')}
-              >
-                <div className="model-option-top">
-                  <span className="model-option-name">Gemini 1.5 Flash</span>
-                  {selectedModel === 'gemini-flash' && <LuCheck className="check-icon" />}
-                </div>
-                <span className="model-option-desc">Phản hồi siêu tốc, tóm tắt nội dung văn bản nhanh</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="popover-section">
-            <div className="toggle-setting-row">
-              <div className="toggle-setting-info">
-                <span className="toggle-setting-title">Chế độ phân tích sâu</span>
-                <span className="toggle-setting-desc">Mở rộng truy vấn đồ thị sang các nút liên đới cấp 3</span>
-              </div>
-              <button 
-                className={`toggle-switch-btn ${deepSearch ? 'active' : ''}`}
-                onClick={toggleDeepSearch}
-              >
-                <div className="toggle-switch-handle"></div>
-              </button>
-            </div>
+          <div className="popover-section text-center">
+            <div className="user-profile-avatar-large">RM</div>
+            <h3 className="user-profile-name-large">Nguyễn Văn An</h3>
+            <p className="user-profile-role-large">Chuyên viên Quan hệ Khách hàng (RM)</p>
+            <p className="user-profile-dept-large text-muted">Khối Bán lẻ & Tín dụng - SHB Hội sở</p>
           </div>
 
           <div className="popover-divider"></div>
 
           <div className="popover-actions">
-            <button 
-              className="popover-action-btn danger-action" 
-              onClick={handleQuickClearChat}
-            >
-              <LuTrash2 className="action-icon" />
-              <span>Dọn dẹp phiên Chat</span>
-            </button>
-            <button className="popover-action-btn secondary-action" onClick={() => {
-              showToast('Đã đăng xuất tài khoản RM', 'info');
+            <button className="popover-action-btn danger-action" onClick={() => {
+              showToast('Đã đăng xuất tài khoản RM An', 'info');
               setShowSettings(false);
             }}>
               <LuLogOut className="action-icon" />
-              <span>Đăng xuất (RM An)</span>
+              <span>Đăng xuất tài khoản</span>
             </button>
           </div>
         </div>
@@ -447,7 +376,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
             <button 
               className={`btn-sidebar-settings ${showSettings ? 'active' : ''}`}
               onClick={() => setShowSettings(!showSettings)}
-              title="Cấu hình hệ thống"
+              title="Xem thông tin tài khoản"
             >
               <LuSettings />
             </button>
@@ -470,7 +399,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
                 setIsCollapsed(false);
                 setTimeout(() => setShowSettings(true), 150);
               }}
-              title="Cấu hình hệ thống"
+              title="Xem thông tin tài khoản"
             >
               <LuSettings />
             </button>
@@ -483,20 +412,6 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
         <div className={`sidebar-toast-notification ${toastType}`}>
           <div className="toast-content-wrapper">
             <span className="toast-message-text">{toastMessage}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Common Confirm Modal Overlay */}
-      {showConfirmModal && (
-        <div className="confirm-modal-overlay" onClick={() => setShowConfirmModal(false)}>
-          <div className="confirm-modal-box panel" onClick={(e) => e.stopPropagation()}>
-            <h3 className="confirm-modal-title">Xác nhận xóa lịch sử</h3>
-            <p className="confirm-modal-text">Bạn có chắc chắn muốn xóa toàn bộ lịch sử trò chuyện hiện tại không? Hành động này không thể hoàn tác.</p>
-            <div className="confirm-modal-actions">
-              <button className="btn-confirm-cancel" onClick={() => setShowConfirmModal(false)}>Hủy</button>
-              <button className="btn-confirm-delete" onClick={executeClearChat}>Xác nhận xóa</button>
-            </div>
           </div>
         </div>
       )}

@@ -41,6 +41,11 @@
   --text-secondary: #A9AFBC;
   --text-muted: #6E7585;
 
+  /* ---- Shadow & Focus Rings tiêu chuẩn cho chế độ Tối ---- */
+  --shadow-panel: 0 4px 15px rgba(0, 0, 0, 0.35);
+  --shadow-raised: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --focus-ring: 0 0 0 3px rgba(240, 99, 29, 0.3);
+
   /* ---- Typography ---- */
   --font-ui: 'Be Vietnam Pro', system-ui, sans-serif;
   --font-legal: 'Source Serif 4', Georgia, serif;   /* CHỈ dùng cho trích dẫn pháp lý gốc */
@@ -73,6 +78,11 @@
   --text-secondary: #334155;      /* Slate 700 - đậm hơn để dễ đọc */
   --text-muted: #64748B;          /* Slate 500 - thay vì Slate 400 mờ */
 
+  /* Shadow & Focus Rings tiêu chuẩn cho chế độ Sáng - KHÔNG cháy sáng */
+  --shadow-panel: 0 4px 15px rgba(15, 23, 42, 0.04);
+  --shadow-raised: 0 8px 30px rgba(15, 23, 42, 0.06);
+  --focus-ring: 0 0 0 3px rgba(240, 99, 29, 0.16);
+
   /* Điều chỉnh sắc độ mờ để giữ thẩm mỹ */
   --orange-wash: rgba(240, 99, 29, 0.08);
   --sea-blue-wash: rgba(28, 114, 147, 0.08);
@@ -103,6 +113,12 @@
   color: var(--sea-blue) !important;
   text-shadow: none !important;
 }
+
+/* Ghi đè bóng đổ các node selected trên đồ thị ở Light Mode */
+[data-theme="light"] .react-flow__node.selected > div {
+  box-shadow: 0 0 0 3px rgba(240, 99, 29, 0.2) !important;
+}
+
 
 /* Glowing Text Shadow Utilities */
 .glow-orange {

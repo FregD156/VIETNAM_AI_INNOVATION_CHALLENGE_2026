@@ -195,3 +195,46 @@
   color: var(--orange-signature);
   font-size: 12px;
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE SEARCH BAR OVERRIDES
+   ============================================================ */
+[data-theme="light"] .graph-toolbar-floating {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: var(--shadow-panel);
+}
+
+[data-theme="light"] .graph-toolbar-floating:focus-within {
+  border-color: var(--orange-signature);
+  box-shadow: var(--shadow-panel), 0 0 0 3px rgba(240, 99, 29, 0.1);
+}
+
+[data-theme="light"] .btn-filter-dropdown-trigger {
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .btn-filter-dropdown-trigger:hover {
+  background-color: rgba(15, 23, 42, 0.04);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .btn-filter-dropdown-trigger.active-filter {
+  background-color: rgba(240, 99, 29, 0.05);
+  color: var(--orange-signature);
+}
+
+[data-theme="light"] .filters-dropdown-popover {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: var(--shadow-raised);
+}
+
+[data-theme="light"] .dropdown-option-item:hover {
+  background-color: rgba(15, 23, 42, 0.02);
+}
+
+[data-theme="light"] .dropdown-option-item.selected {
+  background-color: rgba(240, 99, 29, 0.04);
+}
+

@@ -119,7 +119,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--navy-hairline);
   padding-bottom: 8px;
 }
 
@@ -187,7 +187,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  background-color: rgba(10, 22, 40, 0.3);
+  background-color: rgba(10, 22, 40, 0.2);
   border: 1px solid var(--navy-hairline);
   border-radius: var(--radius-panel); /* vuông bo nhẹ */
   font-size: 11.5px;
@@ -195,7 +195,7 @@
 }
 
 .audit-log-row-item:hover {
-  background-color: rgba(10, 22, 40, 0.5);
+  background-color: rgba(10, 22, 40, 0.35);
 }
 
 .log-row-time {
@@ -258,3 +258,35 @@
     grid-template-columns: 100%;
   }
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE ADMIN WORKSPACE OVERRIDES
+   ============================================================ */
+[data-theme="light"] .admin-workspace-header {
+  box-shadow: 0 4px 20px rgba(10, 22, 40, 0.04);
+}
+
+[data-theme="light"] .admin-header-icon-box {
+  box-shadow: 0 2px 6px rgba(10, 22, 40, 0.04);
+}
+
+[data-theme="light"] .admin-card-section {
+  box-shadow: 0 4px 15px rgba(10, 22, 40, 0.03);
+}
+
+[data-theme="light"] .admin-card-header-badge {
+  color: var(--orange-signature); /* Đổi màu tránh cháy sáng */
+}
+
+[data-theme="light"] .audit-log-row-item {
+  background-color: rgba(15, 23, 42, 0.02);
+}
+
+[data-theme="light"] .audit-log-row-item:hover {
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="light"] .log-row-status-dot {
+  box-shadow: none; /* Bỏ phát sáng ở Light Mode */
+}
+

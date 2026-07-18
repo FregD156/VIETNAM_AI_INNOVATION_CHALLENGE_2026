@@ -20,7 +20,7 @@
   background: var(--navy-surface) ;
   border: 1px solid var(--navy-hairline) !important;
   border-radius: var(--radius-panel) !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-panel);
 }
 
 .react-flow__controls-button {
@@ -45,7 +45,13 @@
   background-color: var(--navy-surface) !important;
   border: 1px solid var(--navy-hairline) !important;
   border-radius: var(--radius-panel) !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: var(--shadow-panel) !important;
+}
+
+.react-flow__minimap-node {
+  fill: var(--navy-surface-raised) !important;
+  stroke: var(--navy-hairline) !important;
+  stroke-width: 1px !important;
 }
 
 .react-flow__minimap-mask {
@@ -55,7 +61,7 @@
 /* Customize custom nodes borders on active - Standard #5 Soft Glow */
 .react-flow__node.selected > div {
   border: 1.5px solid var(--orange-signature) !important;
-  box-shadow: 0 0 12px rgba(240, 99, 29, 0.45) !important;
+  box-shadow: var(--focus-ring) !important;
 }
 
 /* Customize Edge label styling */

@@ -368,3 +368,72 @@
 .footer-label-sparkle {
   font-size: 11px;
 }
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE CHAT INPUT OVERRIDES
+   ============================================================ */
+[data-theme="light"] .chat-input-container-panel {
+  background-color: #FFFFFF;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .chat-suggestion-chip-btn {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="light"] .chat-suggestion-chip-btn:hover:not(:disabled) {
+  background-color: rgba(240, 99, 29, 0.04);
+  border-color: var(--orange-signature);
+  box-shadow: 0 2px 8px rgba(240, 99, 29, 0.05);
+}
+
+[data-theme="light"] .btn-input-voice-tool {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="light"] .btn-input-voice-tool:hover:not(:disabled) {
+  background-color: rgba(240, 99, 29, 0.04);
+  border-color: var(--orange-signature);
+}
+
+[data-theme="light"] .btn-chat-model-selector-trigger {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="light"] .btn-chat-model-selector-trigger:hover:not(:disabled),
+[data-theme="light"] .btn-chat-model-selector-trigger.active {
+  background-color: rgba(240, 99, 29, 0.04);
+  border-color: var(--orange-signature);
+}
+
+[data-theme="light"] .chat-model-inline-popover {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.06);
+}
+
+[data-theme="light"] .inline-model-option:hover {
+  background-color: rgba(15, 23, 42, 0.02);
+}
+
+[data-theme="light"] .inline-model-option.selected {
+  background-color: rgba(240, 99, 29, 0.05);
+}
+
+[data-theme="light"] .chat-textarea-box-wrapper {
+  background-color: #FFFFFF;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .chat-textarea-box-wrapper:focus-within {
+  border-color: var(--orange-signature);
+  box-shadow: 0 0 0 3px rgba(240, 99, 29, 0.12);
+}
+
+[data-theme="light"] .btn-chat-send-submit {
+  box-shadow: 0 4px 12px rgba(240, 99, 29, 0.18);
+}
+
