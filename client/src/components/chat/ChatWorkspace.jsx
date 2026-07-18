@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { LuSparkles, LuTrash2, LuActivity, LuBrain } from 'react-icons/lu';
+import { LuSparkles, LuTrash2, LuActivity } from 'react-icons/lu';
 import { useChatStream } from '../../hooks/useChatStream';
+import { useGraphData } from '../../hooks/useGraphData';
+import NodeDetailSidebar from '../graph/NodeDetailSidebar';
 import ChatHistoryList from './ChatHistoryList';
 import ChatInputArea from './ChatInputArea';
-import CitationModal from './CitationModal';
 import './ChatWorkspace.css';
 
 export const ChatWorkspace = () => {
   const { chatHistory, isStreaming, sendMessage, clearChat } = useChatStream();
-  const [activeCitationId, setActiveCitationId] = useState(null);
+  const { graphData, selectedNode, setSelectedNode } = useGraphData();
   const [showConfirmModal, setShowConfirmModal] = useState(false); // Modal xác nhận xóa
   
   // Trạng thái đồng bộ mô hình AI được chọn từ Sidebar
@@ -47,16 +48,14 @@ export const ChatWorkspace = () => {
     return () => window.removeEventListener('auto-send-chat', handleAutoSend);
   }, [sendMessage]);
 
+  // Click vào trích dẫn sẽ mở trực tiếp Sidebar chi tiết (không chuyển tab)
   const handleCitationClick = (citationId) => {
-    setActiveCitationId(citationId);
-    // Gửi Custom Event để tab Đồ thị tự chọn node và pan camera
-    window.dispatchEvent(new CustomEvent('focus-graph-node', { detail: citationId }));
-    // Gửi Custom Event để AppLayout chuyển tab sang Đồ thị
-    window.dispatchEvent(new CustomEvent('change-tab', { detail: 'graph' }));
-  };
-
-  const handleCloseModal = () => {
-    setActiveCitationId(null);
+    if (graphData && graphData.nodes) {
+      const targetNode = graphData.nodes.find(n => n.id === citationId);
+      if (targetNode) {
+        setSelectedNode(targetNode);
+      }
+    }
   };
 
   const handleClearChatClick = () => {
@@ -68,70 +67,54 @@ export const ChatWorkspace = () => {
     setShowConfirmModal(false);
   };
 
-  const getModelName = (modelId) => {
-    switch (modelId) {
-      case 'shb-core': return 'SHB Core RAG-v2';
-      case 'gemini-pro': return 'Gemini 1.5 Pro';
-      case 'gemini-flash': return 'Gemini 1.5 Flash';
-      default: return 'SHB Core RAG-v2';
-    }
-  };
-
   return (
-    <div className="chat-workspace">
-      {/* Dynamic & Professional Header */}
-      <header className="chat-workspace-header">
-        <div className="header-left-group">
-          <div className="bot-avatar-header">
-            <LuSparkles />
+    <div className="chat-workspace-layout-wrapper">
+      <div className="chat-workspace">
+        {/* Dynamic & Professional Header */}
+        <header className="chat-workspace-header">
+          <div className="header-left-group">
+            <div className="bot-avatar-header">
+              <LuSparkles />
+            </div>
+            <div className="title-container">
+              <h1 className="chat-main-title">AI Assistant - Tra cứu Pháp quy</h1>
+              <p className="chat-sub-title">Trợ lý hỗ trợ RM khối Bán lẻ & Tín dụng SHB</p>
+            </div>
           </div>
-          <div className="title-container">
-            <h1 className="chat-main-title">AI Assistant - Tra cứu Pháp quy</h1>
-            <p className="chat-sub-title">Trợ lý hỗ trợ RM khối Bán lẻ & Tín dụng SHB</p>
+
+          <div className="header-right-group">
+            <div className="header-status-badge status-latency">
+              <LuActivity className="badge-icon glow-blue" />
+              <span className="badge-text monospace text-muted">Latency: ~42ms</span>
+            </div>
+            
+            <button 
+              className="btn-header-action" 
+              onClick={handleClearChatClick}
+              disabled={isStreaming}
+              title="Dọn dẹp phiên hội thoại"
+            >
+              <LuTrash2 />
+              <span>Xóa Chat</span>
+            </button>
           </div>
-        </div>
+        </header>
 
-        <div className="header-right-group">
-          <div className="header-status-badge">
-            <LuBrain className="badge-icon" />
-            <span className="badge-text monospace">{getModelName(currentModel)}</span>
-          </div>
-          <div className="header-status-badge status-latency">
-            <LuActivity className="badge-icon glow-blue" />
-            <span className="badge-text monospace text-muted">Latency: ~42ms</span>
-          </div>
-          
-          <button 
-            className="btn-header-action" 
-            onClick={handleClearChatClick}
-            disabled={isStreaming}
-            title="Dọn dẹp phiên hội thoại"
-          >
-            <LuTrash2 />
-            <span>Xóa Chat</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Message History List */}
-      <ChatHistoryList 
-        chatHistory={chatHistory} 
-        onCitationClick={handleCitationClick} 
-      />
-
-      {/* Input controls */}
-      <ChatInputArea 
-        onSendMessage={sendMessage} 
-        isStreaming={isStreaming}
-      />
-
-      {/* Citation Modal Popup (Lazy Loaded) */}
-      {activeCitationId && (
-        <CitationModal 
-          citationId={activeCitationId} 
-          onClose={handleCloseModal} 
+        {/* Message History List */}
+        <ChatHistoryList 
+          chatHistory={chatHistory} 
+          onCitationClick={handleCitationClick} 
         />
-      )}
+
+        {/* Input controls */}
+        <ChatInputArea 
+          onSendMessage={sendMessage} 
+          isStreaming={isStreaming}
+        />
+      </div>
+
+      {/* HIỂN THỊ TRỰC TIẾP TRÍCH LỤC SIDEBAR BÊN PHẢI CHAT KHI ĐƯỢC CHỌN (KHÔNG CHUYỂN TAB) */}
+      {selectedNode && <NodeDetailSidebar />}
 
       {/* Confirm Modal Overlay */}
       {showConfirmModal && (

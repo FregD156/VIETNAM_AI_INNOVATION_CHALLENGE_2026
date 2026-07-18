@@ -212,32 +212,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
           </button>
         </div>
 
-        {/* Smart Search Command Box */}
-        <div className="sidebar-search-section">
-          {!isCollapsed ? (
-            <div className="search-box-wrapper">
-              <LuSearch className="search-icon-inside" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                className="search-input-field"
-                placeholder="Tra cứu..."
-                value={localSearch}
-                onChange={handleSearchChange}
-                onKeyDown={handleSearchSubmit}
-              />
-              <span className="search-shortcut-badge" title="Phím tắt: Cmd+K hoặc Ctrl+K">⌘K</span>
-            </div>
-          ) : (
-            <button 
-              className="search-collapsed-btn" 
-              onClick={handleSearchIconClick}
-              title="Tìm kiếm nhanh (⌘K)"
-            >
-              <LuSearch />
-            </button>
-          )}
-        </div>
+
 
         {/* Navigation Menu */}
         <nav className="sidebar-nav-menu">
