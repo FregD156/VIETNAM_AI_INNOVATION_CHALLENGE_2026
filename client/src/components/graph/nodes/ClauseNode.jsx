@@ -3,7 +3,7 @@ import { Handle, Position } from 'reactflow';
 import './ClauseNode.css';
 
 export const ClauseNode = ({ data }) => {
-  const isActive = data.status === 'active';
+  const isActive = data.status === 'active' || data.status === 'Còn hiệu lực' || data.status === 'Còn hiệu lực một phần';
   // Đổ màu handle theo tình trạng hiệu lực: Active = Green, Expired = Brick Red
   const handleColor = isActive ? 'var(--emerald-active)' : 'var(--brick-expired)';
   

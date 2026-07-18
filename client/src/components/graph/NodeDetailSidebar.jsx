@@ -64,8 +64,8 @@ export const NodeDetailSidebar = () => {
             <span className="section-label-text">Thông tin pháp lý</span>
           </div>
           <div className="detail-badges-row-flex">
-            <span className={`detail-status-pill ${status}`}>
-              {status === 'active' ? 'Có hiệu lực' : 'Hết hiệu lực'}
+            <span className={`detail-status-pill ${status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần' ? 'active' : 'expired'}`}>
+              {status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần' ? 'Còn hiệu lực' : 'Hết hiệu lực'}
             </span>
             <span className={`detail-source-pill ${isNhnn ? 'nhnn' : 'shb'}`}>
               {isNhnn ? 'NHNN Ban Hành' : 'Quy Chế SHB'}
@@ -79,45 +79,51 @@ export const NodeDetailSidebar = () => {
 
 
         {/* Paper Surface for raw legal text */}
-        {rawLabel === 'Clause' && text && (
+        {rawLabel === 'Clause' && (
           <div className="detail-panel-section">
             <span className="section-label-text block-margin">Nội dung văn bản gốc</span>
-            <div className="detail-paper-surface-text paper-surface">
-              {(() => {
-                const highlightText = selectedNode.data.highlightText;
-                if (!highlightText) {
-                  return <p className="legal-paragraph">{text}</p>;
-                }
-                
-                const cleanText = text.replace(/\s+/g, ' ');
-                const cleanHighlight = highlightText.replace(/\s+/g, ' ').trim();
-                
-                const index = cleanText.toLowerCase().indexOf(cleanHighlight.toLowerCase());
-                if (index !== -1) {
-                  const before = cleanText.substring(0, index);
-                  const match = cleanText.substring(index, index + cleanHighlight.length);
-                  const after = cleanText.substring(index + cleanHighlight.length);
+            {text ? (
+              <div className="detail-paper-surface-text paper-surface">
+                {(() => {
+                  const highlightText = selectedNode.data.highlightText;
+                  if (!highlightText) {
+                    return <p className="legal-paragraph">{text}</p>;
+                  }
+                  
+                  const cleanText = text.replace(/\s+/g, ' ');
+                  const cleanHighlight = highlightText.replace(/\s+/g, ' ').trim();
+                  
+                  const index = cleanText.toLowerCase().indexOf(cleanHighlight.toLowerCase());
+                  if (index !== -1) {
+                    const before = cleanText.substring(0, index);
+                    const match = cleanText.substring(index, index + cleanHighlight.length);
+                    const after = cleanText.substring(index + cleanHighlight.length);
+                    return (
+                      <p className="legal-paragraph">
+                        {before}
+                        <span className="legal-highlight-match">{match}</span>
+                        {after}
+                      </p>
+                    );
+                  }
+                  
                   return (
-                    <p className="legal-paragraph">
-                      {before}
-                      <span className="legal-highlight-match">{match}</span>
-                      {after}
-                    </p>
+                    <>
+                      <div className="rag-chunk-extracted-notice">
+                        <span className="notice-title">Đoạn được RAG trích xuất & đối sánh:</span>
+                        <p className="notice-content">{highlightText}</p>
+                      </div>
+                      <p className="legal-paragraph">{text}</p>
+                    </>
                   );
-                }
-                
-                return (
-                  <>
-                    <div className="rag-chunk-extracted-notice">
-                      <span className="notice-title">Đoạn được RAG trích xuất & đối sánh:</span>
-                      <p className="notice-content">{highlightText}</p>
-                    </div>
-                    <p className="legal-paragraph">{text}</p>
-                  </>
-                );
-              })()}
-              <div className="legal-paper-watermark">SHB COMPLIANCE ORIGINAL</div>
-            </div>
+                })()}
+                <div className="legal-paper-watermark">SHB COMPLIANCE ORIGINAL</div>
+              </div>
+            ) : (
+              <div className="empty-content-notice">
+                <p>Đề mục liên kết trung gian (Không chứa nội dung điều khoản trực tiếp)</p>
+              </div>
+            )}
           </div>
         )}
 
