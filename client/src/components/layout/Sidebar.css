@@ -517,7 +517,7 @@
 }
 
 [data-theme="light"] .settings-popover {
-  box-shadow: 0 10px 30px rgba(10, 22, 40, 0.08);
+  box-shadow: none !important;
 }
 
 [data-theme="light"] .user-profile-avatar-large {

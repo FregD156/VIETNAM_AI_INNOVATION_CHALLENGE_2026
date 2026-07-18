@@ -78,9 +78,9 @@
   --text-secondary: #344C3F;      /* Xanh xám */
   --text-muted: #5C7467;          /* Xanh xám mờ */
 
-  /* Shadow & Focus Rings tiêu chuẩn cho chế độ Sáng - KHÔNG cháy sáng */
-  --shadow-panel: 0 4px 15px rgba(28, 56, 41, 0.03);
-  --shadow-raised: 0 8px 30px rgba(28, 56, 41, 0.05);
+  /* Shadow & Focus Rings tiêu chuẩn cho chế độ Sáng - KHÔNG đổ bóng (Flat Design) */
+  --shadow-panel: none;
+  --shadow-raised: none;
   --focus-ring: 0 0 0 3px rgba(47, 158, 104, 0.18); /* Vòng ring xanh mint dịu mắt */
 
   /* Điều chỉnh sắc độ mờ để giữ thẩm mỹ */

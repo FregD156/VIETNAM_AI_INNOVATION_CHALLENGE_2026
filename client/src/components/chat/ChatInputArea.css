@@ -412,7 +412,7 @@
 [data-theme="light"] .chat-model-inline-popover {
   background-color: #FFFFFF;
   border-color: rgba(15, 23, 42, 0.12);
-  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.06);
+  box-shadow: none !important;
 }
 
 [data-theme="light"] .inline-model-option:hover {
@@ -434,6 +434,6 @@
 }
 
 [data-theme="light"] .btn-chat-send-submit {
-  box-shadow: 0 4px 12px rgba(240, 99, 29, 0.18);
+  box-shadow: none !important;
 }
 
