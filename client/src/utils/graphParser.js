@@ -34,10 +34,11 @@ export const parseNeo4jToReactFlow = (rawData) => {
       return {
         id: nodeId,
         label: node.label || (nodeId.startsWith('doc_') ? 'Document' : 'Clause'),
+        nodeType: node.type || (nodeId.startsWith('doc_') ? 'document' : 'clause'),
         properties: {
           id: nodeId,
           title: node.title || node.name || props.title || '',
-          text: node.text || node.content || props.text || '',
+          text: node.content || node.text || props.text || '',
           status: node.status || props.status || 'Còn hiệu lực',
           type: docType,
           effective_date: node.effective_date || props.effective_date || ''
@@ -84,7 +85,7 @@ export const parseNeo4jToReactFlow = (rawData) => {
 
   // 1. Chuyển đổi Nodes
   const nodes = rawNodes.map((node) => {
-    const isDoc = node.label === 'Document';
+    const isDoc = node.nodeType === 'document' || node.label === 'Document';
     const props = node.properties || {};
     
     // Vị trí mặc định hoặc tự động nếu không khai báo trước
@@ -115,7 +116,7 @@ export const parseNeo4jToReactFlow = (rawData) => {
         status: props.status || 'Còn hiệu lực', 
         docType: docType,    // Luật | NHNN | SHB
         effective_date: props.effective_date || '',
-        rawLabel: node.label
+        rawLabel: isDoc ? 'Document' : 'Clause'
       }
     };
   });
