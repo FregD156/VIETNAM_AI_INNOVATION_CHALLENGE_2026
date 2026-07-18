@@ -27,6 +27,20 @@ export const NodeDetailSidebar = () => {
     return formatted.split('\n').map(line => line.trim()).filter(Boolean);
   };
 
+  // Parse markdown in đậm **text** thành JSX strong
+  const parseBoldMarkdown = (textStr) => {
+    if (!textStr) return '';
+    const parts = textStr.split(/\*\*([^*]+)\*\*/g);
+    if (parts.length === 1) return textStr;
+    
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {
+        return <strong key={index} className="legal-bold-text">{part}</strong>;
+      }
+      return part;
+    });
+  };
+
   // Render văn bản phân cấp có cấu trúc đẹp mắt kèm highlight RAG chéo
   const renderFormattedLegalText = (rawText, highlightText = '') => {
     if (!rawText) return null;
@@ -61,17 +75,17 @@ export const NodeDetailSidebar = () => {
           const match = cleanLine.substring(startIdx, startIdx + cleanHighlight.length);
           const after = cleanLine.substring(startIdx + cleanHighlight.length);
           
-          if (isSectionTitle) return <h4 key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</h4>;
-          if (isDocHeader) return <h4 key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</h4>;
-          if (isArticleHeader) return <h5 key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</h5>;
-          return <p key={idx} className={className}>{before}<span className="legal-highlight-match">{match}</span>{after}</p>;
+          if (isSectionTitle) return <h4 key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</h4>;
+          if (isDocHeader) return <h4 key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</h4>;
+          if (isArticleHeader) return <h5 key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</h5>;
+          return <p key={idx} className={className}>{parseBoldMarkdown(before)}<span className="legal-highlight-match">{match}</span>{parseBoldMarkdown(after)}</p>;
         }
       }
       
-      if (isSectionTitle) return <h4 key={idx} className={className}>{cleanLine}</h4>;
-      if (isDocHeader) return <h4 key={idx} className={className}>{cleanLine}</h4>;
-      if (isArticleHeader) return <h5 key={idx} className={className}>{cleanLine}</h5>;
-      return <p key={idx} className={className}>{cleanLine}</p>;
+      if (isSectionTitle) return <h4 key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</h4>;
+      if (isDocHeader) return <h4 key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</h4>;
+      if (isArticleHeader) return <h5 key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</h5>;
+      return <p key={idx} className={className}>{parseBoldMarkdown(cleanLine)}</p>;
     });
   };
 

@@ -587,6 +587,12 @@
   border-left-color: rgba(0, 0, 0, 0.06);
 }
 
+.legal-bold-text {
+  font-weight: 800;
+  color: var(--orange-signature);
+}
+
+
 
 
 
