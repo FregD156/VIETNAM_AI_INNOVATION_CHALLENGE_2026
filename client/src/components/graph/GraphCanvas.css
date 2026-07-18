@@ -175,4 +175,42 @@
   background-color: rgba(0, 0, 0, 0.03);
 }
 
+.toolbar-divider {
+  width: 1px;
+  height: 14px;
+  background-color: var(--navy-hairline);
+  margin: 0 4px;
+}
+
+.reset-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-primary);
+  border: 1px solid var(--navy-hairline) !important;
+}
+
+.reset-view-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--orange-signature) !important;
+}
+
+.reset-view-icon {
+  font-size: 11px;
+}
+
+[data-theme="light"] .toolbar-divider {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .reset-view-btn {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .reset-view-btn:hover {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border-color: var(--orange-signature) !important;
+}
+
+
 

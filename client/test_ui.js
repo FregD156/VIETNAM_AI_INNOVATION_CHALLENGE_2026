@@ -45,7 +45,7 @@ import path from 'path';
   });
 
   try {
-    const url = 'http://localhost:5173';
+    const url = 'http://localhost:5175';
     console.log(`Navigating to Frontend dev server: ${url}...`);
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
     

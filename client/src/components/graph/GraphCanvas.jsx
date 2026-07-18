@@ -10,6 +10,7 @@ import ReactFlow, {
 import { useGraphData } from '../../hooks/useGraphData';
 import DocumentNode from './nodes/DocumentNode';
 import ClauseNode from './nodes/ClauseNode';
+import { LuMaximize } from 'react-icons/lu';
 
 import 'reactflow/dist/style.css';
 import './GraphCanvas.css';
@@ -26,18 +27,33 @@ export const GraphCanvas = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [layoutMode, setLayoutMode] = useState('original'); // 'original' | 'lr' | 'snowflake' | 'grid'
   
-  const { setCenter } = useReactFlow();
+  const { setCenter, fitView } = useReactFlow();
 
   // Lưu trữ danh sách các Document Node ID đang được mở rộng
   const [expandedNodeIds, setExpandedNodeIds] = useState(new Set());
 
-  // Thuật toán sắp xếp toạ độ các Node động theo bố cục lựa chọn
+  // Quay về vị trí trung tâm và tự động reset độ thu phóng cho vừa vặn canvas
+  const handleResetView = () => {
+    fitView({ duration: 800, padding: 0.25 });
+  };
+
+  // Tự động mở rộng tất cả các Document Node để hiển thị các liên kết chéo khi dữ liệu đồ thị sẵn sàng
+  useEffect(() => {
+    if (graphData && graphData.nodes) {
+      const docIds = graphData.nodes
+        .filter(n => n.type === 'documentNode')
+        .map(n => n.id);
+      setExpandedNodeIds(new Set(docIds));
+    }
+  }, [graphData]);
+
+  // Thuật toán sắp xếp toạ độ các Node động theo bố cục lựa chọn (Nén khoảng cách nhỏ gọn hơn để dễ nhìn liên kết)
   const applyLayoutAlgorithms = (nodesList, edgesList, mode) => {
     const docNodes = nodesList.filter(n => n.type === 'documentNode');
     
     if (mode === 'lr') {
       // Bố cục Trái -> Phải (Phân tầng từ văn bản gốc sang các điều khoản con - 2 Cột song song để tránh bị dài dòng)
-      let currentY = 100;
+      let currentY = 50;
       docNodes.forEach((doc) => {
         const children = nodesList.filter(n => {
           if (n.id === doc.id) return false;
@@ -46,29 +62,29 @@ export const GraphCanvas = () => {
         
         const cols = 2;
         const rowCount = Math.ceil(children.length / cols) || 1;
-        const groupHeight = Math.max(120, rowCount * 110);
+        const groupHeight = Math.max(100, rowCount * 75);
         
         // Căn giữa Document node theo chiều dọc của cụm Clause con
-        doc.position = { x: 100, y: currentY + (groupHeight / 2) - 40 };
+        doc.position = { x: 50, y: currentY + (groupHeight / 2) - 30 };
         
         children.forEach((child, childIdx) => {
           const row = Math.floor(childIdx / cols);
           const col = childIdx % cols;
           child.position = {
-            x: 460 + col * 320, // Cột 1: 460, Cột 2: 780
-            y: currentY + row * 110
+            x: 350 + col * 240, // Khoảng cách cột 240px (rút ngắn từ 320px)
+            y: currentY + row * 75  // Khoảng cách dòng 75px (rút ngắn từ 110px)
           };
         });
         
-        // Cộng dồn Y lũy kế cho văn bản tiếp theo kèm khoảng cách an toàn 120px
-        currentY += groupHeight + 120;
+        // Cộng dồn Y lũy kế cho văn bản tiếp theo kèm khoảng cách an toàn 80px
+        currentY += groupHeight + 80;
       });
     } else if (mode === 'snowflake') {
-      // Bố cục Bông tuyết (Quy chế gốc ở tâm, các điều khoản tỏa tròn xung quanh - Tính toán tâm động chia 2 cột chính)
+      // Bố cục Bông tuyết (Quy chế gốc ở tâm, các điều khoản tỏa tròn xung quanh - Tính toán tâm động chia thành 3 cột center gọn gàng)
       docNodes.forEach((doc, idx) => {
         const center = { 
-          x: 500 + (idx % 2) * 1000, 
-          y: 400 + Math.floor(idx / 2) * 900 
+          x: 250 + (idx % 3) * 480, // Khoảng cách X thu về 480px
+          y: 200 + Math.floor(idx / 3) * 440 // Khoảng cách Y thu về 440px
         };
         doc.position = center;
         
@@ -78,7 +94,7 @@ export const GraphCanvas = () => {
         });
         
         const count = children.length;
-        const radius = 280; // Bán kính tỏa tròn an toàn không chồng lấn
+        const radius = 150; // Bán kính nén về 150px để thấy rõ các đường liên kết nối ngắn
         children.forEach((child, childIdx) => {
           const angle = (childIdx * 2 * Math.PI) / (count || 1);
           child.position = {
@@ -89,7 +105,7 @@ export const GraphCanvas = () => {
       });
     } else if (mode === 'grid') {
       // Bố cục Dàn lưới gọn gàng (Xếp theo cụm lưới chữ nhật 3 cột tương ứng từng văn bản, giãn cách dọc lũy kế)
-      let startY = 100;
+      let startY = 50;
       docNodes.forEach((doc) => {
         const children = nodesList.filter(n => {
           if (n.id === doc.id) return false;
@@ -98,21 +114,21 @@ export const GraphCanvas = () => {
         
         const cols = 3;
         const rowCount = Math.ceil(children.length / cols) || 1;
-        const groupHeight = rowCount * 110;
+        const groupHeight = rowCount * 75;
         
         // Căn giữa Document node theo chiều dọc của lưới con
-        doc.position = { x: 100, y: startY + (groupHeight / 2) - 20 };
+        doc.position = { x: 50, y: startY + (groupHeight / 2) - 20 };
         
         children.forEach((child, childIdx) => {
           const row = Math.floor(childIdx / cols);
           const col = childIdx % cols;
           child.position = {
-            x: 460 + col * 300, // Chia 3 cột giãn cách rộng rãi
-            y: startY + row * 110
+            x: 350 + col * 240, // Khoảng cách cột 240px
+            y: startY + row * 75  // Khoảng cách dòng 75px
           };
         });
         
-        startY += groupHeight + 120;
+        startY += groupHeight + 80;
       });
     }
   };
@@ -268,6 +284,14 @@ export const GraphCanvas = () => {
           onClick={() => setLayoutMode('grid')}
         >
           Gọn gàng
+        </button>
+        <div className="toolbar-divider" />
+        <button 
+          className="btn-layout-option reset-view-btn" 
+          onClick={handleResetView}
+          title="Quay về trung tâm và reset độ thu phóng"
+        >
+          <LuMaximize className="reset-view-icon" /> Reset
         </button>
       </div>
 
