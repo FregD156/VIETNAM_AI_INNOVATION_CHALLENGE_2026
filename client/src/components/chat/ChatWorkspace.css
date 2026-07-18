@@ -1,47 +1,143 @@
+/* ============================================================
+   SHB GRAPH-RAG — CHAT WORKSPACE STYLE
+   ============================================================ */
+
 .chat-workspace {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
   overflow: hidden;
+  background-color: var(--navy-abyss);
 }
 
-.workspace-header {
-  height: 60px;
+.chat-workspace-header {
+  height: 68px;
   border-bottom: 1px solid var(--navy-hairline);
   padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: var(--navy-surface);
+  flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-.workspace-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
+.header-left-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
 }
 
-.workspace-title svg {
+.bot-avatar-header {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-circle); /* tròn tuyệt đối */
+  background: linear-gradient(135deg, var(--orange-signature) 0%, #c2410c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 18px;
+  box-shadow: 0 0 10px rgba(240, 99, 29, 0.3);
+}
+
+.title-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-main-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.chat-sub-title {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin: 0;
+  margin-top: 2px;
+}
+
+.header-right-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Status Badges */
+.header-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--navy-surface-raised);
+  border: 1px solid var(--navy-hairline);
+  padding: 6px 12px;
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo triết lý logo */
+  height: 32px;
+}
+
+.badge-icon {
+  font-size: 14px;
   color: var(--orange-signature);
 }
 
-.workspace-subtitle {
-  font-size: 11px;
-  color: var(--text-secondary);
+.badge-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.workspace-badge {
-  background-color: var(--emerald-active-wash);
-  color: var(--emerald-active);
-  border: 1px solid rgba(47, 158, 104, 0.2);
-  padding: 4px 10px;
-  border-radius: var(--radius-circle);
-  font-size: 10px;
+.badge-text.monospace {
+  font-family: var(--font-data);
+}
+
+.status-latency {
+  background-color: rgba(28, 114, 147, 0.05);
+}
+
+/* Header Action Buttons */
+.btn-header-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  border: 1px solid var(--navy-hairline);
+  color: var(--text-secondary);
+  padding: 0 14px;
+  height: 32px;
+  border-radius: var(--radius-panel); /* vuông bo nhẹ */
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-standard);
+}
+
+.btn-header-action:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.btn-header-action.confirm-active {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+.btn-header-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 800px) {
+  .status-latency {
+    display: none;
+  }
 }

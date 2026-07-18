@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuX, LuInfo } from 'react-icons/lu';
+import { LuX, LuInfo, LuBookOpen, LuCalendar, LuTag } from 'react-icons/lu';
 import { useGraphData } from '../../hooks/useGraphData';
 import VersionTimeline from './VersionTimeline';
 import './NodeDetailSidebar.css';
@@ -9,67 +9,90 @@ export const NodeDetailSidebar = () => {
 
   if (!selectedNode) {
     return (
-      <div className="node-detail-sidebar">
-        <div className="sidebar-placeholder">
-          <LuInfo className="placeholder-icon" />
-          <p>Chọn một node trên đồ thị để khám phá thông tin chi tiết và lịch sử điều khoản</p>
+      <aside className="node-detail-sidebar placeholder-state">
+        <div className="sidebar-placeholder-content">
+          <div className="info-glow-icon">
+            <LuInfo />
+          </div>
+          <h3 className="placeholder-title">Đồ Thị Tri Thức SHB</h3>
+          <p className="placeholder-desc">
+            Chọn một điểm nút (Node) trên đồ thị để khám phá thông tin chi tiết cấu trúc liên đới và lịch sử ban hành điều khoản.
+          </p>
         </div>
-      </div>
+      </aside>
     );
   }
 
   const { title, text, status, docType, effective_date, rawLabel } = selectedNode.data;
+  const isNhnn = docType === 'NHNN' || selectedNode.id.includes('tt');
 
   return (
-    <div className="node-detail-sidebar">
+    <aside className="node-detail-sidebar active-state">
       {/* Sidebar Header */}
-      <div className="sidebar-header">
-        <span className="sidebar-title">Chi Tiết Điều Khoản</span>
-        <button className="btn-close" onClick={() => setSelectedNode(null)}>
+      <div className="sidebar-detail-header">
+        <div className="header-title-group">
+          <LuBookOpen className="header-icon" />
+          <span className="header-title-text">Trích lục điều khoản</span>
+        </div>
+        <button 
+          className="btn-sidebar-close" 
+          onClick={() => setSelectedNode(null)}
+          title="Đóng bảng chi tiết"
+        >
           <LuX />
         </button>
       </div>
 
       {/* Sidebar Body */}
-      <div className="sidebar-body">
-        {/* Tiêu đề & Loại */}
-        <div className="detail-section">
-          <span className="detail-label">Tên Quy Định / Điều Khoản</span>
-          <span className="detail-value" style={{ fontWeight: 700, fontSize: '14px' }}>{title}</span>
+      <div className="sidebar-detail-body">
+        {/* Title Section */}
+        <div className="detail-panel-section">
+          <div className="section-label-group">
+            <LuTag className="section-icon" />
+            <span className="section-label-text">Tên quy định / Điều khoản</span>
+          </div>
+          <h2 className="detail-value-main-title">{title}</h2>
         </div>
 
-        {/* Trạng thái & Ngày */}
-        <div className="detail-section">
-          <span className="detail-label">Thông tin cơ sở</span>
-          <div className="detail-badge-row">
-            <span className={`timeline-status ${status}`}>
+        {/* Metadata section */}
+        <div className="detail-panel-section">
+          <div className="section-label-group">
+            <LuCalendar className="section-icon" />
+            <span className="section-label-text">Thông tin pháp lý</span>
+          </div>
+          <div className="detail-badges-row-flex">
+            <span className={`detail-status-pill ${status}`}>
               {status === 'active' ? 'Có hiệu lực' : 'Hết hiệu lực'}
             </span>
-            <span className="timeline-status" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--color-text-secondary)' }}>
-              Ban hành: {effective_date}
+            <span className={`detail-source-pill ${isNhnn ? 'nhnn' : 'shb'}`}>
+              {isNhnn ? 'NHNN Ban Hành' : 'Quy Chế SHB'}
+            </span>
+            <span className="detail-date-pill monospace">
+              Ngày hiệu lực: {effective_date}
             </span>
           </div>
         </div>
 
-        {/* Nội dung gốc */}
+        {/* Paper Surface for raw legal text */}
         {rawLabel === 'Clause' && text && (
-          <div className="detail-section">
-            <span className="detail-label">Nội Dung Điều Khoản Gốc</span>
-            <div className="detail-value-text paper-surface">
-              {text}
+          <div className="detail-panel-section">
+            <span className="section-label-text block-margin">Nội dung văn bản gốc</span>
+            <div className="detail-paper-surface-text paper-surface">
+              <p className="legal-paragraph">{text}</p>
+              <div className="legal-paper-watermark">SHB COMPLIANCE ORIGINAL</div>
             </div>
           </div>
         )}
 
-        {/* Trục lịch sử Timeline */}
+        {/* Version Timeline section */}
         {rawLabel === 'Clause' && (
-          <div className="detail-section" style={{ marginTop: '10px' }}>
-            <span className="detail-label">Lịch sử sửa đổi & Sắp xếp thời gian</span>
+          <div className="detail-panel-section timeline-top-border">
+            <span className="section-label-text block-margin">Dòng thời gian & Sửa đổi</span>
             <VersionTimeline nodeId={selectedNode.id} />
           </div>
         )}
       </div>
-    </div>
+    </aside>
   );
 };
 

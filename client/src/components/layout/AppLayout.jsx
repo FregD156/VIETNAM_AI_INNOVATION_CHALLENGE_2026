@@ -6,28 +6,31 @@ import AdminWorkspace from '../admin/AdminWorkspace';
 
 export const AppLayout = () => {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'graph' | 'admin'
-
-  const renderWorkspace = () => {
-    switch (activeTab) {
-      case 'chat':
-        return <ChatWorkspace />;
-      case 'graph':
-        return <GraphWorkspace />;
-      case 'admin':
-        return <AdminWorkspace />;
-      default:
-        return <ChatWorkspace />;
-    }
-  };
+  const [isCollapsed, setIsCollapsed] = useState(false); // Sidebar collapse state
 
   return (
     <div className="app-container">
-      {/* Navigation bar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Navigation bar with collapse control */}
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+      />
       
-      {/* Content panel */}
+      {/* Content panel hosting transitioned workspaces */}
       <main className="main-content">
-        {renderWorkspace()}
+        <div className={`workspace-wrapper ${activeTab === 'chat' ? 'active' : ''}`}>
+          <ChatWorkspace />
+        </div>
+        
+        <div className={`workspace-wrapper ${activeTab === 'graph' ? 'active' : ''}`}>
+          <GraphWorkspace />
+        </div>
+        
+        <div className={`workspace-wrapper ${activeTab === 'admin' ? 'active' : ''}`}>
+          <AdminWorkspace />
+        </div>
       </main>
     </div>
   );

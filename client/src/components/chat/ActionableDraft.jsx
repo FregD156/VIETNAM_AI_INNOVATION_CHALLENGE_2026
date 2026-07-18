@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LuCopy, LuCheck, LuRefreshCw, LuArrowRight } from 'react-icons/lu';
+import { LuCopy, LuCheck, LuRefreshCw, LuCloudUpload } from 'react-icons/lu';
 import { adminService } from '../../services/adminService';
 import './ActionableDraft.css';
 
@@ -9,7 +9,7 @@ export const ActionableDraft = ({ draft }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState('idle'); // idle | loading | success | error
 
-  // Reset states khi draft nội dung thay đổi
+  // Reset states khi nội dung draft thay đổi
   useEffect(() => {
     if (draft) {
       setDraftText(draft.content);
@@ -51,46 +51,61 @@ export const ActionableDraft = ({ draft }) => {
   if (!draft) return null;
 
   return (
-    <div className="actionable-draft">
-      <div className="draft-header">
-        <span className="draft-title">
-          {draft.type === 'email' ? '📧 Thư Điện Tử Nháp' : '📞 Kịch Bản Gọi Điện Nháp'}
-        </span>
-        <span className="draft-badge">Đề xuất bởi AI</span>
+    <div className="actionable-draft-container">
+      {/* Draft Header Toolbar */}
+      <div className="draft-toolbar-header">
+        <div className="draft-type-tag">
+          <span className="draft-bullet-dot"></span>
+          <span className="draft-type-name">
+            {draft.type === 'email' ? '📧 Bản nháp Email Khách hàng' : '📞 Kịch bản Thoại RM'}
+          </span>
+        </div>
+        
+        <div className="draft-toolbar-right-actions">
+          {/* Status Labels */}
+          {syncStatus === 'loading' && (
+            <span className="sync-badge loading">
+              <LuRefreshCw className="icon-spin-animation" />
+              <span>Đang đồng bộ CRM...</span>
+            </span>
+          )}
+          {syncStatus === 'success' && (
+            <span className="sync-badge success">
+              <LuCheck />
+              <span>CRM Synced</span>
+            </span>
+          )}
+
+          <button 
+            className={`btn-toolbar-tool btn-copy ${isCopied ? 'copied' : ''}`} 
+            onClick={handleCopy} 
+            title="Sao chép văn bản"
+          >
+            {isCopied ? <LuCheck /> : <LuCopy />}
+            <span>{isCopied ? 'Đã sao chép' : 'Sao chép'}</span>
+          </button>
+
+          <button 
+            className="btn-toolbar-tool btn-crm-sync" 
+            onClick={handleSyncCRM} 
+            disabled={isSyncing || syncStatus === 'success'}
+            title="Đồng bộ bản nháp này sang CRM nội bộ SHB"
+          >
+            <LuCloudUpload />
+            <span>Đồng bộ CRM</span>
+          </button>
+        </div>
       </div>
 
-      <textarea
-        className="draft-editor"
-        value={draftText}
-        onChange={(e) => setDraftText(e.target.value)}
-        placeholder="Nội dung bản nháp..."
-      />
-
-      <div className="draft-actions">
-        {syncStatus === 'loading' && (
-          <span className="sync-status loading">
-            <LuRefreshCw className="animate-spin" /> Đang đồng bộ CRM...
-          </span>
-        )}
-        {syncStatus === 'success' && (
-          <span className="sync-status success">
-            <LuCheck /> Đã đồng bộ CRM thành công!
-          </span>
-        )}
-
-        <button className="btn-action btn-copy" onClick={handleCopy} title="Copy vào clipboard">
-          {isCopied ? <LuCheck /> : <LuCopy />}
-          <span>{isCopied ? 'Đã Copy' : 'Copy'}</span>
-        </button>
-
-        <button 
-          className="btn-action btn-sync" 
-          onClick={handleSyncCRM} 
-          disabled={isSyncing || syncStatus === 'success'}
-        >
-          <LuArrowRight />
-          <span>Đồng bộ CRM</span>
-        </button>
+      {/* Editor Box styled as paper sheet for high-end feel */}
+      <div className="draft-paper-editor-wrapper">
+        <textarea
+          className="draft-editor-textarea paper-surface"
+          value={draftText}
+          onChange={(e) => setDraftText(e.target.value)}
+          placeholder="Nội dung bản nháp pháp lý..."
+        />
+        <div className="paper-watermark">SHB COMPLIANCE DRAFT</div>
       </div>
     </div>
   );

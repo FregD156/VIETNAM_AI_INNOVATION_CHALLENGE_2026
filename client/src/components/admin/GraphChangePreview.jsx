@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { diffWords } from 'diff';
-import { LuCheck, LuGitCommitHorizontal, LuInfo } from 'react-icons/lu';
+import { LuCheck, LuGitCommitHorizontal, LuInfo, LuLink, LuFileDiff, LuCircleCheck } from 'react-icons/lu';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { useGraphData } from '../../hooks/useGraphData';
 import './GraphChangePreview.css';
@@ -13,17 +13,21 @@ export const GraphChangePreview = () => {
 
   if (!diffPreviewData) {
     return (
-      <div className="change-preview-container">
-        <span className="preview-title">Đề xuất cập nhật sơ đồ đồ thị tri thức</span>
-        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <LuInfo />
-          <span>Hãy upload tài liệu để sinh bản so sánh thay đổi pháp lý.</span>
+      <div className="change-preview-container empty-state">
+        <div className="empty-preview-content">
+          <div className="preview-glow-icon">
+            <LuFileDiff />
+          </div>
+          <h3 className="empty-preview-title">Đề xuất cập nhật Sơ đồ Tri thức</h3>
+          <p className="empty-preview-desc">
+            Vui lòng nạp tài liệu thông tư hoặc quyết định (PDF) ở panel bên trái. Hệ thống sẽ tự động quét, so sánh các điều khoản cũ/mới và hiển thị đề xuất cập nhật đồ thị tại đây.
+          </p>
         </div>
       </div>
     );
   }
 
-  // Sử dụng thư viện diff để so sánh chuỗi cấp độ từ
+  // Sử dụng thư việc diff để so sánh chuỗi cấp độ từ
   const diffParts = diffWords(diffPreviewData.originalText, diffPreviewData.modifiedText);
 
   const handleApprove = () => {
@@ -54,56 +58,80 @@ export const GraphChangePreview = () => {
 
     setTimeout(() => {
       setShowStatus(false);
-    }, 3000);
+    }, 4000);
   };
 
   return (
-    <div className="change-preview-container">
-      <span className="preview-title">{diffPreviewData.title}</span>
-
-      {/* Kết quả so sánh text */}
-      <div className="diff-viewer">
-        {diffParts.map((part, index) => {
-          if (part.added) {
-            return <span key={index} className="diff-added">{part.value}</span>;
-          }
-          if (part.removed) {
-            return <span key={index} className="diff-removed">{part.value}</span>;
-          }
-          return <span key={index}>{part.value}</span>;
-        })}
+    <div className="change-preview-container active-state">
+      <div className="preview-active-header">
+        <LuFileDiff className="header-icon" />
+        <h3 className="preview-active-title">{diffPreviewData.title}</h3>
       </div>
 
-      {/* Đề xuất liên kết mới trên Neo4j */}
-      <div className="proposed-rels-list">
-        <span className="detail-label" style={{ fontSize: '10px' }}>Đề xuất liên kết đồ thị Neo4j:</span>
-        {diffPreviewData.proposedRelations.map((rel, idx) => {
-          const isSuper = rel.type === 'SUPERSEDES';
-          return (
-            <div key={idx} className="rel-item">
-              <span className={`rel-badge ${isSuper ? 'supersedes' : 'references'}`}>
-                {rel.type}
-              </span>
-              <span className="rel-desc">{rel.description}</span>
-            </div>
-          );
-        })}
+      {/* Comparison Text Container styled as Paper Surface */}
+      <div className="diff-viewer-wrapper">
+        <span className="section-small-label">So sánh thay đổi điều khoản (Diff Preview)</span>
+        <div className="diff-paper-surface paper-surface">
+          <div className="diff-content-scroll">
+            {diffParts.map((part, index) => {
+              if (part.added) {
+                return <span key={index} className="diff-added">{part.value}</span>;
+              }
+              if (part.removed) {
+                return <span key={index} className="diff-removed">{part.value}</span>;
+              }
+              return <span key={index}>{part.value}</span>;
+            })}
+          </div>
+          <div className="diff-paper-watermark">SHB COMPLIANCE DIFF</div>
+        </div>
       </div>
 
-      {/* Nút phê duyệt */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+      {/* Proposed Neo4j Relations List */}
+      <div className="proposed-relations-section">
+        <div className="section-label-group">
+          <LuLink className="label-icon" />
+          <span className="section-small-label">Đề xuất cập nhật liên kết GraphDB (Neo4j)</span>
+        </div>
+        
+        <div className="proposed-relations-list">
+          {diffPreviewData.proposedRelations.map((rel, idx) => {
+            const isSuper = rel.type === 'SUPERSEDES';
+            return (
+              <div key={idx} className="rel-card-item">
+                <div className="rel-badge-row">
+                  <span className={`rel-badge-pill ${isSuper ? 'supersedes' : 'references'}`}>
+                    {rel.type}
+                  </span>
+                  <span className="rel-connector-label">Liên kết thực thể</span>
+                </div>
+                <p className="rel-card-description">{rel.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Action Footer Approval */}
+      <div className="preview-footer-action-row">
         {showStatus ? (
-          <span style={{ fontSize: '12px', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <LuCheck /> Đã phê duyệt và đồng bộ đồ thị Neo4j thành công!
+          <span className="approve-status-success">
+            <LuCircleCheck className="success-icon" />
+            <span>Phê duyệt và đồng bộ Neo4j thành công!</span>
           </span>
-        ) : <span />}
+        ) : (
+          <div className="info-helper-text">
+            <LuInfo />
+            <span>Vui lòng kiểm duyệt kỹ trước khi đồng bộ cơ sở dữ liệu.</span>
+          </div>
+        )}
 
         <button 
-          className="btn-approve" 
+          className={`btn-approve-submit ${isApproved ? 'approved' : ''}`} 
           onClick={handleApprove}
           disabled={isApproved}
         >
-          <LuGitCommitHorizontal />
+          {isApproved ? <LuCheck /> : <LuGitCommitHorizontal />}
           <span>{isApproved ? 'Đã Phê Duyệt' : 'Phê Duyệt & Đồng Bộ Đồ Thị'}</span>
         </button>
       </div>

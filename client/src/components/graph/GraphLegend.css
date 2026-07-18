@@ -1,0 +1,110 @@
+/* ============================================================
+   SHB GRAPH-RAG — GRAPH LEGEND PANEL STYLES
+   ============================================================ */
+
+.graph-legend-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+  padding: 12px;
+  background-color: var(--navy-surface);
+  border: 1px solid var(--navy-hairline);
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo rule */
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  pointer-events: auto; /* cho phép click nếu cần */
+  user-select: none;
+}
+
+.legend-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend-sec-title {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.legend-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-item-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.legend-divider {
+  height: 1px;
+  background-color: var(--navy-hairline);
+}
+
+/* Indicators styling */
+.dot-color-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle); /* tròn */
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* Node Colors mapping */
+.dot-color-indicator.node-shb {
+  background-color: var(--orange-signature);
+  box-shadow: 0 0 4px var(--orange-signature);
+}
+
+.dot-color-indicator.node-nhnn {
+  background-color: var(--sea-blue-light);
+  box-shadow: 0 0 4px var(--sea-blue-light);
+}
+
+.dot-color-indicator.node-active {
+  background-color: var(--emerald-active);
+  box-shadow: 0 0 4px var(--emerald-active);
+}
+
+.dot-color-indicator.node-expired {
+  background-color: var(--brick-expired);
+  box-shadow: 0 0 4px var(--brick-expired);
+}
+
+/* Edge Lines mapping */
+.line-color-indicator {
+  width: 14px;
+  height: 2.5px;
+  border-radius: var(--radius-circle);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.line-color-indicator.edge-has {
+  background-color: var(--orange-signature);
+}
+
+.line-color-indicator.edge-supersedes {
+  background-color: var(--brick-expired);
+  height: 2px;
+  border-bottom: 1.5px dashed var(--brick-expired);
+}
+
+.line-color-indicator.edge-references {
+  background-color: var(--sea-blue);
+}

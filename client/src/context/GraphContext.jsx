@@ -26,20 +26,32 @@ export const GraphProvider = ({ children }) => {
       return;
     }
 
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
     setGraphData(prev => {
       const updatedNodes = prev.nodes.map(node => {
-        const title = node.data.title.toLowerCase();
-        const text = node.data.text.toLowerCase();
-        const isMatched = title.includes(q) || text.includes(q);
+        let isMatched = false;
+        
+        if (q === ':active') {
+          isMatched = node.data.status === 'active';
+        } else if (q === ':expired') {
+          isMatched = node.data.status === 'expired';
+        } else if (q === ':shb') {
+          isMatched = node.data.docType === 'SHB' || node.id.includes('shb') || node.id.includes('qd') || node.id.includes('tietkiem');
+        } else if (q === ':nhnn') {
+          isMatched = node.data.docType === 'NHNN' || node.id.includes('tt');
+        } else {
+          const title = (node.data.title || '').toLowerCase();
+          const text = (node.data.text || '').toLowerCase();
+          isMatched = title.includes(q) || text.includes(q);
+        }
         
         return {
           ...node,
           style: {
             ...node.style,
-            opacity: isMatched ? 1 : 0.25,
-            border: isMatched ? '2px solid var(--color-accent-gold)' : 'none',
-            boxShadow: isMatched ? '0 0 15px var(--color-accent-gold)' : 'none'
+            opacity: isMatched ? 1 : 0.15,
+            border: isMatched ? '2px solid var(--orange-signature)' : 'none',
+            boxShadow: isMatched ? '0 0 15px rgba(240, 99, 29, 0.4)' : 'none'
           }
         };
       });

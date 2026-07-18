@@ -1,81 +1,114 @@
+/* ============================================================
+   SHB GRAPH-RAG — DRAG & DROP UPLOAD STYLES
+   ============================================================ */
+
 .upload-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 100%;
 }
 
-/* Drag & Drop Dropzone Box */
+/* Dropzone style */
 .dropzone {
-  border: 2px dashed var(--navy-hairline);
-  border-radius: var(--radius-panel);
-  padding: 32px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.01);
+  padding: 32px 20px;
+  background-color: rgba(10, 22, 40, 0.3);
+  border: 2px dashed var(--navy-hairline);
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo rule */
   cursor: pointer;
-  gap: 12px;
+  text-align: center;
   transition: all var(--dur-fast) var(--ease-standard);
 }
 
-.dropzone:hover, .dropzone.active {
+.dropzone:hover {
+  border-color: var(--orange-signature);
+  background-color: rgba(240, 99, 29, 0.02);
+  box-shadow: 0 4px 15px rgba(240, 99, 29, 0.05);
+}
+
+.dropzone.active {
   border-color: var(--orange-signature);
   background-color: var(--orange-wash);
+  box-shadow: 0 0 15px rgba(240, 99, 29, 0.15);
+  transform: scale(0.995);
 }
 
 .upload-icon {
-  font-size: 40px;
+  font-size: 32px;
   color: var(--orange-signature);
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 4px rgba(240, 99, 29, 0.3));
 }
 
 .upload-text {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-primary);
+  margin-bottom: 6px;
 }
 
 .upload-subtext {
   font-size: 10px;
   color: var(--text-muted);
+  max-width: 80%;
+  line-height: 1.4;
 }
 
 /* Upload Queue List */
 .upload-queue-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-height: 200px;
-  overflow-y: auto;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .queue-item {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: var(--navy-surface-raised);
   border: 1px solid var(--navy-hairline);
-  border-radius: var(--radius-tag);
-  padding: 12px;
+  border-radius: var(--radius-panel); /* vuông bo nhẹ */
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  animation: slideInUp var(--dur-fast) var(--ease-standard) forwards;
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .queue-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+}
+
+.file-info-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.file-type-icon {
+  color: var(--orange-signature);
+  font-size: 18px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 2px rgba(240, 99, 29, 0.2));
 }
 
 .file-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   overflow: hidden;
 }
 
 .file-name {
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -84,7 +117,7 @@
 }
 
 .file-size {
-  font-size: 9px;
+  font-size: 9.5px;
   color: var(--text-muted);
 }
 
@@ -94,30 +127,68 @@
   gap: 10px;
 }
 
+/* Success status */
+.upload-success-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--emerald-active-wash);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(47, 158, 104, 0.15);
+}
+
+.success-icon {
+  color: var(--emerald-active);
+  font-size: 11px;
+}
+
+.success-text {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--emerald-active);
+  text-transform: uppercase;
+}
+
+.upload-progress-percent {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
 .btn-remove-queue {
   background: transparent;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
   display: flex;
-  transition: color var(--dur-fast) var(--ease-standard);
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--radius-circle); /* tròn */
+  font-size: 14px;
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .btn-remove-queue:hover {
-  color: var(--brick-expired);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ef4444;
 }
 
-/* Progress bar styling */
+/* Progress bar fill */
 .progress-bar-container {
-  width: 100%;
   height: 4px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
+  background-color: rgba(10, 22, 40, 0.4);
+  border-radius: var(--radius-circle);
   overflow: hidden;
+  width: 100%;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background-color: var(--orange-signature);
-  transition: width 0.1s ease;
+  background: linear-gradient(90deg, var(--orange-signature) 0%, var(--orange-ember) 100%);
+  transition: width var(--dur-fast) var(--ease-standard);
+}
+
+.monospace {
+  font-family: var(--font-data);
 }

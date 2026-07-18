@@ -22,7 +22,7 @@ export const DragDropUpload = () => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-
+ 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const files = Array.from(e.dataTransfer.files);
       files.forEach(file => {
@@ -61,7 +61,7 @@ export const DragDropUpload = () => {
         style={{ display: 'none' }}
       />
 
-      {/* Vùng kéo thả kéo thả file */}
+      {/* Vùng kéo thả file */}
       <div 
         className={`dropzone ${isDragActive ? 'active' : ''}`}
         onDragEnter={handleDrag}
@@ -72,7 +72,7 @@ export const DragDropUpload = () => {
       >
         <LuUpload className="upload-icon" />
         <span className="upload-text">Kéo thả tài liệu PDF hoặc Click để chọn</span>
-        <span className="upload-subtext">Hỗ trợ các thông tư, quy chế nội bộ định dạng PDF (Max 20MB)</span>
+        <span className="upload-subtext">Hỗ trợ quy trình tín dụng, thông tư ngân hàng nhà nước dạng PDF (Tối đa 20MB)</span>
       </div>
 
       {/* Danh sách file đang nạp lên RAG */}
@@ -81,35 +81,40 @@ export const DragDropUpload = () => {
           {uploadQueue.map(item => (
             <div key={item.id} className="queue-item">
               <div className="queue-item-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                  <LuFile style={{ color: 'var(--color-accent-gold)', flexShrink: 0 }} />
+                <div className="file-info-group">
+                  <LuFile className="file-type-icon" />
                   <div className="file-info">
                     <span className="file-name">{item.fileName}</span>
-                    <span className="file-size">{item.fileSize}</span>
+                    <span className="file-size monospace">{item.fileSize}</span>
                   </div>
                 </div>
                 
                 <div className="queue-actions">
                   {item.status === 'success' ? (
-                    <LuCircleCheck style={{ color: 'var(--color-success)', fontSize: '16px' }} />
+                    <span className="upload-success-indicator" title="Đã nạp thành công">
+                      <LuCircleCheck className="success-icon" />
+                      <span className="success-text">Hoàn tất</span>
+                    </span>
                   ) : (
-                    <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)' }}>
+                    <span className="upload-progress-percent monospace">
                       {item.progress}%
                     </span>
                   )}
+                  
                   <button 
                     className="btn-remove-queue" 
                     onClick={(e) => {
                       e.stopPropagation();
                       removeFromQueue(item.id);
                     }}
+                    title="Xóa khỏi hàng đợi"
                   >
-                    <LuTrash2 size={13} />
+                    <LuTrash2 />
                   </button>
                 </div>
               </div>
 
-              {/* Thanh tiến trình */}
+              {/* Thanh tiến trình tải lên */}
               {item.status !== 'success' && (
                 <div className="progress-bar-container">
                   <div 

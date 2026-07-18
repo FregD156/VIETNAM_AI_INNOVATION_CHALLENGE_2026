@@ -1,25 +1,37 @@
+/* ============================================================
+   SHB GRAPH-RAG — CITATION TAG STYLES
+   Phụ trợ, thứ cấp dùng màu Sea Blue đúng rule
+   ============================================================ */
+
 .citation-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background-color: var(--navy-surface-raised);
-  color: var(--orange-ember);
-  border: 1px solid var(--navy-hairline);
-  padding: 2px 8px;
-  border-radius: var(--radius-tag);
+  gap: 5px;
+  background-color: var(--sea-blue-wash); /* Xanh biển mờ */
+  color: var(--sea-blue-light);
+  border: 1px solid rgba(28, 114, 147, 0.25);
+  padding: 3px 10px;
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo rule */
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  margin: 0 4px;
+  margin: 2px 0;
   text-decoration: none;
   vertical-align: middle;
   transition: all var(--dur-fast) var(--ease-standard);
   font-family: var(--font-data);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .citation-tag:hover {
-  background-color: var(--orange-signature);
+  background-color: var(--sea-blue);
   color: #ffffff;
-  border-color: var(--orange-signature);
-  box-shadow: 0 0 8px rgba(240, 99, 29, 0.4);
+  border-color: var(--sea-blue);
+  box-shadow: 0 0 10px rgba(28, 114, 147, 0.4);
+  transform: translateY(-1px);
+}
+
+.citation-tag svg {
+  font-size: 10px;
+  flex-shrink: 0;
 }

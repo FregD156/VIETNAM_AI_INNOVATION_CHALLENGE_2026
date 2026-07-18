@@ -46,18 +46,59 @@
   --font-legal: 'Source Serif 4', Georgia, serif;   /* CHỈ dùng cho trích dẫn pháp lý gốc */
   --font-data: 'IBM Plex Mono', monospace;           /* mã điều khoản, timestamp, version */
 
-  /* ---- Hình khối: signature "vuông ôm tròn" ----
-     Panel/khung nghiệp vụ = gần vuông (ổn định, quy tắc)
-     Node/nút hành động chính/chấm trạng thái = tròn tuyệt đối (kết nối, luồng) */
-  --radius-panel: 8px;    /* KHÔNG bo tròn hết cỡ như pill — đây là chủ đích */
-  --radius-tag: 6px;
-  --radius-circle: 999px; /* chỉ dùng cho node, avatar, dot trạng thái, nút tròn chính */
+  /* ---- Hình khối: micro-radius bo tròn nhẹ tinh tế ---- */
+  --radius-panel: 4px;
+  --radius-tag: 2px;
+  --radius-circle: 999px;
 
   /* ---- Motion — có chủ đích, không rải rác ---- */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-fast: 150ms;
   --dur-base: 240ms;
   --dur-signature: 480ms; /* riêng cho khoảnh khắc "vòng tròn nở từ khung vuông" */
+}
+
+/* ============================================================
+   SHB GRAPH-RAG — LIGHT MODE DESIGN TOKENS
+   Giao diện sáng cao cấp, tinh tế, không chói mắt
+   ============================================================ */
+[data-theme="light"] {
+  --navy-abyss: #F4F6F9;          /* Nền chính sáng */
+  --navy-surface: #FFFFFF;        /* Nền panel sáng */
+  --navy-surface-raised: #E9EDF2; /* Nền popover/modal sáng */
+  --navy-hairline: rgba(10, 22, 40, 0.08); /* Viền sẫm mờ trên nền sáng */
+
+  /* Chữ trên nền sáng */
+  --text-primary: #0F172A;        /* Slate 900 */
+  --text-secondary: #475569;      /* Slate 600 */
+  --text-muted: #94A3B8;          /* Slate 400 */
+
+  /* Điều chỉnh sắc độ mờ để giữ thẩm mỹ */
+  --orange-wash: rgba(240, 99, 29, 0.06);
+  --sea-blue-wash: rgba(28, 114, 147, 0.06);
+  --emerald-active-wash: rgba(47, 158, 104, 0.08);
+  --brick-expired-wash: rgba(192, 68, 44, 0.08);
+}
+
+/* Glowing Text Shadow Utilities */
+.glow-orange {
+  color: var(--orange-signature) !important;
+  text-shadow: 0 0 8px var(--orange-ember), 0 0 15px rgba(240, 99, 29, 0.5);
+}
+
+.glow-emerald {
+  color: var(--emerald-active) !important;
+  text-shadow: 0 0 8px var(--emerald-active), 0 0 15px rgba(47, 158, 104, 0.5);
+}
+
+.glow-brick {
+  color: var(--brick-expired) !important;
+  text-shadow: 0 0 8px var(--brick-expired), 0 0 15px rgba(192, 68, 44, 0.5);
+}
+
+.glow-blue {
+  color: var(--sea-blue-light) !important;
+  text-shadow: 0 0 8px var(--sea-blue-light), 0 0 15px rgba(79, 168, 201, 0.5);
 }
 
 * {

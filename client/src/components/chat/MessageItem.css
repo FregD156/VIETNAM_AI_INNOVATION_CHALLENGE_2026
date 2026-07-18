@@ -1,110 +1,201 @@
-.message-item-container {
+/* ============================================================
+   SHB GRAPH-RAG — MESSAGE ITEM STYLES
+   ============================================================ */
+
+.message-item-row {
   display: flex;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  gap: 12px;
   animation: fadeIn var(--dur-base) var(--ease-standard) forwards;
 }
 
-.message-item-container.user {
+.message-item-row.user {
   justify-content: flex-end;
 }
 
-.message-item-container.ai {
+.message-item-row.ai {
   justify-content: flex-start;
 }
 
-.message-bubble {
-  max-width: 75%;
-  padding: 16px;
-  border-radius: var(--radius-panel);
-  position: relative;
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-/* User Message styling - Solid raised surface */
-.message-item-container.user .message-bubble {
-  background-color: var(--navy-surface-raised);
-  color: var(--text-primary);
-  border-bottom-right-radius: 2px;
+/* 1. SYMMETRICAL SENDER AVATARS */
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-circle); /* tròn tuyệt đối */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--navy-hairline);
 }
 
-/* AI Message styling - Solid surface panel */
-.message-item-container.ai .message-bubble {
+.bot-avatar {
+  background: linear-gradient(135deg, var(--orange-signature) 0%, #c2410c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(240, 99, 29, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-avatar {
+  background-color: var(--navy-surface-raised);
+  color: var(--text-secondary);
+}
+
+/* 2. CHAT BUBBLE BOX */
+.message-bubble-box {
+  max-width: 72%;
+  padding: 16px 20px;
+  border-radius: var(--radius-panel); /* vuông bo nhẹ theo triết lý logo */
   background-color: var(--navy-surface);
   border: 1px solid var(--navy-hairline);
   color: var(--text-primary);
-  border-bottom-left-radius: 2px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  line-height: 1.6;
+  font-size: 13.5px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
-/* Welcome message special highlight */
-.message-bubble.welcome-bubble {
+.message-item-row.user .message-bubble-box {
+  background-color: var(--navy-surface-raised);
+  border-bottom-right-radius: 2px; /* góc nhọn tinh tế bên người gửi */
+}
+
+.message-item-row.ai .message-bubble-box {
+  border-bottom-left-radius: 2px; /* góc nhọn tinh tế bên AI */
+}
+
+/* Welcome message special styling */
+.message-bubble-box.welcome {
   border-color: rgba(240, 99, 29, 0.3);
+  box-shadow: 0 4px 20px rgba(240, 99, 29, 0.06);
 }
 
-/* Message Header & Meta */
-.message-meta {
+/* 3. BUBBLE HEADER METADATA */
+.message-bubble-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-size: 11px;
-  color: var(--text-muted);
   font-family: var(--font-data);
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding-bottom: 6px;
 }
 
-.sender-name {
+.bubble-sender-name {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.message-item-container.ai .sender-name {
+.message-item-row.ai .bubble-sender-name {
   color: var(--orange-signature);
 }
 
-.message-item-container.user .sender-name {
+.message-item-row.user .bubble-sender-name {
   color: var(--text-secondary);
 }
 
-/* Markdown parsing rendering styles */
-.message-body p {
-  margin-bottom: 10px;
+.bubble-message-time {
+  font-weight: 500;
 }
 
-.message-body p:last-child {
+/* 4. MARKDOWN PARSER RENDERING */
+.message-bubble-body {
+  word-break: break-word;
+}
+
+.message-p {
+  margin: 0 0 12px 0;
+}
+
+.message-p:last-child {
   margin-bottom: 0;
 }
 
-.message-body ul, .message-body ol {
-  margin-left: 20px;
-  margin-bottom: 10px;
+.message-space {
+  height: 10px;
 }
 
-.message-body li {
-  margin-bottom: 4px;
+.message-h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 18px 0 10px 0;
+  border-bottom: 1px solid var(--navy-hairline);
+  padding-bottom: 4px;
 }
 
-.message-body strong {
+.message-h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--orange-ember);
+  margin: 14px 0 8px 0;
+}
+
+/* Blockquote for original legal text quotes */
+.message-blockquote {
+  margin: 12px 0;
+  padding: 10px 16px;
+  background-color: rgba(28, 114, 147, 0.05); /* Sea Blue Wash mờ */
+  border-left: 3px solid var(--sea-blue);
+  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  color: var(--text-secondary);
+  font-family: var(--font-legal);
+  font-size: 13.5px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.message-bubble-body ul, 
+.message-bubble-body ol {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+}
+
+.message-bubble-body li {
+  margin-bottom: 6px;
+}
+
+.message-bubble-body li:last-child {
+  margin-bottom: 0;
+}
+
+.message-bubble-body strong {
   color: var(--orange-ember);
   font-weight: 600;
 }
 
-/* Citation footer inside bubble */
-.message-citations {
-  margin-top: 14px;
-  padding-top: 10px;
+/* 5. CITATIONS FOOTER SECTION */
+.message-bubble-citations {
+  margin-top: 16px;
+  padding-top: 12px;
   border-top: 1px solid var(--navy-hairline);
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
 }
 
-.citations-label {
+.citations-header-label {
   font-size: 11px;
   color: var(--text-muted);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.citations-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Custom animation overlay helper */
+.animate-fade-in {
+  animation: fadeIn var(--dur-fast) var(--ease-standard) forwards;
 }

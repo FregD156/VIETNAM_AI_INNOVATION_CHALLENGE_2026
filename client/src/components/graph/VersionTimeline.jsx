@@ -1,7 +1,7 @@
 import React from 'react';
 import './VersionTimeline.css';
 
-// Chuỗi phiên bản đã được sắp xếp trước theo năm (ngăn ngừa re-sort trong render)
+// Chuỗi phiên bản đã được sắp xếp trước theo năm
 const TIMELINE_DATA = {
   loan_limit: [
     {
@@ -20,7 +20,7 @@ const TIMELINE_DATA = {
   ekyc: [
     {
       year: '2020',
-      status: 'active',
+      status: 'expired',
       version: 'v1.0',
       text: 'Ngân hàng thương mại mở tài khoản thanh toán bằng eKYC phải áp dụng hạn mức tối đa 100 triệu đồng/tháng.'
     },
@@ -56,27 +56,35 @@ export const VersionTimeline = ({ nodeId }) => {
     timelineKey = 'deposit';
   }
 
-  const timelineItems = TIMELINE_DATA[timelineKey];
+  const timelineItems = TIMELINE_DATA[timelineKey] || [];
 
   return (
-    <div className="version-timeline">
-      {timelineItems.map((item, idx) => (
-        <div key={idx} className="timeline-item">
-          {/* Vòng tròn timeline với màu trạng thái */}
-          <div className={`timeline-dot ${item.status}`} />
-          
-          <div className="timeline-header">
-            <span className="timeline-year">Năm {item.year} ({item.version})</span>
-            <span className={`timeline-status ${item.status}`}>
-              {item.status === 'active' ? 'Có hiệu lực' : item.status === 'expired' ? 'Hết hạn' : 'Dự thảo'}
-            </span>
-          </div>
+    <div className="version-timeline-container">
+      <div className="timeline-axis-line"></div>
+      
+      {timelineItems.map((item, idx) => {
+        const isActive = item.status === 'active';
+        return (
+          <div key={idx} className={`timeline-version-card ${isActive ? 'active-version' : 'expired-version'}`}>
+            {/* Timeline Dot: Tròn tuyệt đối */}
+            <div className={`timeline-indicator-dot ${item.status}`} />
+            
+            {/* Card Header metadata */}
+            <div className="timeline-card-header">
+              <span className="timeline-version-badge monospace">{item.version}</span>
+              <span className="timeline-year-text monospace">Năm ban hành: {item.year}</span>
+              <span className={`timeline-status-badge ${item.status}`}>
+                {isActive ? 'Đang hiệu lực' : 'Đã hết hạn'}
+              </span>
+            </div>
 
-          <div className={`timeline-text ${item.status === 'active' ? 'highlight' : ''}`}>
-            {item.text}
+            {/* Card Text Content */}
+            <div className="timeline-card-body-text">
+              {item.text}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

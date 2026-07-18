@@ -2,39 +2,39 @@
   flex: 1;
   height: 100%;
   position: relative;
-  background-color: var(--color-bg-primary);
+  background-color: var(--navy-abyss);
   overflow: hidden;
 }
 
 /* React Flow custom styling overrides */
 .react-flow {
-  background-color: var(--color-bg-primary);
+  background-color: var(--navy-abyss);
 }
 
 .react-flow__background {
   opacity: 0.05;
 }
 
-/* Customize controls and mini-map overlays */
+/* Customize controls and mini-map overlays - Standard #1 Hairline */
 .react-flow__controls {
-  background: var(--color-bg-sidebar);
-  border: 1px solid var(--color-border-glass);
-  border-radius: var(--radius-sm);
+  background: var(--navy-surface) ;
+  border: 1px solid var(--navy-hairline) !important;
+  border-radius: var(--radius-panel) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .react-flow__controls-button {
   background: transparent;
-  border-bottom: 1px solid var(--color-border-glass);
-  color: var(--color-text-secondary);
-  fill: var(--color-text-secondary);
-  transition: all var(--transition-fast);
+  border-bottom: 1px solid var(--navy-hairline) !important;
+  color: var(--text-secondary);
+  fill: var(--text-secondary);
+  transition: all var(--dur-fast) var(--ease-standard);
 }
 
 .react-flow__controls-button:hover {
-  background-color: var(--color-bg-glass-hover);
-  color: var(--color-accent-gold);
-  fill: var(--color-accent-gold);
+  background-color: var(--navy-surface-raised);
+  color: var(--orange-signature);
+  fill: var(--orange-signature);
 }
 
 .react-flow__controls-button svg {
@@ -42,38 +42,38 @@
 }
 
 .react-flow__minimap {
-  background-color: var(--color-bg-sidebar) !important;
-  border: 1px solid var(--color-border-glass) !important;
-  border-radius: var(--radius-md) !important;
+  background-color: var(--navy-surface) !important;
+  border: 1px solid var(--navy-hairline) !important;
+  border-radius: var(--radius-panel) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
 }
 
 .react-flow__minimap-mask {
-  fill: rgba(11, 18, 32, 0.6) !important;
+  fill: rgba(10, 22, 40, 0.6) !important;
 }
 
-/* Customize custom nodes borders on active */
+/* Customize custom nodes borders on active - Standard #5 Soft Glow */
 .react-flow__node.selected > div {
-  border: 1.5px solid var(--color-accent-gold) !important;
-  box-shadow: 0 0 15px var(--color-accent-gold) !important;
+  border: 1.5px solid var(--orange-signature) !important;
+  box-shadow: 0 0 12px rgba(240, 99, 29, 0.45) !important;
 }
 
 /* Customize Edge label styling */
 .react-flow__edge-text {
   font-size: 8px !important;
   font-weight: 700 !important;
-  fill: var(--color-text-muted) !important;
+  fill: var(--text-muted) !important;
 }
 
 .react-flow__edge-textbg {
-  fill: var(--color-bg-primary) !important;
+  fill: var(--navy-abyss) !important;
   opacity: 0.9 !important;
-  rx: 3 !important;
-  ry: 3 !important;
+  rx: 0 !important; /* Sharp corners */
+  ry: 0 !important;
 }
 
 .react-flow__attribution {
   background-color: transparent !important;
-  color: var(--color-text-muted) !important;
+  color: var(--text-muted) !important;
   font-size: 8px !important;
 }
