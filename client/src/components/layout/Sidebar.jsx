@@ -8,10 +8,12 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
       <div className="sidebar-top">
         {/* Brand Logo SHB */}
         <div className="brand-logo">
-          <div className="logo-icon">S</div>
+          <div className="logo-icon">
+            <div className="logo-circle">S</div>
+          </div>
           <div className="brand-text">
-            <span className="brand-name">SHB Graph-RAG</span>
-            <span className="brand-sub">Compliance AI</span>
+            <span className="brand-name">SHB Compliance</span>
+            <span className="brand-sub">Ngân hàng Sài Gòn - Hà Nội</span>
           </div>
         </div>
 
@@ -45,10 +47,10 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
 
       {/* Cán bộ tín dụng / RM Profile (Bank A Brief context) */}
       <div className="sidebar-footer">
-        <div className="user-avatar">RM</div>
+        <div className="user-avatar">SHB</div>
         <div className="user-info">
           <span className="user-name">Nguyễn Văn An</span>
-          <span className="user-role">RM - Phòng Bán lẻ</span>
+          <span className="user-role">RM - Khối Bán lẻ SHB</span>
         </div>
       </div>
     </aside>

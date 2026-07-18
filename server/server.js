@@ -82,8 +82,9 @@ app.post('/api/admin/crm-sync', (req, res) => {
 
 // Khởi chạy server
 app.listen(PORT, () => {
-  console.log(`=========================================`);
+  console.log(`=======================================================`);
   console.log(`🚀 SHB Graph-RAG Backend Server is running!`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
-  console.log(`=========================================`);
+  console.log(`🔗 Local API Base URL:  http://localhost:${PORT}/api`);
+  console.log(`🔗 Production Domain:   https://api.compliance.shb.com.vn/api`);
+  console.log(`=======================================================`);
 });

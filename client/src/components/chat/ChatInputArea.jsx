@@ -36,7 +36,7 @@ export const ChatInputArea = ({ onSendMessage, onClearChat, isStreaming }) => {
     if (isRecording) {
       setIsRecording(false);
       // Điền câu hỏi giả lập khi ngắt ghi âm
-      setText('Hồ sơ eKYC mở tài khoản cá nhân online cần những gì?');
+      setText('Hồ sơ eKYC mở tài khoản cá nhân online tại SHB cần những gì?');
     } else {
       setIsRecording(true);
     }
@@ -48,9 +48,9 @@ export const ChatInputArea = ({ onSendMessage, onClearChat, isStreaming }) => {
   };
 
   const suggestions = [
-    { label: 'Hồ sơ eKYC online', query: 'Hồ sơ eKYC mở tài khoản cá nhân online cần những gì?' },
-    { label: 'Hạn mức vay tín chấp', query: 'Quy định hạn mức vay tín chấp tiêu dùng online?' },
-    { label: 'Gia hạn sổ tiết kiệm', query: 'Sổ tiết kiệm đến hạn tất toán xử lý thế nào?' }
+    { label: 'Hồ sơ eKYC SHB', query: 'Hồ sơ eKYC mở tài khoản cá nhân online tại SHB cần những gì?' },
+    { label: 'Hạn mức vay SHB Mobile', query: 'Quy định hạn mức cho vay tiêu dùng online trên ứng dụng SHB Mobile?' },
+    { label: 'Tất toán tiết kiệm SHB', query: 'Sổ tiết kiệm đến hạn tất toán xử lý thế nào theo quy chế SHB?' }
   ];
 
   return (
