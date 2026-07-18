@@ -7,6 +7,146 @@ export const EvaluationWorkspace = () => {
   const [benchmarkData, setBenchmarkData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Hàm helper phân tích cú pháp Markdown (in đậm, in nghiêng, danh sách đánh số) cho bảng đánh giá
+  const renderAnswerText = (text) => {
+    if (!text) return null;
+
+    const lines = text.split('\n');
+    let inList = false;
+    let listItems = [];
+    let inOrderedList = false;
+    let orderedListItems = [];
+    const elements = [];
+
+    const parseKeywords = (textStr) => {
+      if (typeof textStr !== 'string') return textStr;
+      
+      const docRegexStr = '\\b((?:TT|QĐ)\\s*\\d+\\/\\d+(?:\\/(?:TT-NHNN|QĐ-SHB|SHB))?)\\b';
+      const moneyRegexStr = '\\b(\\d+(?:\\.\\d+)*\\s*(?:triệu|tỷ)(?:\\s*(?:đồng|VNĐ))?(?:\\/tháng)?|\\d{1,3}(?:\\.\\d{3})+(?:\\s*(?:VNĐ|đồng))?(?:\\/tháng)?)\\b';
+      const combinedRegex = new RegExp(`${docRegexStr}|${moneyRegexStr}`, 'gi');
+      
+      const res = [];
+      let lastIdx = 0;
+      let match;
+      let key = 0;
+      
+      while ((match = combinedRegex.exec(textStr)) !== null) {
+        if (match.index > lastIdx) {
+          res.push(textStr.substring(lastIdx, match.index));
+        }
+        
+        const matchedText = match[0];
+        if (matchedText.match(/(?:TT|QĐ)/i)) {
+          res.push(<span key={`doc-${key++}`} className="legal-code-badge">{matchedText}</span>);
+        } else {
+          res.push(<span key={`money-${key++}`} className="legal-highlight" style={{ color: 'var(--orange-signature)', fontWeight: 800 }}>{matchedText}</span>);
+        }
+        
+        lastIdx = combinedRegex.lastIndex;
+      }
+      
+      if (lastIdx < textStr.length) {
+        res.push(textStr.substring(lastIdx));
+      }
+      
+      return res.length > 0 ? res : textStr;
+    };
+
+    const parseItalic = (textStr) => {
+      if (!textStr) return '';
+      const italicParts = textStr.split(/\*([^*]+)\*/g);
+      if (italicParts.length === 1) return textStr;
+      
+      return italicParts.map((part, index) => {
+        if (index % 2 === 1) {
+          return <em key={`i-${index}`} className="legal-italic-text" style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>{part}</em>;
+        }
+        return part;
+      });
+    };
+
+    const parseBold = (str) => {
+      const parts = str.split('**');
+      return parts.map((part, index) => {
+        if (index % 2 === 1) {
+          return <strong key={index} style={{ fontWeight: 800, color: 'var(--orange-signature)' }}>{parseItalic(part)}</strong>;
+        }
+        return <span key={index}>{parseItalic(part)}</span>;
+      });
+    };
+
+    const closeListIfAny = (idx) => {
+      if (inList) {
+        elements.push(<ul key={`ul_${idx}`} className="message-ul" style={{ paddingLeft: '20px', margin: '0 0 10px 0' }}>{listItems}</ul>);
+        listItems = [];
+        inList = false;
+      }
+      if (inOrderedList) {
+        elements.push(<ol key={`ol_${idx}`} className="message-ol" style={{ paddingLeft: '20px', margin: '0 0 10px 0' }}>{orderedListItems}</ol>);
+        orderedListItems = [];
+        inOrderedList = false;
+      }
+    };
+
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      
+      if (trimmed.startsWith('### ')) {
+        closeListIfAny(idx);
+        elements.push(<h3 key={`h3_${idx}`} className="message-h3" style={{ fontSize: '13px', fontWeight: 700, margin: '14px 0 8px 0' }}>{parseBold(trimmed.substring(4))}</h3>);
+      }
+      else if (trimmed.startsWith('## ')) {
+        closeListIfAny(idx);
+        elements.push(<h2 key={`h2_${idx}`} className="message-h2" style={{ fontSize: '14px', fontWeight: 700, margin: '16px 0 10px 0' }}>{parseBold(trimmed.substring(3))}</h2>);
+      }
+      else if (trimmed.startsWith('> ')) {
+        closeListIfAny(idx);
+        elements.push(
+          <blockquote key={`bq_${idx}`} className="message-blockquote" style={{ borderLeft: '3px solid var(--orange-signature)', paddingLeft: '12px', margin: '10px 0', background: 'rgba(255,255,255,0.02)' }}>
+            <p>{parseBold(trimmed.substring(2))}</p>
+          </blockquote>
+        );
+      }
+      else if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        if (inOrderedList) {
+          elements.push(<ol key={`ol_${idx}`} className="message-ol" style={{ paddingLeft: '20px', margin: '0 0 10px 0' }}>{orderedListItems}</ol>);
+          orderedListItems = [];
+          inOrderedList = false;
+        }
+        inList = true;
+        listItems.push(<li key={`li_${idx}`} style={{ marginBottom: '4px' }}>{parseBold(trimmed.substring(2))}</li>);
+      } 
+      else if (trimmed.match(/^\d+\.\s+/)) {
+        if (inList) {
+          elements.push(<ul key={`ul_${idx}`} className="message-ul" style={{ paddingLeft: '20px', margin: '0 0 10px 0' }}>{listItems}</ul>);
+          listItems = [];
+          inList = false;
+        }
+        inOrderedList = true;
+        const matchIndex = trimmed.indexOf('.');
+        const listContent = trimmed.substring(matchIndex + 1).trim();
+        orderedListItems.push(<li key={`ol_li_${idx}`} style={{ marginBottom: '4px' }}>{parseBold(listContent)}</li>);
+      }
+      else if (trimmed === '') {
+        closeListIfAny(idx);
+        elements.push(<div key={`space_${idx}`} className="message-space" style={{ height: '8px' }} />);
+      } 
+      else {
+        closeListIfAny(idx);
+        elements.push(<p key={`p_${idx}`} className="message-p" style={{ margin: '0 0 8px 0', lineHeight: 1.5 }}>{parseBold(line)}</p>);
+      }
+    });
+
+    if (inList) {
+      elements.push(<ul key="ul_final" className="message-ul" style={{ paddingLeft: '20px', margin: '0 0 10px 0' }}>{listItems}</ul>);
+    }
+    if (inOrderedList) {
+      elements.push(<ol key="ol_final" className="message-ol" style={{ paddingLeft: '20px', margin: '0 0 10px 0' }}>{orderedListItems}</ol>);
+    }
+
+    return elements;
+  };
+
   // Gọi API benchmark thật từ backend
   const fetchBenchmark = async () => {
     setIsLoading(true);
@@ -275,7 +415,7 @@ export const EvaluationWorkspace = () => {
               <div className="col-body-content">
                 <span className="content-label">Câu trả lời RAG truyền thống:</span>
                 <div className="answer-text-box">
-                  {currentData.standard.answer}
+                  {renderAnswerText(currentData.standard.answer)}
                 </div>
               </div>
             </div>
@@ -308,9 +448,7 @@ export const EvaluationWorkspace = () => {
               <div className="col-body-content">
                 <span className="content-label">Câu trả lời Graph-RAG:</span>
                 <div className="answer-text-box advanced-highlight">
-                  {currentData.advanced.answer.split('\n').map((line, idx) => (
-                    <p key={idx} style={{ margin: '0 0 8px 0' }}>{line}</p>
-                  ))}
+                  {renderAnswerText(currentData.advanced.answer)}
                 </div>
                 <div className="citations-box">
                   <span className="citations-title">Đối chiếu nguồn lực:</span>
