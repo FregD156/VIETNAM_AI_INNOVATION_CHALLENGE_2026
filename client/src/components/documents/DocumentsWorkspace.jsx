@@ -47,7 +47,7 @@ export const DocumentsWorkspace = () => {
   
   const activeClausesCount = clauses.filter(c => {
     const status = c.data.status || '';
-    return status === 'active' || status === 'Còn hiệu lực';
+    return status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần';
   }).length;
   
   const expiredClausesCount = clauses.filter(c => {
@@ -64,7 +64,7 @@ export const DocumentsWorkspace = () => {
 
     // Lọc theo trạng thái hiệu lực (tương thích cả active/expired và Còn hiệu lực/Hết hiệu lực)
     const status = c.data.status || '';
-    const isNodeActive = status === 'active' || status === 'Còn hiệu lực';
+    const isNodeActive = status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần';
     const matchStatus = statusFilter === 'all' || 
       (statusFilter === 'active' && isNodeActive) || 
       (statusFilter === 'expired' && !isNodeActive);
@@ -204,7 +204,7 @@ export const DocumentsWorkspace = () => {
                       const docType = clause.data.docType || 'SHB';
                       const tagClass = docType === 'Luật' ? 'law' : (docType === 'NHNN' ? 'nhnn' : 'shb');
                       const status = clause.data.status || '';
-                      const isActive = status === 'active' || status === 'Còn hiệu lực';
+                      const isActive = status === 'active' || status === 'Còn hiệu lực' || status === 'Còn hiệu lực một phần';
                       
                       return (
                         <tr 
@@ -226,7 +226,7 @@ export const DocumentsWorkspace = () => {
                           </td>
                           <td className="cell-status" style={{ textAlign: 'center' }}>
                             <span className={`detail-status-pill ${isActive ? 'active' : 'expired'}`}>
-                              {isActive ? 'Còn hiệu lực' : 'Hết hiệu lực'}
+                              {status || 'Còn hiệu lực'}
                             </span>
                           </td>
                           <td className="cell-action" style={{ textAlign: 'center' }}>
