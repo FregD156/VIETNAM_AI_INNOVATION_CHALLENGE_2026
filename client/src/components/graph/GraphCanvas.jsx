@@ -250,21 +250,93 @@ export const GraphCanvas = () => {
       }
     }
 
-    setNodes(visibleNodes.map(node => {
-      if (node.type === 'documentNode') {
+    // 3. Áp dụng Highlight kết nối khi có Node được chọn
+    let finalNodes = [...visibleNodes];
+    let finalEdges = [...visibleEdges];
+
+    if (selectedNode) {
+      const selectedId = selectedNode.id;
+      const connectedEdgeIds = new Set();
+      const connectedNodeIds = new Set([selectedId]);
+
+      visibleEdges.forEach(edge => {
+        if (edge.source === selectedId || edge.target === selectedId) {
+          connectedEdgeIds.add(edge.id);
+          connectedNodeIds.add(edge.source);
+          connectedNodeIds.add(edge.target);
+        }
+      });
+
+      finalNodes = visibleNodes.map(node => {
+        const isConnected = connectedNodeIds.has(node.id);
+        const isSelf = node.id === selectedId;
+        
         return {
           ...node,
           data: {
             ...node.data,
             isExpanded: viewMode === 'micro' && activeDocId === node.id
+          },
+          style: {
+            ...node.style,
+            opacity: isConnected ? 1 : 0.15,
+            transition: 'opacity 0.25s ease, transform 0.25s ease',
+            border: isSelf 
+              ? '2px solid var(--orange-signature)' 
+              : (isConnected ? '1.5px solid rgba(255, 255, 255, 0.45)' : 'none'),
+            boxShadow: isSelf 
+              ? '0 0 15px rgba(240, 99, 29, 0.4)' 
+              : (isConnected ? '0 0 8px rgba(255, 255, 255, 0.2)' : 'none')
           }
         };
-      }
-      return node;
-    }));
-    
-    setEdges(visibleEdges);
-  }, [graphData, viewMode, activeDocId, layoutMode, setNodes, setEdges]);
+      });
+
+      finalEdges = visibleEdges.map(edge => {
+        const isConnected = connectedEdgeIds.has(edge.id);
+        return {
+          ...edge,
+          animated: isConnected, // Chạy chuyển động truyền dữ liệu cho các đường kết nối
+          style: {
+            ...edge.style,
+            opacity: isConnected ? 1 : 0.08,
+            strokeWidth: isConnected ? 2.5 : (edge.style?.strokeWidth || 1.2),
+            stroke: isConnected ? (edge.style?.stroke || '#F0631D') : (edge.style?.stroke || '#64748b'),
+            transition: 'opacity 0.25s ease, stroke-width 0.25s ease'
+          }
+        };
+      });
+    } else {
+      finalNodes = visibleNodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          isExpanded: viewMode === 'micro' && activeDocId === node.id
+        },
+        style: {
+          ...node.style,
+          opacity: 1,
+          border: 'none',
+          boxShadow: 'none',
+          transition: 'opacity 0.25s ease'
+        }
+      }));
+
+      finalEdges = visibleEdges.map(edge => ({
+        ...edge,
+        animated: false,
+        style: {
+          ...edge.style,
+          opacity: 1,
+          strokeWidth: edge.style?.strokeWidth || 1.2,
+          stroke: edge.style?.stroke || '#64748b',
+          transition: 'opacity 0.25s ease'
+        }
+      }));
+    }
+
+    setNodes(finalNodes);
+    setEdges(finalEdges);
+  }, [graphData, viewMode, activeDocId, layoutMode, selectedNode, setNodes, setEdges]);
 
   // Lắng nghe sự kiện focus node từ bên ngoài (như click CitationTag trong Chat)
   useEffect(() => {
