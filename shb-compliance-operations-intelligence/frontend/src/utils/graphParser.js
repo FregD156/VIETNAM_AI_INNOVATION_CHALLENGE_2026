@@ -18,18 +18,21 @@ export const parseNeo4jToReactFlow = (rawData) => {
     rawRelationships = rawData.rawRelationships;
   } else if (rawData.nodes && rawData.links) {
     // Định dạng API NetworkX thật từ FastAPI
-    rawNodes = rawData.nodes.map(node => ({
-      id: node.id,
-      label: node.label || (node.id.startsWith('doc_') ? 'Document' : 'Clause'),
-      properties: {
-        id: node.id,
-        title: node.title || node.name || '',
-        text: node.text || node.content || '',
-        status: node.status || 'active',
-        type: node.type || node.docType || (node.id.startsWith('doc_tt') ? 'NHNN' : 'SHB_Internal'),
-        effective_date: node.effective_date || ''
-      }
-    }));
+    rawNodes = rawData.nodes.map(node => {
+      const nodeId = node.id || '';
+      return {
+        id: nodeId,
+        label: node.label || (nodeId.startsWith('doc_') ? 'Document' : 'Clause'),
+        properties: {
+          id: nodeId,
+          title: node.title || node.name || '',
+          text: node.text || node.content || '',
+          status: node.status || 'active',
+          type: node.type || node.docType || (nodeId.startsWith('doc_tt') ? 'NHNN' : 'SHB_Internal'),
+          effective_date: node.effective_date || ''
+        }
+      };
+    });
     
     rawRelationships = rawData.links.map((link, idx) => ({
       id: link.id || `rel_${link.source}_${link.type || 'link'}_${link.target}_${idx}`,

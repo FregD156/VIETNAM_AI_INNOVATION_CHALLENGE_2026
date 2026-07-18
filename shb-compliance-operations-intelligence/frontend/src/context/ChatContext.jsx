@@ -163,9 +163,9 @@ export const ChatProvider = ({ children }) => {
                 // Trích lục citations từ Object map sang Array
                 const citationMap = finalData.citations || {};
                 const citationsList = Object.entries(citationMap).map(([key, value]) => ({
-                  id: value.chunk_id || value.id || key,
-                  label: value.title || `Tài liệu [${key}]`,
-                  sourceText: value.content || value.text || ''
+                  id: value?.chunk_id || value?.id || key,
+                  label: value?.title || `Tài liệu [${key}]`,
+                  sourceText: value?.content || value?.text || ''
                 }));
                 
                 // Phát hiện mâu thuẫn
@@ -201,9 +201,9 @@ export const ChatProvider = ({ children }) => {
               const finalData = event.data || {};
               const citationMap = finalData.citations || {};
               const citationsList = Object.entries(citationMap).map(([key, value]) => ({
-                id: value.chunk_id || value.id || key,
-                label: value.title || `Tài liệu [${key}]`,
-                sourceText: value.content || value.text || ''
+                id: value?.chunk_id || value?.id || key,
+                label: value?.title || `Tài liệu [${key}]`,
+                sourceText: value?.content || value?.text || ''
               }));
               setChatHistory(prev => prev.map(msg => 
                 msg.id === aiMessageId ? { 

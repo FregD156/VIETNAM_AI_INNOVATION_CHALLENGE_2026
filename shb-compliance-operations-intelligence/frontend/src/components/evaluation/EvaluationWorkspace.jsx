@@ -32,12 +32,20 @@ export const EvaluationWorkspace = () => {
     fetchBenchmark();
   }, []);
 
-  // Lấy các metrics động từ benchmark, hoặc fallback về dữ liệu tiêu chuẩn
-  const standardPrecision = benchmarkData ? Math.round(benchmarkData.metrics.standard_hit_rate * 100) : 72;
-  const advancedPrecision = benchmarkData ? Math.round(benchmarkData.metrics.advanced_hit_rate * 100) : 98;
+  // Lấy các metrics động từ benchmark, hoặc fallback về dữ liệu tiêu chuẩn (có kiểm tra an toàn)
+  const standardPrecision = benchmarkData?.metrics?.standard_hit_rate !== undefined 
+    ? Math.round(benchmarkData.metrics.standard_hit_rate * 100) 
+    : 72;
+  const advancedPrecision = benchmarkData?.metrics?.advanced_hit_rate !== undefined 
+    ? Math.round(benchmarkData.metrics.advanced_hit_rate * 100) 
+    : 98;
   
-  const standardSuperseded = benchmarkData ? benchmarkData.metrics.standard_superseded_results : 4;
-  const advancedSuperseded = benchmarkData ? benchmarkData.metrics.advanced_superseded_results : 0;
+  const standardSuperseded = benchmarkData?.metrics?.standard_superseded_results !== undefined 
+    ? benchmarkData.metrics.standard_superseded_results 
+    : 4;
+  const advancedSuperseded = benchmarkData?.metrics?.advanced_superseded_results !== undefined 
+    ? benchmarkData.metrics.advanced_superseded_results 
+    : 0;
 
   // Các kịch bản truy vấn mẫu để so sánh Side-by-Side
   const scenarios = {
